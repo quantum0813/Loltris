@@ -298,8 +298,7 @@ class Board(object):
                         nblocks[(x, y)] = self.blocks[(x, y)]
                 self.blocks = nblocks
 
-        if lines:
-            self.score += SCORES["tetris"].get(lines, 9001)
+        self.score += SCORES["tetris"].get(lines, 0)
         self.lines += lines
 
         self.level_lines -= lines
