@@ -474,10 +474,7 @@ def genKey(d):
     >>> genKey({"name": "GenericFont", "size": 40, "bold": True})
     'TrueGenericFont40'
     """
-    ret = ""
-    for x in sorted(d):
-        ret += str(d[x])
-    return ret
+    return "".join([str(d[key]) for key in sorted(d)])
 
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
