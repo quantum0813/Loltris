@@ -47,6 +47,7 @@ BLOCK_WIDTH = 10
 BLOCK_HEIGHT = 10
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 16
+SOUND_ENABLED = False
 
 BOARD_BLOCKWIDTH = 20
 LEVEL_LINES = 20
@@ -75,8 +76,10 @@ TETRIS_STATUSBOX_FONT = {
         "size":15,
         "bold":False,
         }
+
 # DISPLAY_OPTIONS = FULLSCREEN | DOUBLEBUF | HWSURFACE
 DISPLAY_OPTIONS = 0
+GHOST_COLOR = (0x29, 0x29, 0x29)
 
 SCORES = {
         "tetris": {1: 100, 2: 250, 3: 500, 4: 1500},
@@ -110,10 +113,15 @@ def rot90(matrix):
 
     return ret
 
+## TODO: Finish this
+class Job(object):
+    def __init__(self):
+        pass
+
 class Tetromino(object):
-    def __init__(self, board, matrix, type, color, x=0, y=None, updateinterval=FRAMERATE, queue=0):
+    def __init__(self, board, matrix, _type, color, x=0, y=None, ghostpiece=True, updateinterval=FRAMERATE, queue=None):
         self.matrix = matrix
-        self.type = type
+        self.type = _type
         self.board = board
         self.color = color
         self.updateinterval = updateinterval
@@ -123,8 +131,13 @@ class Tetromino(object):
         self.sped_up = False
         self.x = x
         self.y = y
-        self.queue = queue
+        self.queue = queue if queue != None else Queue.TETROMINO
         self.level = 1
+
+        self.ghostpiece = None
+        if ghostpiece:
+            self.ghostpiece = GhostTetromino(board, matrix, _type, GHOST_COLOR, x=x, y=y)
+            self.ghostpiece.drop()
 
         if y == None:
             self.y = -(len(self.matrix))
@@ -137,6 +150,9 @@ class Tetromino(object):
                     return True
 
     def draw(self):
+        if self.ghostpiece:
+            self.ghostpiece.draw()
+
         def drawBlock(x, y, _):
             self.board.drawCube(x, y, self.color)
         self.forBlock(drawBlock)
@@ -193,6 +209,7 @@ class Tetromino(object):
 
     ## Move horizontally, if possible
     def moveHorizontal(self, direction):
+        self.updateGhost("moveHorizontal", direction)
         self.x += direction
         if self.checkBlockCollision():
             self.x -= direction
@@ -205,12 +222,23 @@ class Tetromino(object):
         self.matrix = rot90(self.matrix)
         if self.checkWallCollision(self.x, self.y) or self.checkBlockCollision():
             self.matrix = last_matrix
+        else:
+            self.updateGhost("rotate", direction)
+
+    def updateGhost(self, attr, *args, **kwargs):
+        if self.ghostpiece:
+            self.ghostpiece.y = self.y
+            self.ghostpiece.x = self.x
+            getattr(self.ghostpiece, attr)(*args, **kwargs)
+            self.ghostpiece.drop()
 
     ## It makes the game WAAY to easy, but i kind of always wondered "what if"
     def flip(self):
         flip(self.matrix)
         if self.checkWallCollision(self.x, self.y) or self.checkBlockCollision():
             flip(self.matrix)
+        else:
+            self.updateGhost("flip")
 
     def eventHandler(self, events):
         for event in events:
@@ -241,9 +269,17 @@ class Tetromino(object):
                     self.updateinterval /= 10
                     self.time_until_update = self.updateinterval
 
-class GameInfo(object):
-    def __init__(self, info):
-        pass
+## This object will be managed by a Tetromino(), it should not be managed as a Job
+class GhostTetromino(Tetromino):
+    def __init__(self, *args, **kwargs):
+        super(GhostTetromino, self).__init__(*args, ghostpiece=False, **kwargs)
+
+    def drop(self):
+        for y in xrange(self.board.height+1):
+            self.y = y
+            if self.checkBlockCollision() or self.checkWallCollision(self.x, self.y) == "bottom":
+                self.y -= 1
+                break
 
 class Board(object):
     def __init__(self, screen, x=0, y=0, blockwidth=0, width=0, height=0, innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=0, level=1):
@@ -285,18 +321,18 @@ class Board(object):
         lines = 0
 
         for row in rows:
-            ps = [p for p in self.blocks if p[1] == row]
-            if len(ps) == self.width:
+            points = [p for p in self.blocks if p[1] == row]
+            if len(points) == self.width:
                 lines += 1
-                for p in ps:
+                for p in points:
                     self.blocks.pop(p)
-                nblocks = {}
+                new_blocks = {}
                 for x, y in self.blocks:
                     if y < row:
-                        nblocks[(x, y+1)] = self.blocks[(x, y)]
+                        new_blocks[(x, y+1)] = self.blocks[(x, y)]
                     else:
-                        nblocks[(x, y)] = self.blocks[(x, y)]
-                self.blocks = nblocks
+                        new_blocks[(x, y)] = self.blocks[(x, y)]
+                self.blocks = new_blocks
 
         self.score += SCORES["tetris"].get(lines, 0)
         self.lines += lines
@@ -693,7 +729,7 @@ class TimedExecution(object):
 class TetrisGame(Game):
     def __init__(self, *args, **kwargs):
         self.id = "TetrisGame"
-        super(TetrisGame, self).__init__(self.id, *args, soundtrack=os.path.join(Load.MUSICDIR, "uprising.mp3"), sound_enabled=True, **kwargs)
+        super(TetrisGame, self).__init__(self.id, *args, soundtrack=os.path.join(Load.MUSICDIR, "uprising.mp3"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.running = self.mainLoop
 
         ## All the jobs
