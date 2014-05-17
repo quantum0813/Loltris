@@ -4,6 +4,7 @@
 from xml.etree import ElementTree
 from RGB import rgbHexDecode
 import os.path
+import Log
 
 DATADIR = "data"
 XMLDIR = os.path.join(DATADIR, "XML")
@@ -46,13 +47,12 @@ def _loadKeymaps(xml):
 
 def loadKeymaps():
     path = os.path.join(XMLDIR, "Keymap.xml")
-    print("Loading keymaps from `{}'".format(path))
+    Log.log("Loading keymaps from `{}'".format(path))
     try:
         with open(path) as rf:
             return _loadKeymaps(rf.read())
     except:
-        print("Error while loading keymaps from `{}'".format(path))
-        raise ImportError
+        raise ImportError("Error while loading keymaps from `{}'".format(path))
 
 def _loadTetrominos(xml, verbose=True):
     tree = ElementTree.XML(xml)
@@ -72,7 +72,7 @@ def _loadTetrominos(xml, verbose=True):
     for sub in tree.getchildren():
         sub_items = dict(sub.items())
         if verbose:
-            print("Loading tetromino `{}' with color `{}'".format(sub_items["name"], sub_items["color"]))
+            Log.log("Loading tetromino `{}' with color `{}'".format(sub_items["name"], sub_items["color"]))
         tetrominos.append([
                 rgbHexDecode(sub_items["color"]),
                 sub_items["name"],
@@ -83,10 +83,9 @@ def _loadTetrominos(xml, verbose=True):
 
 def loadTetrominos():
     path = os.path.join(XMLDIR, "Tetrominos.xml")
-    print("Loading tetrominos from `{}'".format(path))
+    Log.log("Loading tetrominos from `{}'".format(path))
     try:
         with open(path) as rf:
             return _loadTetrominos(rf.read())
     except:
-        print("Error while loading tetrominos from `{}'".format(path))
-        raise ImportError
+        raise ImportError("Error while loading tetrominos from `{}'".format(path))

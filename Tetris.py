@@ -423,6 +423,9 @@ class Game(object):
 
         self.setup()
 
+    def removeJob(self, job):
+        delattr(self.jobs, job)
+
     def stopMusic(self):
         self.playing = ""
         Pygame.mixer.music.stop()
@@ -540,9 +543,9 @@ def genKey(d):
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, font={"name": ""}, padding=12, queue=None, variables={},
-                 updatewhen=None):
-        Log.log("Initializing TextBox for `{}' with {}".format(
-            game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
+                 updatewhen=None, onclick=None):
+        # Log.log("Initializing TextBox for `{}' with {}".format(
+        #     game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
         self.game = game
         self.x = x
         self.y = y
@@ -566,6 +569,7 @@ class TextBox(object):
         self.xcenter = xcenter
         self.padding = padding
         self.variables = variables
+        self.onclick = onclick
 
         ## XXX: Hold that thought
         self.updatewhen = updatewhen
@@ -642,10 +646,26 @@ class TextBox(object):
                     )
 
     def eventHandler(self, events):
-        pass
+        for event in events:
+            ## TODO: Mousedown must only apply to a single object at a time
+            ##       this could be accomplished by a lock, or by removing certain
+            ##       events from the event list.
+            if event.type == MOUSEBUTTONDOWN and self.onclick:
+                x, y = Pygame.mouse.get_pos()
+                if (x > self.x and x < self.x+self.width) and (y > self.y and y < self.y+self.height):
+                    self.onclick()
 
     def update(self):
         pass
+
+class InputBox(TextBox):
+    def __init__(self, prompt):
+        super(InputBox, self).__init__(
+                "{}{input}",
+                variables={
+                    "level": lambda s: s.getJob("board").level,
+                    }
+                )
 
 ## TODO: Add sliders and other fancy shit
 class Menu(Game):
@@ -836,8 +856,9 @@ class MainMenu(Menu):
         self.header = "Loltris"
         self.menu = {
                 "Start Game": self.startTetrisGame,
-                "Options": lambda: self.call(OptionsMenu, caption="Loltris - options"),
+                "Options": lambda: self.call(OptionsMenu, caption="Loltris - Options"),
                 "Quit": self.quit,
+                "Creator": lambda: self.call(MakeTetromino, caption="Loltris - Creator"),
                 }
         self.setupObjects()
         # self.addJob(
@@ -865,12 +886,57 @@ class PauseMenu(Menu):
                 }
         self.setupObjects()
 
+class ColorPalette(object):
+    def __init__(self):
+        self.red = 0
+        self.green = 0
+        self.blue = 0
+
+    def eventHandler(self, events):
+        for event in events:
+            if event.type == MOUSEBUTTONDOWN:
+                pass
+
+## Get all the islands that are in a hash table
+def islands(dictionary):
+    class Block(object):
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+            self.neighbours = []
+
+    def neighbours(x, y):
+        positions = [(x+1, y+1), (x-1, y-1), (x+1, y-1), (x-1, y+1),
+                     (x, y-1), (x-1, y), (x, y+1), (x+1, y), ]
+        return (pos for pos in positions if pos in dictionary)
+
+    def traverse(block, visited):
+        if (block.x, block.y) in visited:
+            return
+        visited.add((block.x, block.y))
+        for block in block.neighbours:
+            traverse(block, visited)
+
+    blocks = {}
+    for x, y in dictionary:
+        blocks[(x, y)] = Block(x, y)
+    for block in blocks:
+        blocks[block].neighbours = set([blocks[pos] for pos in neighbours(blocks[block].x, blocks[block].y)])
+
+    visited = set()
+    traverse(blocks[block], visited)
+
+    return set(blocks).difference(visited)
+
 class MakeTetromino(Game):
     def __init__(self, *args, **kwargs):
         self.id = "MakeTetromino"
-        super(TetrisGame, self).__init__(self.id, *args, sound_enabled=SOUND_ENABLED, **kwargs)
-        ## TODO: The user should be able to change this
+        super(MakeTetromino, self).__init__(self.id, *args, **kwargs)
+        self.running = self.mainLoop
+
+        ## TODO: The user should be able to change the color, create a "color palette thingy"
         self.color = (0xbb,0xbb,0xbb)
+
         self.addJob(
                 "board",
                 Board(self.screen,
@@ -882,14 +948,57 @@ class MakeTetromino(Game):
                       level=kwargs.get("level", 1)
                       ),
                 )
+        self.addJob(
+                "save-button",
+                TextBox(self, "Save", x=self.jobs.board.x + (self.jobs.board.width*self.jobs.board.blockwidth) + 5,
+                    y=self.jobs.board.y, 
+                    textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                    font=TETRIS_STATUSBOX_FONT, onclick=self.save,
+                    )
+                )
 
     def eventHandler(self, events):
         for event in events:
+            if event.type == QUIT:
+                self.quit()
             if event.type == MOUSEBUTTONDOWN:
-                x, y = self.jobs.board.getBlockInPos(Pygame.mouse.get_pos())
-                self.jobs.blocks[(x, y)] = self.color
+                x, y = self.jobs.board.getBlockInPos(*Pygame.mouse.get_pos())
+                if x > self.jobs.board.width-1 or y > self.jobs.board.height-1 or x < 0 or y < 0:
+                    pass
+                elif not self.jobs.board.blocks.get((x, y)):
+                    self.jobs.board.blocks[(x, y)] = self.color
+                else:
+                    self.jobs.board.blocks.pop((x, y))
 
     def save(self):
+        if any(islands(self.jobs.board.blocks)):
+            Log.log("Islands present, will not save tetromino")
+            self.addJob(
+                    "Islands-present-window",
+                    TextBox(self, "Invalid: Islands present", xcenter=True, ycenter=True, font=MENU_OPTION_FONT,
+                            textfit=True, onclick=lambda: self.removeJob("Islands-present-window"),
+                            colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa),},
+                            background=True, border=True,
+                            )
+                    )
+            return
+
+        xlow = min(x for x, y in self.jobs.board.blocks)
+        xhigh = max(x for x, y in self.jobs.board.blocks)
+        ylow = min(y for x, y in self.jobs.board.blocks)
+        yhigh = max(y for x, y in self.jobs.board.blocks)
+        matrix = [
+                [(x, y) in self.jobs.board.blocks for x in xrange(xlow, xhigh+1)]
+                for y in xrange(ylow, yhigh+1)
+                ]
+
+        Log.log("Created new tetromino, displaying below")
+        printTetromino(matrix)
+        Save.saveTetromino(self.color, "kek", matrix)
+
+        return True
+
+    def mainLoop(self):
         pass
 
 if __name__ == '__main__':
