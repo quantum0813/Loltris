@@ -149,35 +149,25 @@ class Tetromino(object):
         if y == None:
             self.y = -(len(self.matrix))
 
-    ## TODO: Add Balinger's generator code here, then update the rest of the class.
-    ##       This will replace the forBlock higher-order function.
     def getActiveBlocks(self):
-        pass
-
-    ## Hackety hack
-    def forBlock(self, func, shortcircuit=False):
         for y in xrange(len(self.matrix)):
             for x in xrange(len(self.matrix[y])):
-                if self.matrix[y][x] and func(self.x + x, self.y + y, self.matrix) and shortcircuit:
-                    return True
+                if self.matrix[y][x]:
+                    yield self.x + x, self.y + y
 
     def draw(self):
         if self.ghostpiece:
             self.ghostpiece.draw()
-
-        def drawBlock(x, y, _):
+        for x, y in self.getActiveBlocks():
             self.board.drawCube(x, y, self.color)
-        self.forBlock(drawBlock)
 
     def insert(self):
-        def insert(x, y, _):
-            self.board.blocks[(x, y)] = self.color
-
         if self.y < 0:
             ## XXX: GAME OVER
             self.board.update_required = False
 
-        self.forBlock(insert)
+        for x, y in self.getActiveBlocks():
+            self.board.blocks[(x, y)] = self.color
         self.board.checkTetris()
         self.update_required = False
 
@@ -192,9 +182,7 @@ class Tetromino(object):
             self.moveDiagonal(1)
 
     def checkBlockCollision(self):
-        def colliding(x, y, _):
-            return self.board.blocks.get((x, y))
-        return self.forBlock(colliding, shortcircuit=True)
+        return any(self.board.blocks.get((x, y)) for x, y in self.getActiveBlocks())
 
     def checkWallCollision(self, xp, yp):
         for y in xrange(len(self.matrix)):
@@ -367,7 +355,6 @@ class Board(object):
     ## TODO: Switch to this method, drawing every single block each time is a waste
     ##       of resources. Just need to figure some more stuff out.
     def drawNewBlocks(self):
-        """  """
         for block in self.drawnblocks.difference(self.blocks):
             self.drawCube(block[0], block[1], self.blocks[block])
             self.drawnblocks.add(block)
@@ -399,19 +386,31 @@ class Board(object):
                     (self.x + self.width*self.blockwidth - 2, self.y + self.blockwidth*y),
                     1)
 
+    def getBlockInPos(self, x, y):
+        """ Get the block coordinates for pixel coordinates
+            used primarily to see which block the mouse is on
+        """
+        xpos = (x - self.x) / self.blockwidth
+        ypos = (y - self.y) / self.blockwidth
+        return xpos, ypos
+
     def eventHandler(self, events):
+        pass
+
+class Jobs(object):
+    def __init__(self):
         pass
 
 class Game(object):
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
                  width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=False, soundtrack=None):
+        Log.log("Initializing Game object `{}'".format(_id))
+        self.jobs = Jobs()
         self.caption = caption
         self.mouse_visible = mouse_visible
         self.bgcolor = bgcolor
         self.screen = screen
         self.ticktime = ticktime
-        self.batch = {}
-        self.drawqueue = []
         self.ret = 0
         self.windows = {}
         self.height = y
@@ -441,11 +440,10 @@ class Game(object):
             Log.error("Unable to play music file: `{}'".format(path))
 
     def getJob(self, name):
-        return self.batch[name]
+        return getattr(self.jobs, name)
 
     def addJob(self, name, obj):
-        self.batch[name] = obj
-        self.drawqueue.append(name)
+        setattr(self.jobs, name, obj)
 
     ## Why not just call Sys.exit(), why create a separate method for this?
     ## Because finishing of can get more complex as this program develops.
@@ -496,7 +494,7 @@ class Game(object):
             self.clock.tick(self.ticktime)
             self.screen.fill(self.bgcolor)
             self.events = Pygame.event.get()
-            queue = sorted(self.batch, key=lambda obj: self.batch[obj].queue)
+            queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
             for obj in queue:
                 obj = self.getJob(obj)
                 if obj.update_required:
@@ -541,8 +539,10 @@ def genKey(d):
 
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
-            xcenter=False, x=0, y=0, height=0, width=0, textfit=False, font={"name": ""}, padding=12, queue=None, variables={},
-            updatewhen=None):
+                 xcenter=False, x=0, y=0, height=0, width=0, textfit=False, font={"name": ""}, padding=12, queue=None, variables={},
+                 updatewhen=None):
+        Log.log("Initializing TextBox for `{}' with {}".format(
+            game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
         self.game = game
         self.x = x
         self.y = y
@@ -671,6 +671,7 @@ class Menu(Game):
         x, y = self.options_pos
         self.options = []
         for option in self.menu:
+            # option = option.replace(" ", "_")
             self.options.append("{}".format(option))
             self.addJob("{}".format(option),
                     TextBox(self, option, y=y, x=x, textfit=True,
@@ -764,7 +765,7 @@ class TetrisGame(Game):
 
         ## All the jobs
         self.addJob("board", Board(self.screen, x=BLOCK_WIDTH, y=BLOCK_HEIGHT, height=BOARD_HEIGHT, width=BOARD_WIDTH, blockwidth=BOARD_BLOCKWIDTH, level=kwargs.get("level", 1)))
-        self.addJob("tetromino", randomTetromino(self.batch["board"], updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
+        self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
         self.addJob("status",
                 TextBox(self, "Level: {level}\nScore: {score}\nLines: {lines}\nLines left: {level up}", border=True, y=BLOCK_HEIGHT+1, x=BLOCK_WIDTH*2+(BOARD_WIDTH)*BOARD_BLOCKWIDTH, textfit=True,
                     colors={"border":(0xaa,0xaa,0xaa), "font":(0xaa,0xaa,0xaa)},
@@ -779,7 +780,7 @@ class TetrisGame(Game):
                 )
 
     def mainLoop(self):
-        if not self.getJob("board").update_required and not self.batch.get("window-game_over"):
+        if not self.getJob("board").update_required and not hasattr(self.jobs, "window-game_over"):
             ## XXX: GAME OVER
             board = self.getJob("board")
             if len(self.highscores) < HIGHSCORES or any(board.score > score for score in self.highscores):
@@ -799,8 +800,8 @@ class TetrisGame(Game):
                             )
             self.addJob("endtimer", TimedExecution(self.quitGame, seconds=2, anykey=True))
 
-        if not self.batch["tetromino"].update_required and self.getJob("board").update_required:
-            self.addJob("tetromino", randomTetromino(self.batch["board"], updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
+        if not self.jobs.tetromino.update_required and self.getJob("board").update_required:
+            self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
 
     def eventHandler(self, events):
         if not events:
@@ -863,6 +864,33 @@ class PauseMenu(Menu):
                 "Continue": self.quitGame,
                 }
         self.setupObjects()
+
+class MakeTetromino(Game):
+    def __init__(self, *args, **kwargs):
+        self.id = "MakeTetromino"
+        super(TetrisGame, self).__init__(self.id, *args, sound_enabled=SOUND_ENABLED, **kwargs)
+        ## TODO: The user should be able to change this
+        self.color = (0xbb,0xbb,0xbb)
+        self.addJob(
+                "board",
+                Board(self.screen,
+                      x=BLOCK_WIDTH,
+                      y=BLOCK_HEIGHT,
+                      height=BOARD_HEIGHT,
+                      width=BOARD_WIDTH,
+                      blockwidth=BOARD_BLOCKWIDTH,
+                      level=kwargs.get("level", 1)
+                      ),
+                )
+
+    def eventHandler(self, events):
+        for event in events:
+            if event.type == MOUSEBUTTONDOWN:
+                x, y = self.jobs.board.getBlockInPos(Pygame.mouse.get_pos())
+                self.jobs.blocks[(x, y)] = self.color
+
+    def save(self):
+        pass
 
 if __name__ == '__main__':
     import doctest

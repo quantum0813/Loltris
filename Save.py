@@ -21,11 +21,14 @@ def _appendScores(root, scores):
         root.append(dictsToXml("score", scores))
 
 def saveScores(scores):
+    ## Get current scores
     parser = ElementTree.XMLParser(remove_blank_text=True, encoding="utf-8")
     xml =  ElementTree.parse(os.path.join(XMLDIR, "Scores.xml"), parser)
     root = xml.getroot()
 
+    ## Append new scores to current scores
     _appendScores(root, scores)
 
+    ## Store the new scores along with the old ones
     xml.write(os.path.join(XMLDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
 
