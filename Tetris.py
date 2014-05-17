@@ -42,14 +42,14 @@ keymap = None
 ##       for what a sprite (or object or whatever) should be able to do.
 
 SCREEN_HEIGHT = 360
-SCREEN_WIDTH = 360
+SCREEN_WIDTH = 450
 FRAMERATE = 30
 BLOCK_WIDTH = 10
 BLOCK_HEIGHT = 10
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 16
 SOUND_ENABLED = False
-HIGHSCORES = 10
+HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
 
 ## TODO: Need a way to set this.
@@ -79,6 +79,11 @@ MENU_COLORSCHEME = {
         "option":(0xaa,0xaa,0xaa),
                 }
 TETRIS_STATUSBOX_FONT = {
+        "name":"monaco",
+        "size":15,
+        "bold":False,
+        }
+HIGHSCORELIST_FONT = {
         "name":"monaco",
         "size":15,
         "bold":False,
@@ -608,7 +613,7 @@ class TextBox(object):
         if self.xcenter:
             self.x = (self.game.width / 2) - (self.width / 2)
         if self.ycenter:
-            self.y = (self.game.height / 2) - (height / 2)
+            self.y = (self.game.height / 2) - (self.height / 2)
 
     def draw(self):
         ## XXX: Hold that thought
@@ -669,29 +674,34 @@ class InputBox(TextBox):
 
 ## TODO: Add sliders and other fancy shit
 class Menu(Game):
-    def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False, **kwargs):
+    def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False, isroot=False, **kwargs):
         self.id = _id
         super(Menu, self).__init__(self.id, **kwargs)
         self.running = self.mainLoop
         self.colorscheme = MENU_COLORSCHEME
         self.header = ""
-        self.menu = {}
+        self.menu = []
+        self.lookup = {}
         self.options = []
         self.selected = 0
         self.options_pos = (10, 80)
         self.header_font = header_font
         self.option_font = option_font
+        self.isroot = isroot
 
     def setupObjects(self):
+        if not self.isroot and self.menu[-1][0] != "Back":
+            self.menu.append(("Back", self.quitGame))
+
         self.addJob("header",
                 TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=True,
                     colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
                     )
                 )
+        self.lookup = dict(self.menu)
         x, y = self.options_pos
         self.options = []
-        for option in self.menu:
-            # option = option.replace(" ", "_")
+        for option, func in self.menu:
             self.options.append("{}".format(option))
             self.addJob("{}".format(option),
                     TextBox(self, option, y=y, x=x, textfit=True,
@@ -700,6 +710,7 @@ class Menu(Game):
                             "font":self.colorscheme["selected"] if len(self.options)-1==self.selected else self.colorscheme["option"]
                             },
                         font=self.option_font,
+                        onclick=func,
                         )
                     )
             y += self.getJob("{}".format(option)).fontheight
@@ -729,7 +740,7 @@ class Menu(Game):
 
     def execOption(self):
         ## Right now each option just runs a function, this may change
-        option = self.menu[self.options[self.selected]]
+        option = self.lookup[self.options[self.selected]]
         option()
 
     def eventHandler(self, events):
@@ -845,45 +856,57 @@ class OptionsMenu(Menu):
     def __init__(self, **kwargs):
         super(OptionsMenu, self).__init__("OptionsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Options"
-        self.menu = {
-                "Crash": lambda: lololololololololol
-                }
+        self.menu = [
+                ("Crash", lambda: lololololololololol)
+                ]
         self.setupObjects()
+
+class MenuAction(object):
+    def __init__(self, seq, text, function):
+        self.text = text
+        self.function = function
+        self.seq = seq
 
 class MainMenu(Menu):
     def __init__(self, **kwargs):
-        super(MainMenu, self).__init__("MainMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+        super(MainMenu, self).__init__("MainMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, **kwargs)
         self.header = "Loltris"
-        self.menu = {
-                "Start Game": self.startTetrisGame,
-                "Options": lambda: self.call(OptionsMenu, caption="Loltris - Options"),
-                "Quit": self.quit,
-                "Creator": lambda: self.call(MakeTetromino, caption="Loltris - Creator"),
-                }
+        self.menu = [
+                ("Start Game", self.startTetrisGame,),
+                ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options"),),
+                ("Creator", lambda: self.call(MakeTetromino, caption="Loltris - Creator"),),
+                ("Quit", self.quit,),
+                ]
+        self.highscores = Load.loadHighscores(top=HIGHSCORES)
         self.setupObjects()
-        # self.addJob(
-        #          "HighscoreList",
-        #          TextBox(self, option, y=y, x=x, textfit=True,
-        #              colors={
-        #                  "background":self.colorscheme["background"],
-        #                  "font":self.colorscheme["selected"] if len(self.options)-1==self.selected else self.colorscheme["option"]
-        #                  },
-        #              font=self.option_font,
-        #              )
-        #         )
+        self.addJob(
+                 "highscorelist",
+                 TextBox(self, "".join(["{}: {}\n".format(x["name"], x["score"]) for x in self.highscores]),
+                     x=self.jobs.header.width+self.jobs.header.x, ycenter=True, textfit=True,
+                     colors={
+                         "background":self.colorscheme["background"],
+                         "font":self.colorscheme["option"],
+                         "border": (0xaa,0xaa,0xaa),
+                         },
+                     font=HIGHSCORELIST_FONT,
+                     border=True,
+                     background=True,
+                     )
+                )
 
     def startTetrisGame(self):
         self.call(TetrisGame, caption="Loltris", player_name=PLAYER)
+        self.highscores = Load.loadHighscores(top=HIGHSCORES)
 
 class PauseMenu(Menu):
     def __init__(self, **kwargs):
         super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Pause"
-        self.menu = {
-                "Quit Game": self.quit,
-                "Quit to main menu": lambda: self.quitGame("MainMenu"),
-                "Continue": self.quitGame,
-                }
+        self.menu = [
+                ("Quit Game", self.quit,),
+                ("Quit to main menu", lambda: self.quitGame("MainMenu"),),
+                ("Continue", self.quitGame,),
+                ]
         self.setupObjects()
 
 class ColorPalette(object):
