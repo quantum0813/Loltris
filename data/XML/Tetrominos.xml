@@ -1,3 +1,6 @@
+<!-- Go ahead, add some crazy new tetrominos
+ -->
+
 <tetrominos true="#" false="_">
     <tetromino name="I" color="#3322DD">
         #

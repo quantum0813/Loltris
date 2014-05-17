@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-*- coding: utf-8 -*--
+#-*- coding: utf-8 -*-
 
 from xml.etree import ElementTree
 from RGB import rgbHexDecode
@@ -10,24 +10,30 @@ XMLDIR = os.path.join(DATADIR, "XML")
 IMAGEDIR = os.path.join(DATADIR, "Images")
 MUSICDIR = os.path.join(DATADIR, "Music")
 
+## TODO: Switch to specifying the types manually everywhere
 typeConvert = {
         None: lambda x: x,
-        "int": int,
+        "int": lambda x: int(x.strip()),
         }
 
-def load3NestXml(xml):
-    def items(tree):
-        for item in tree.getchildren():
-            d = {}
-            for info in item.getchildren():
-                d[info.tag] = typeConvert[dict(info.items()).get("type")](info.text)
-            yield d
+## As in duck-typing
+def duck(text):
+    if all(x.isdigit() or x.isspace() for x in text):
+        return int(text.strip())
+    return text.strip()
 
-    return items(ElementTree.XML(xml))
+def loadHighscores(top=10):
+    with open(os.path.join(XMLDIR, "Scores.xml")) as rf:
+        return _loadScores(rf.read())[:top]
 
-## TODO: Use symbolic values inside the keymap file, instead of numeric literals
-def loadHighscores(xml):
-    return sorted(load3NestXml(xml), key=lambda x: x["score"])
+def _loadScores(xml):
+    tree = ElementTree.XML(xml)
+    scores = []
+    for score in tree.getchildren():
+        scores.append({})
+        for info in score.getchildren():
+            scores[-1][info.tag] = duck(info.text)
+    return sorted(scores, key=lambda d: d["score"], reverse=True)
 
 def _loadKeymaps(xml):
     tree = ElementTree.XML(xml)

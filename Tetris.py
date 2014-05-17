@@ -23,6 +23,7 @@ import random as Random
 import Queue
 import Load
 import Log
+import Save
 import os.path
 from pygame.locals import *
 from Exceptions import *
@@ -41,13 +42,18 @@ keymap = None
 ##       for what a sprite (or object or whatever) should be able to do.
 
 SCREEN_HEIGHT = 500
-SCREEN_WIDTH = 400
+SCREEN_WIDTH = 600
 FRAMERATE = 30
 BLOCK_WIDTH = 10
 BLOCK_HEIGHT = 10
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 16
 SOUND_ENABLED = False
+HIGHSCORES = 10
+UBERCOLOR = (0x70, 0x70, 0x22)
+
+## TODO: Need a way to set this.
+PLAYER = "Anon"
 
 BOARD_BLOCKWIDTH = 20
 LEVEL_LINES = 20
@@ -55,6 +61,7 @@ LEVEL_LINES_INCREASE = 5
 UPDATEINTERVAL_DECREASE = FRAMERATE / 10
 
 ## TODO: XML this shit
+GLOBAL_FONT_NAME = "monaco"
 MENU_HEADER_FONT = {
         "name":"monaco",
         "size":40,
@@ -142,11 +149,16 @@ class Tetromino(object):
         if y == None:
             self.y = -(len(self.matrix))
 
+    ## TODO: Add Balinger's generator code here, then update the rest of the class.
+    ##       This will replace the forBlock higher-order function.
+    def getActiveBlocks(self):
+        pass
+
     ## Hackety hack
-    def forBlock(self, func, boolean=False):
+    def forBlock(self, func, shortcircuit=False):
         for y in xrange(len(self.matrix)):
             for x in xrange(len(self.matrix[y])):
-                if self.matrix[y][x] and func(self.x + x, self.y + y, self.matrix) and boolean:
+                if self.matrix[y][x] and func(self.x + x, self.y + y, self.matrix) and shortcircuit:
                     return True
 
     def draw(self):
@@ -182,7 +194,7 @@ class Tetromino(object):
     def checkBlockCollision(self):
         def colliding(x, y, _):
             return self.board.blocks.get((x, y))
-        return self.forBlock(colliding, boolean=True)
+        return self.forBlock(colliding, shortcircuit=True)
 
     def checkWallCollision(self, xp, yp):
         for y in xrange(len(self.matrix)):
@@ -334,7 +346,8 @@ class Board(object):
                         new_blocks[(x, y)] = self.blocks[(x, y)]
                 self.blocks = new_blocks
 
-        self.score += SCORES["tetris"].get(lines, 0)
+        if lines:
+            self.score += SCORES["tetris"].get(lines, 9001)
         self.lines += lines
 
         self.level_lines -= lines
@@ -499,6 +512,21 @@ class Game(object):
                 self.running()
 
         return self.ret
+
+## Creates a perfect tetromino (for the current board)
+def makeUberTetromino(board):
+    tetromino = []
+    for y in xrange(board.height+1):
+        if any(board.blocks.get((x, y)) for x in xrange(board.width+1)):
+            break
+    def clearUpwards(xpos, ypos):
+        for y in xrange(ypos):
+            if board.blocks.get((xpos, y)):
+                return False
+        return True
+    for y in xrange(y, board.height+1):
+        tetromino.append([True if clearUpwards(x, y) else False for x in xrange(0, board.width)])
+    return Tetromino(board, tetromino, "UBER", UBERCOLOR, x=0)
 
 def randomTetromino(board, updateinterval=FRAMERATE/2):
     color, type, matrix = Random.choice(tetrominos)
@@ -727,10 +755,12 @@ class TimedExecution(object):
         self.cycles -= 1
 
 class TetrisGame(Game):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, player_name="", *args, **kwargs):
         self.id = "TetrisGame"
         super(TetrisGame, self).__init__(self.id, *args, soundtrack=os.path.join(Load.MUSICDIR, "uprising.mp3"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.running = self.mainLoop
+        self.highscores = Load.loadHighscores(top=HIGHSCORES)
+        self.player_name = player_name
 
         ## All the jobs
         self.addJob("board", Board(self.screen, x=BLOCK_WIDTH, y=BLOCK_HEIGHT, height=BOARD_HEIGHT, width=BOARD_WIDTH, blockwidth=BOARD_BLOCKWIDTH, level=kwargs.get("level", 1)))
@@ -750,13 +780,25 @@ class TetrisGame(Game):
 
     def mainLoop(self):
         if not self.getJob("board").update_required and not self.batch.get("window-game_over"):
-            self.addJob("window-game_over",
-                    TextBox(self, "Game Over", border=True, ycenter=True, xcenter=True, width=80, height=50, textfit=True, background=True,
-                        colors={"background":(0x22,0x22,0x22), "border":(0xaa,0xaa,0xaa), "font":(0xaa,0x22,0x22)},
-                        font={"size":60},
-                        )
-                    )
+            ## XXX: GAME OVER
+            board = self.getJob("board")
+            if len(self.highscores) < HIGHSCORES or any(board.score > score for score in self.highscores):
+                self.addJob("window-game_over",
+                            TextBox(self, "New Highscore!", border=True, ycenter=True, xcenter=True, width=80, height=50, textfit=True, background=True,
+                                colors={"background":(0x22,0x22,0x22), "border":(0xaa,0xaa,0xaa), "font":(0x66,0x66,0x66)},
+                                font={ "name":"monaco", "size":35, "bold":False }
+                                )
+                            )
+                Save.saveScores([{"name": self.player_name, "score": board.score, "level": board.level, "lines": board.lines}])
+            else:
+                self.addJob("window-game_over",
+                            TextBox(self, "Game Over", border=True, ycenter=True, xcenter=True, width=80, height=50, textfit=True, background=True,
+                                colors={"background":(0x22,0x22,0x22), "border":(0xaa,0xaa,0xaa), "font":(0xaa,0x22,0x22)},
+                                font={ "name":"monaco", "size":35, "bold":True }
+                                )
+                            )
             self.addJob("endtimer", TimedExecution(self.quitGame, seconds=2, anykey=True))
+
         if not self.batch["tetromino"].update_required and self.getJob("board").update_required:
             self.addJob("tetromino", randomTetromino(self.batch["board"], updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
 
@@ -771,6 +813,9 @@ class TetrisGame(Game):
             elif event.type == KEYDOWN:
                 if event.key == keymap["game"]["pause"]:
                     self.call(PauseMenu, caption="Tetris - Paused")
+
+                if event.key == K_TAB:
+                    self.addJob("tetromino", makeUberTetromino(self.getJob("board")))
 
 
 ## Placeholder, need to add sliders and other stuff to the Menu class
@@ -787,13 +832,26 @@ class OptionsMenu(Menu):
 class MainMenu(Menu):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__("MainMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
-        self.header = "Molltris"
+        self.header = "Loltris"
         self.menu = {
-                "Start Game": lambda: self.call(TetrisGame, caption="Mølltris"),
+                "Start Game": self.startTetrisGame,
                 "Options": lambda: self.call(OptionsMenu, caption="Mølltris - options"),
                 "Quit": self.quit,
                 }
         self.setupObjects()
+        # self.addJob(
+        #          "HighscoreList",
+        #          TextBox(self, option, y=y, x=x, textfit=True,
+        #              colors={
+        #                  "background":self.colorscheme["background"],
+        #                  "font":self.colorscheme["selected"] if len(self.options)-1==self.selected else self.colorscheme["option"]
+        #                  },
+        #              font=self.option_font,
+        #              )
+        #         )
+
+    def startTetrisGame(self):
+        self.call(TetrisGame, caption="Mølltris", player_name=PLAYER)
 
 class PauseMenu(Menu):
     def __init__(self, **kwargs):
@@ -811,4 +869,4 @@ if __name__ == '__main__':
     tetrominos = Load.loadTetrominos()
     keymap = Load.loadKeymaps()
     doctest.testmod()
-    MainMenu(caption="Mølltris").run()
+    MainMenu(caption="Loltris").run()
