@@ -35,4 +35,28 @@
     <name>Anon</name>
     <level>1</level>
   </score>
+  <score>
+    <score>10501</score>
+    <lines>11</lines>
+    <name>Anon</name>
+    <level>1</level>
+  </score>
+  <score>
+    <score>12001</score>
+    <lines>22</lines>
+    <name>Anon</name>
+    <level>2</level>
+  </score>
+  <score>
+    <score>20252</score>
+    <lines>22</lines>
+    <name>Anon</name>
+    <level>2</level>
+  </score>
+  <score>
+    <score>34403</score>
+    <lines>50</lines>
+    <name>Anon</name>
+    <level>3</level>
+  </score>
 </scores>

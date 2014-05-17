@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 #-*- coding: utf-8 -*--
 
-## Tetris clone written in Python/Pygame
+## Tetris clone written in Python/Pygame, with some weird features.
 ## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
 ##
 ## This program is free software: you can redistribute it and/or modify
@@ -41,8 +41,8 @@ keymap = None
 ##       a lot of things in common. It would also serve as a nice piece of documentation
 ##       for what a sprite (or object or whatever) should be able to do.
 
-SCREEN_HEIGHT = 500
-SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 360
+SCREEN_WIDTH = 360
 FRAMERATE = 30
 BLOCK_WIDTH = 10
 BLOCK_HEIGHT = 10
@@ -95,7 +95,7 @@ SCORES = {
 globfonts = { }
 
 def printTetromino(matrix, t="#", f=" "):
-    """ Prints a matrix to the console """
+    """ Prints a matrix to the console for debugging purposes """
     for y in matrix:
         for x in y:
             Sys.stdout.write(t if x else f)
@@ -525,7 +525,7 @@ def makeUberTetromino(board):
                 return False
         return True
     for y in xrange(y, board.height+1):
-        tetromino.append([True if clearUpwards(x, y) else False for x in xrange(0, board.width)])
+        tetromino.append([clearUpwards(x, y) for x in xrange(0, board.width)])
     return Tetromino(board, tetromino, "UBER", UBERCOLOR, x=0)
 
 def randomTetromino(board, updateinterval=FRAMERATE/2):
@@ -814,7 +814,7 @@ class TetrisGame(Game):
                 if event.key == keymap["game"]["pause"]:
                     self.call(PauseMenu, caption="Tetris - Paused")
 
-                if event.key == K_TAB:
+                if event.key == keymap["game"]["uber_tetromino"]:
                     self.addJob("tetromino", makeUberTetromino(self.getJob("board")))
 
 
@@ -835,7 +835,7 @@ class MainMenu(Menu):
         self.header = "Loltris"
         self.menu = {
                 "Start Game": self.startTetrisGame,
-                "Options": lambda: self.call(OptionsMenu, caption="Mølltris - options"),
+                "Options": lambda: self.call(OptionsMenu, caption="Loltris - options"),
                 "Quit": self.quit,
                 }
         self.setupObjects()
@@ -851,7 +851,7 @@ class MainMenu(Menu):
         #         )
 
     def startTetrisGame(self):
-        self.call(TetrisGame, caption="Mølltris", player_name=PLAYER)
+        self.call(TetrisGame, caption="Loltris", player_name=PLAYER)
 
 class PauseMenu(Menu):
     def __init__(self, **kwargs):

@@ -19,5 +19,6 @@
         <drop_down type="int">32</drop_down>
         <rotate_right type="int">273</rotate_right>
         <reverse type="int">281</reverse>
+        <uber_tetromino type="int">9</uber_tetromino>
     </game>
 </keymaps>
