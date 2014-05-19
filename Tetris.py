@@ -716,14 +716,16 @@ class TextBox(object):
                     )
 
     def eventHandler(self, event):
-        if event.type == MOUSEMOTION and (self.onmouseenter and self.onmouseleave):
+        if event.type == MOUSEMOTION:
             isin = isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height))
             if isin and not self.hasmouse:
                 self.hasmouse = True
-                self.onmouseenter(self)
+                if self.onmouseenter:
+                    self.onmouseenter(self)
             if not isin and self.hasmouse:
                 self.hasmouse = False
-                self.onmouseleave(self)
+                if self.onmouseleave:
+                    self.onmouseleave(self)
         if event.type == MOUSEBUTTONDOWN and self.onmouseclick:
             if isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height)):
                 self.onmouseclick()
