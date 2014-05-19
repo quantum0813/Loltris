@@ -25,14 +25,17 @@ import Load
 import Log
 import Save
 import os.path
+
+## Used to store the state of the game.
+import pickle
+import bz2
+
 from pygame.locals import *
 from Exceptions import *
 from xml.etree import ElementTree
 
 tetrominos = None
 keymap = None
-
-## TODO: Add a highscore list, this is the most obvious feature at this point.
 
 ## TODO: Make it draw faster by limiting what is being drawn and update, work
 ##       on this has already been started.
@@ -60,15 +63,15 @@ LEVEL_LINES = 20
 LEVEL_LINES_INCREASE = 5
 UPDATEINTERVAL_DECREASE = FRAMERATE / 10
 
-## TODO: XML this shit
+## TODO: Put font and colorscheme information in JSON files.
+
 GLOBAL_FONT_NAME = "monaco"
 MENU_HEADER_FONT = {
-        "name":"monaco",
-        "size":40,
-        "bold":True,
+        "name":"orbitron-bold",
+        "size":55,
         }
 MENU_OPTION_FONT = {
-        "name":"monaco",
+        "name":"freemono",
         "size":20,
         "bold":False,
         }
@@ -77,7 +80,7 @@ MENU_COLORSCHEME = {
         "selected": (0x66,0x66,0x66),
         "background":(0x22,0x22,0x22),
         "option":(0xaa,0xaa,0xaa),
-                }
+        }
 TETRIS_STATUSBOX_FONT = {
         "name":"monaco",
         "size":15,
@@ -88,6 +91,8 @@ HIGHSCORELIST_FONT = {
         "size":15,
         "bold":False,
         }
+ERRORBOX_FONT = MENU_OPTION_FONT
+ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
 
 # DISPLAY_OPTIONS = FULLSCREEN | DOUBLEBUF | HWSURFACE
 DISPLAY_OPTIONS = 0
@@ -99,11 +104,14 @@ SCORES = {
 
 globfonts = { }
 
-def printTetromino(matrix, t="#", f=" "):
+def printTetromino(matrix, t="#", f="_"):
     """ Prints a matrix to the console for debugging purposes """
+    Sys.stdout.write(" _" * len(matrix[0]))
+    print
     for y in matrix:
+        Sys.stdout.write("|")
         for x in y:
-            Sys.stdout.write(t if x else f)
+            Sys.stdout.write("{}|".format(t if x else f))
         print
 
 def flip(matrix):
@@ -131,7 +139,10 @@ class Job(object):
         pass
 
 class Tetromino(object):
-    def __init__(self, board, matrix, _type, color, x=0, y=None, ghostpiece=True, updateinterval=FRAMERATE, queue=None):
+    def __init__(self, board, matrix, _type, color, x=0, y=None, xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None):
+        if not matrix:
+            raise TypeError("Will not create matrix with empty matrix")
+
         self.matrix = matrix
         self.type = _type
         self.board = board
@@ -146,9 +157,12 @@ class Tetromino(object):
         self.queue = queue if queue != None else Queue.TETROMINO
         self.level = 1
 
+        if xcenter:
+            self.x = (self.board.width//2) - (len(self.matrix[0])//2)
+
         self.ghostpiece = None
         if ghostpiece:
-            self.ghostpiece = GhostTetromino(board, matrix, _type, GHOST_COLOR, x=x, y=y)
+            self.ghostpiece = GhostTetromino(board, matrix, _type, GHOST_COLOR, x=x, y=y, xcenter=xcenter)
             self.ghostpiece.drop()
 
         if y == None:
@@ -169,6 +183,13 @@ class Tetromino(object):
     def insert(self):
         if self.y < 0:
             ## XXX: GAME OVER
+            Log.log("Game over, displaying game state")
+            matrix = [
+                    [(x, y) in self.board.blocks for x in xrange(self.board.width)]
+                    for y in xrange(self.board.height)
+                    ]
+            printTetromino(matrix, f="_")
+
             self.board.update_required = False
 
         for x, y in self.getActiveBlocks():
@@ -245,34 +266,33 @@ class Tetromino(object):
         else:
             self.updateGhost("flip")
 
-    def eventHandler(self, events):
-        for event in events:
-            if event.type == KEYUP:
-                if event.key == keymap["game"]["speed_up"] and self.sped_up:
-                    self.sped_up = False
-                    self.updateinterval *= 10
-                    self.time_until_update = self.updateinterval
+    def eventHandler(self, event):
+        if event.type == KEYUP:
+            if event.key == keymap["game"]["speed_up"] and self.sped_up:
+                self.sped_up = False
+                self.updateinterval *= 10
+                self.time_until_update = self.updateinterval
 
-            if event.type == KEYDOWN:
-                if event.key == keymap["game"]["rotate_right"]:
-                    self.rotate(1)
-                elif event.key == keymap["game"]["rotate_left"]:
-                    self.rotate(-1)
-                elif event.key == keymap["game"]["reverse"]:
-                    self.flip()
+        if event.type == KEYDOWN:
+            if event.key == keymap["game"]["rotate_right"]:
+                self.rotate(1)
+            elif event.key == keymap["game"]["rotate_left"]:
+                self.rotate(-1)
+            elif event.key == keymap["game"]["reverse"]:
+                self.flip()
 
-                elif event.key == keymap["game"]["move_right"]:
-                    self.moveHorizontal(1)
-                elif event.key == keymap["game"]["move_left"]:
-                    self.moveHorizontal(-1)
+            elif event.key == keymap["game"]["move_right"]:
+                self.moveHorizontal(1)
+            elif event.key == keymap["game"]["move_left"]:
+                self.moveHorizontal(-1)
 
-                elif event.key == keymap["game"]["drop_down"]:
-                    self.drop()
+            elif event.key == keymap["game"]["drop_down"]:
+                self.drop()
 
-                elif event.key == keymap["game"]["speed_up"]:
-                    self.sped_up = True
-                    self.updateinterval /= 10
-                    self.time_until_update = self.updateinterval
+            elif event.key == keymap["game"]["speed_up"]:
+                self.sped_up = True
+                self.updateinterval /= 10
+                self.time_until_update = self.updateinterval
 
 ## This object will be managed by a Tetromino(), it should not be managed as a Job
 class GhostTetromino(Tetromino):
@@ -287,7 +307,9 @@ class GhostTetromino(Tetromino):
                 break
 
 class Board(object):
-    def __init__(self, screen, x=0, y=0, blockwidth=0, width=0, height=0, innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=0, level=1):
+    def __init__(self, screen, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f),
+                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=0, level=1
+                ):
         self.anchor = (x, y)
         self.x = x
         self.y = y
@@ -297,6 +319,7 @@ class Board(object):
         self.drawnblocks = set()
         self.blockwidth = blockwidth
         self.screen = screen
+        self.bgcolor = bgcolor
         self.innercolor = innercolor
         self.outercolor = outercolor
         self.isupdated = True
@@ -353,8 +376,8 @@ class Board(object):
         self.isupdated = True
 
     def draw(self):
-        self.drawAllBlocks()
         self.drawBoard()
+        self.drawAllBlocks()
         self.isupdated = False
 
     ## TODO: Switch to this method, drawing every single block each time is a waste
@@ -376,6 +399,11 @@ class Board(object):
                 self.outercolor,
                 (self.x, self.y, self.width * self.blockwidth, self.height * self.blockwidth + 1),
                 1)
+        Pygame.draw.rect(
+                self.screen,
+                self.bgcolor,
+                (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
+                0)
         for x in xrange(1, self.width):
             Pygame.draw.line(
                     self.screen,
@@ -399,7 +427,7 @@ class Board(object):
         ypos = (y - self.y) / self.blockwidth
         return xpos, ypos
 
-    def eventHandler(self, events):
+    def eventHandler(self, event):
         pass
 
 class Jobs(object):
@@ -425,6 +453,7 @@ class Game(object):
         self.soundtrack = soundtrack
         self.sound_enabled = sound_enabled
         self.playing = ""
+        self.lock = {}
 
         self.setup()
 
@@ -491,7 +520,7 @@ class Game(object):
         Pygame.display.flip()
         self.clock = Pygame.time.Clock()
 
-    def eventHandler(self, events):
+    def eventHandler(self, event):
         pass
 
     def run(self):
@@ -499,23 +528,36 @@ class Game(object):
             raise GameError("Game has not been properly initialized")
 
         while self.running:
+
             self.clock.tick(self.ticktime)
             self.screen.fill(self.bgcolor)
             self.events = Pygame.event.get()
+
             queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
+
             for obj in queue:
+
                 obj = self.getJob(obj)
                 if obj.update_required:
                     obj.update()
                 if obj.draw_required:
                     obj.draw()
 
-                ## Context is love, context is life.
-                obj.eventHandler(self.events)
+                for event in self.events:
+                    if event.type not in self.lock:
+                        obj.eventHandler(event)
+
             Pygame.display.flip()
-            self.eventHandler(self.events)
+
+            for event in self.events:
+                if event.type not in self.lock:
+                    self.eventHandler(event)
+
             if self.running:
                 self.running()
+
+            ## Remove locks
+            self.lock = {}
 
         return self.ret
 
@@ -532,11 +574,11 @@ def makeUberTetromino(board):
         return True
     for y in xrange(y, board.height+1):
         tetromino.append([clearUpwards(x, y) for x in xrange(0, board.width)])
-    return Tetromino(board, tetromino, "UBER", UBERCOLOR, x=0)
+    return Tetromino(board, tetromino, "UBER", UBERCOLOR, xcenter=True)
 
 def randomTetromino(board, updateinterval=FRAMERATE/2):
     color, type, matrix = Random.choice(tetrominos)
-    return Tetromino(board, matrix, type, color, x=(board.width/2)-1, updateinterval=updateinterval)
+    return Tetromino(board, matrix, type, color, xcenter=True, updateinterval=updateinterval)
 
 def genKey(d):
     """
@@ -545,12 +587,22 @@ def genKey(d):
     """
     return "".join([str(d[key]) for key in sorted(d)])
 
+def isInCube(pos, cube):
+    x, y = pos
+    cube_x, cube_y, cube_width, cube_height = cube
+    ## Parentheses added for clarity.
+    return (x > cube_x and x < cube_x+cube_width) and (y > cube_y and y < cube_y+cube_height)
+
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, font={"name": ""}, padding=12, queue=None, variables={},
-                 updatewhen=None, onclick=None):
+                 updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None):
         # Log.log("Initializing TextBox for `{}' with {}".format(
         #     game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
+
+        if not text:
+            raise TypeError("No text given to TextBox")
+
         self.game = game
         self.x = x
         self.y = y
@@ -574,7 +626,12 @@ class TextBox(object):
         self.xcenter = xcenter
         self.padding = padding
         self.variables = variables
-        self.onclick = onclick
+        self.onmouseclick = onmouseclick
+
+        ## TODO: This
+        self.onmouseenter = onmouseenter
+        self.onmouseleave = onmouseleave
+        self.hasmouse = False
 
         ## XXX: Hold that thought
         self.updatewhen = updatewhen
@@ -591,8 +648,16 @@ class TextBox(object):
             self.font["name"] = Pygame.font.get_default_font()
         fontobj = globfonts.get(genKey(self.font))
         if not fontobj:
-            fontobj = globfonts[genKey(self.font)] = \
-                    Pygame.font.SysFont(self.font["name"], self.font.get("size", 40), bold=self.font.get("bold"), italic=self.font.get("italic"))
+            try:
+                fontobj = globfonts[genKey(self.font)] = \
+                        Pygame.font.Font(
+                                os.path.join(Load.FONTDIR, "{}.ttf".format(self.font["name"])),
+                                self.font.get("size", 40),
+                                bold=self.font.get("bold"),
+                                italic=self.font.get("italic")
+                                )
+            except IOError:
+                raise IOError("Unable to load font: `{}'".format(self.font["name"]))
 
         self.rendered_fonts = []
         self.fontwidth = 0
@@ -617,9 +682,9 @@ class TextBox(object):
 
     def draw(self):
         ## XXX: Hold that thought
-        if self.updatewhen:
-            for update in updatewhen:
-                pass
+        # if self.updatewhen:
+        #     for update in updatewhen:
+        #         pass
 
         self.renderFonts()
 
@@ -650,15 +715,19 @@ class TextBox(object):
                     (self.x + self.width, spos),
                     )
 
-    def eventHandler(self, events):
-        for event in events:
-            ## TODO: Mousedown must only apply to a single object at a time
-            ##       this could be accomplished by a lock, or by removing certain
-            ##       events from the event list.
-            if event.type == MOUSEBUTTONDOWN and self.onclick:
-                x, y = Pygame.mouse.get_pos()
-                if (x > self.x and x < self.x+self.width) and (y > self.y and y < self.y+self.height):
-                    self.onclick()
+    def eventHandler(self, event):
+        if event.type == MOUSEMOTION and (self.onmouseenter and self.onmouseleave):
+            isin = isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height))
+            if isin and not self.hasmouse:
+                self.hasmouse = True
+                self.onmouseenter(self)
+            if not isin and self.hasmouse:
+                self.hasmouse = False
+                self.onmouseleave(self)
+        if event.type == MOUSEBUTTONDOWN and self.onmouseclick:
+            if isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height)):
+                self.onmouseclick()
+                self.game.lock[MOUSEBUTTONDOWN] = self
 
     def update(self):
         pass
@@ -690,13 +759,18 @@ class Menu(Game):
         self.isroot = isroot
 
     def setupObjects(self):
+        def mouseLeave(box):
+            box.colors["font"] = self.colorscheme["option"]
+        def mouseEnter(box):
+            box.colors["font"] = self.colorscheme["selected"]
+
         if not self.isroot and self.menu[-1][0] != "Back":
             self.menu.append(("Back", self.quitGame))
 
         self.addJob("header",
-                TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=True,
-                    colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                    )
+                TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
+                        colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
+                        )
                 )
         self.lookup = dict(self.menu)
         x, y = self.options_pos
@@ -707,10 +781,12 @@ class Menu(Game):
                     TextBox(self, option, y=y, x=x, textfit=True,
                         colors={
                             "background":self.colorscheme["background"],
-                            "font":self.colorscheme["selected"] if len(self.options)-1==self.selected else self.colorscheme["option"]
+                            "font":self.colorscheme["option"],
                             },
                         font=self.option_font,
-                        onclick=func,
+                        onmouseclick=func,
+                        onmouseenter=mouseEnter,
+                        onmouseleave=mouseLeave,
                         )
                     )
             y += self.getJob("{}".format(option)).fontheight
@@ -718,45 +794,54 @@ class Menu(Game):
     def mainLoop(self):
         pass
 
+    def move(self, direction):
+        item = self.getSelectedItem()
+        obj = self.getJob(self.menu[item][0])
+        if item == len(self.menu)-1 and direction == 1:
+            newobj = self.getJob(self.menu[0][0])
+        elif item == 0 and direction == -1:
+            newobj = self.getJob(self.menu[len(self.menu)-1][0])
+        else:
+            newobj = self.getJob(self.menu[item+direction][0])
+        obj.onmouseleave(obj)
+        obj.hasmouse = False
+        newobj.onmouseenter(newobj)
+        newobj.hasmouse = True
+        Log.log("Moving cursor to {}".format(repr(newobj.text)))
+
+    def getSelectedItem(self):
+        for i in xrange(len(self.menu)):
+            option, func = self.menu[i]
+            if self.getJob(option).hasmouse:
+                break
+        else:
+            return 0
+        return i
+
     def changeMenu(self, menu):
         self.call(menu)
 
     def close(self):
         self.quitGame()
 
-    def moveUp(self):
-        if self.selected == 0:
-            self.selected = len(self.options)-1
-        else:
-            self.selected -= 1
-        self.setupObjects()
-
-    def moveDown(self):
-        if self.selected == len(self.options)-1:
-            self.selected = 0
-        else:
-            self.selected += 1
-        self.setupObjects()
-
     def execOption(self):
         ## Right now each option just runs a function, this may change
-        option = self.lookup[self.options[self.selected]]
+        option = self.lookup[self.options[self.getSelectedItem()]]
         option()
 
-    def eventHandler(self, events):
-        for event in events:
-            if event.type == QUIT:
-                self.quit()
+    def eventHandler(self, event):
+        if event.type == QUIT:
+            self.quit()
 
-            if event.type == KEYDOWN:
-                if event.key == keymap["menu"]["back"]:
-                    self.close()
-                elif event.key == keymap["menu"]["down"]:
-                    self.moveDown()
-                elif event.key == keymap["menu"]["up"]:
-                    self.moveUp()
-                elif event.key == keymap["menu"]["select"]:
-                    self.execOption()
+        if event.type == KEYDOWN:
+            if event.key == keymap["menu"]["back"]:
+                self.close()
+            elif event.key == keymap["menu"]["down"]:
+                self.move(1)
+            elif event.key == keymap["menu"]["up"]:
+                self.move(-1)
+            elif event.key == keymap["menu"]["select"]:
+                self.execOption()
 
 class TimedExecution(object):
     def __init__(self, function, cycles=0, seconds=0, anykey=True):
@@ -771,11 +856,10 @@ class TimedExecution(object):
         elif seconds:
             self.cycles = seconds * FRAMERATE
 
-    def eventHandler(self, events):
-        for event in events:
-            if event.type == KEYDOWN and self.anykey:
-                self.update_required = False
-                self.function()
+    def eventHandler(self, event):
+        if event.type == KEYDOWN and self.anykey:
+            self.update_required = False
+            self.function()
 
     def draw(self):
         pass
@@ -795,7 +879,17 @@ class TetrisGame(Game):
         self.player_name = player_name
 
         ## All the jobs
-        self.addJob("board", Board(self.screen, x=BLOCK_WIDTH, y=BLOCK_HEIGHT, height=BOARD_HEIGHT, width=BOARD_WIDTH, blockwidth=BOARD_BLOCKWIDTH, level=kwargs.get("level", 1)))
+        self.addJob("board",
+                    Board(self.screen,
+                          x=BLOCK_WIDTH,
+                          y=BLOCK_HEIGHT,
+                          height=BOARD_HEIGHT,
+                          width=BOARD_WIDTH,
+                          blockwidth=BOARD_BLOCKWIDTH,
+                          level=kwargs.get("level", 1),
+                          bgcolor=self.bgcolor
+                          )
+                    )
         self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
         self.addJob("status",
                 TextBox(self, "Level: {level}\nScore: {score}\nLines: {lines}\nLines left: {level up}", border=True, y=BLOCK_HEIGHT+1, x=BLOCK_WIDTH*2+(BOARD_WIDTH)*BOARD_BLOCKWIDTH, textfit=True,
@@ -814,40 +908,27 @@ class TetrisGame(Game):
         if not self.getJob("board").update_required and not hasattr(self.jobs, "window-game_over"):
             ## XXX: GAME OVER
             board = self.getJob("board")
-            if len(self.highscores) < HIGHSCORES or any(board.score > score for score in self.highscores):
-                self.addJob("window-game_over",
-                            TextBox(self, "New Highscore!", border=True, ycenter=True, xcenter=True, width=80, height=50, textfit=True, background=True,
-                                colors={"background":(0x22,0x22,0x22), "border":(0xaa,0xaa,0xaa), "font":(0x66,0x66,0x66)},
-                                font={ "name":"monaco", "size":35, "bold":False }
-                                )
-                            )
+
+            if len(self.highscores) < HIGHSCORES or any(board.score > score["score"] for score in self.highscores):
+                self.addJob("window-game_over", Notification(self, "window-game_over", "New Highscore!"))
                 Save.saveScores([{"name": self.player_name, "score": board.score, "level": board.level, "lines": board.lines}])
             else:
-                self.addJob("window-game_over",
-                            TextBox(self, "Game Over", border=True, ycenter=True, xcenter=True, width=80, height=50, textfit=True, background=True,
-                                colors={"background":(0x22,0x22,0x22), "border":(0xaa,0xaa,0xaa), "font":(0xaa,0x22,0x22)},
-                                font={ "name":"monaco", "size":35, "bold":True }
-                                )
-                            )
+                self.addJob("window-game_over", Notification(self, "window-game_over", "Game Over"))
             self.addJob("endtimer", TimedExecution(self.quitGame, seconds=2, anykey=True))
 
         if not self.jobs.tetromino.update_required and self.getJob("board").update_required:
             self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
 
-    def eventHandler(self, events):
-        if not events:
-            return
+    def eventHandler(self, event):
+        if event.type == QUIT:
+            self.quit()
 
-        for event in events:
-            if event.type == QUIT:
-                self.quit()
+        elif event.type == KEYDOWN:
+            if event.key == keymap["game"]["pause"]:
+                self.call(PauseMenu, caption="Tetris - Paused")
 
-            elif event.type == KEYDOWN:
-                if event.key == keymap["game"]["pause"]:
-                    self.call(PauseMenu, caption="Tetris - Paused")
-
-                if event.key == keymap["game"]["uber_tetromino"]:
-                    self.addJob("tetromino", makeUberTetromino(self.getJob("board")))
+            if event.key == keymap["game"]["uber_tetromino"]:
+                self.addJob("tetromino", makeUberTetromino(self.getJob("board")))
 
 
 ## Placeholder, need to add sliders and other stuff to the Menu class
@@ -867,6 +948,18 @@ class MenuAction(object):
         self.function = function
         self.seq = seq
 
+class HighscoreList(Game):
+    def __init__(self, top=HIGHSCORES, *args, **kwargs):
+        super(HighscoreList, self).__init__("HighscoreList", *args, **kwargs)
+        self.running = self.mainLoop
+
+    def eventHandler(self, event):
+        if event.type == QUIT:
+            self.quit()
+
+    def mainLoop(self):
+        pass
+
 class MainMenu(Menu):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__("MainMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, **kwargs)
@@ -875,24 +968,33 @@ class MainMenu(Menu):
                 ("Start Game", self.startTetrisGame,),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options"),),
                 ("Creator", lambda: self.call(MakeTetromino, caption="Loltris - Creator"),),
-                ("Quit", self.quit,),
+                ("Highscores", lambda: self.call(HighscoreList, caption="Loltris - Highscores"),),
+                ("Exit", self.quit,),
                 ]
         self.highscores = Load.loadHighscores(top=HIGHSCORES)
         self.setupObjects()
-        self.addJob(
-                 "highscorelist",
-                 TextBox(self, "".join(["{}: {}\n".format(x["name"], x["score"]) for x in self.highscores]),
-                     x=self.jobs.header.width+self.jobs.header.x, ycenter=True, textfit=True,
-                     colors={
-                         "background":self.colorscheme["background"],
-                         "font":self.colorscheme["option"],
-                         "border": (0xaa,0xaa,0xaa),
-                         },
-                     font=HIGHSCORELIST_FONT,
-                     border=True,
-                     background=True,
-                     )
-                )
+        if self.highscores:
+            self.addJob(
+                     "highscorelist",
+                     TextBox(
+                         self,
+                         ( "Top {} scores\n\n".format(HIGHSCORES) + ## Header and spaced line
+                           "".join(["{}: {}\n".format(x["name"], x["score"]) for x in self.highscores]) + ## The scores
+                           ("\n" * (HIGHSCORES - len(self.highscores))) ## Empty lines
+                           ),
+                         y=self.jobs.header.y+self.jobs.header.height+10, textfit=True,
+                         colors={
+                             "background":self.colorscheme["background"],
+                             "font":self.colorscheme["option"],
+                             "border": (0xaa,0xaa,0xaa),
+                             },
+                         font=HIGHSCORELIST_FONT,
+                         border=True,
+                         background=True,
+                         )
+                    )
+            ## 5 pixels from the right edge
+            self.jobs.highscorelist.x = SCREEN_WIDTH - self.jobs.highscorelist.width - 5
 
     def startTetrisGame(self):
         self.call(TetrisGame, caption="Loltris", player_name=PLAYER)
@@ -903,8 +1005,8 @@ class PauseMenu(Menu):
         super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Pause"
         self.menu = [
-                ("Quit Game", self.quit,),
-                ("Quit to main menu", lambda: self.quitGame("MainMenu"),),
+                ("Exit Game", self.quit,),
+                ("Exit to main menu", lambda: self.quitGame("MainMenu"),),
                 ("Continue", self.quitGame,),
                 ]
         self.setupObjects()
@@ -915,12 +1017,10 @@ class ColorPalette(object):
         self.green = 0
         self.blue = 0
 
-    def eventHandler(self, events):
-        for event in events:
-            if event.type == MOUSEBUTTONDOWN:
-                pass
+    def eventHandler(self, event):
+        if event.type == MOUSEBUTTONDOWN:
+            pass
 
-## Get all the islands that are in a hash table
 def islands(dictionary):
     class Block(object):
         def __init__(self, x, y):
@@ -951,6 +1051,14 @@ def islands(dictionary):
 
     return set(blocks).difference(visited)
 
+class Notification(TextBox):
+    def __init__(self, game, _id, text):
+        super(Notification, self).__init__(
+                game, text, xcenter=True, ycenter=True, font=ERRORBOX_FONT,
+                textfit=True, onmouseclick=lambda: game.removeJob(_id),
+                colors=ERRORBOX_COLORSCHEME, background=True, border=True,
+                )
+
 class MakeTetromino(Game):
     def __init__(self, *args, **kwargs):
         self.id = "MakeTetromino"
@@ -968,42 +1076,61 @@ class MakeTetromino(Game):
                       height=BOARD_HEIGHT,
                       width=BOARD_WIDTH,
                       blockwidth=BOARD_BLOCKWIDTH,
-                      level=kwargs.get("level", 1)
+                      level=kwargs.get("level", 1),
+                      bgcolor=self.bgcolor
                       ),
                 )
+
+        ## TODO: Make it less cumbersome and repeditive to spawn a row of buttons
         self.addJob(
-                "save-button",
+                "save_button",
                 TextBox(self, "Save", x=self.jobs.board.x + (self.jobs.board.width*self.jobs.board.blockwidth) + 5,
-                    y=self.jobs.board.y, 
-                    textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
-                    font=TETRIS_STATUSBOX_FONT, onclick=self.save,
+                        y=self.jobs.board.y, 
+                        textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.save,
+                        )
+                )
+        self.addJob(
+                "clear_button",
+                TextBox(self, "Clear", x=self.jobs.board.x + (self.jobs.board.width*self.jobs.board.blockwidth) + 5,
+                        y=self.jobs.board.y + self.jobs.save_button.height,
+                        textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.clear,
+                    )
+                )
+        self.addJob(
+                "exit_button",
+                TextBox(self, "Exit", x=self.jobs.board.x + (self.jobs.board.width*self.jobs.board.blockwidth) + 5,
+                        y=self.jobs.clear_button.y + self.jobs.clear_button.height,
+                        textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame,
                     )
                 )
 
-    def eventHandler(self, events):
-        for event in events:
-            if event.type == QUIT:
-                self.quit()
-            if event.type == MOUSEBUTTONDOWN:
-                x, y = self.jobs.board.getBlockInPos(*Pygame.mouse.get_pos())
-                if x > self.jobs.board.width-1 or y > self.jobs.board.height-1 or x < 0 or y < 0:
-                    pass
-                elif not self.jobs.board.blocks.get((x, y)):
-                    self.jobs.board.blocks[(x, y)] = self.color
-                else:
-                    self.jobs.board.blocks.pop((x, y))
+    def clear(self):
+        self.jobs.board.blocks = {}
+
+    def eventHandler(self, event):
+        if event.type == QUIT:
+            self.quit()
+        if event.type == MOUSEBUTTONDOWN:
+            x, y = self.jobs.board.getBlockInPos(*Pygame.mouse.get_pos())
+            if x > self.jobs.board.width-1 or y > self.jobs.board.height-1 or x < 0 or y < 0:
+                pass
+            elif not self.jobs.board.blocks.get((x, y)):
+                self.jobs.board.blocks[(x, y)] = self.color
+            else:
+                self.jobs.board.blocks.pop((x, y))
 
     def save(self):
+        if not self.jobs.board.blocks:
+            Log.log("No blocks present, will not save tetromino")
+            self.addJob("no_blocks_present", Notification(self, "no_blocks_present", "Invalid: No blocks present"))
+            return
+
         if any(islands(self.jobs.board.blocks)):
             Log.log("Islands present, will not save tetromino")
-            self.addJob(
-                    "Islands-present-window",
-                    TextBox(self, "Invalid: Islands present", xcenter=True, ycenter=True, font=MENU_OPTION_FONT,
-                            textfit=True, onclick=lambda: self.removeJob("Islands-present-window"),
-                            colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa),},
-                            background=True, border=True,
-                            )
-                    )
+            self.addJob( "islands_present_window", Notification(self, "islands_present_window", "Invalid: Islands present"))
             return
 
         xlow = min(x for x, y in self.jobs.board.blocks)

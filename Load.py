@@ -7,6 +7,7 @@ import os.path
 import Log
 
 DATADIR = "data"
+FONTDIR = os.path.join(DATADIR, "Fonts")
 XMLDIR = os.path.join(DATADIR, "XML")
 IMAGEDIR = os.path.join(DATADIR, "Images")
 MUSICDIR = os.path.join(DATADIR, "Music")

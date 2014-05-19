@@ -49,7 +49,7 @@ def _appendTetromino(root, color, name, matrix):
 
 def saveTetromino(color, name, matrix):
     path = os.path.join(XMLDIR, "Tetrominos.xml")
-    parser = ElementTree.XMLParser(remove_blank_text=True, encoding="utf-8")
+    parser = ElementTree.XMLParser(encoding="utf-8")
     xml =  ElementTree.parse(path, parser)
     root = xml.getroot()
 

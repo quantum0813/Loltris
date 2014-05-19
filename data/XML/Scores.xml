@@ -1,62 +1,44 @@
 <scores>
   <score>
-    <score>9101</score>
-    <lines>7</lines>
+    <score>10100</score>
+    <lines>71</lines>
+    <name>Anon</name>
+    <level>3</level>
+  </score>
+  <score>
+    <score>0</score>
+    <lines>0</lines>
     <name>Anon</name>
     <level>1</level>
   </score>
   <score>
     <score>9001</score>
-    <lines>6</lines>
-    <name>Anon</name>
-    <level>1</level>
-  </score>
-  <score>
-    <score>0</score>
-    <lines>0</lines>
-    <name>Anon</name>
-    <level>1</level>
-  </score>
-  <score>
-    <score>0</score>
-    <lines>0</lines>
-    <name>Anon</name>
-    <level>1</level>
-  </score>
-  <score>
-    <score>0</score>
-    <lines>0</lines>
-    <name>Anon</name>
-    <level>1</level>
-  </score>
-  <score>
-    <score>3000</score>
-    <lines>8</lines>
-    <name>Anon</name>
-    <level>1</level>
-  </score>
-  <score>
-    <score>10501</score>
     <lines>11</lines>
     <name>Anon</name>
     <level>1</level>
   </score>
   <score>
-    <score>12001</score>
-    <lines>22</lines>
+    <score>1100</score>
+    <lines>10</lines>
     <name>Anon</name>
-    <level>2</level>
+    <level>1</level>
   </score>
   <score>
-    <score>20252</score>
-    <lines>22</lines>
+    <score>0</score>
+    <lines>0</lines>
     <name>Anon</name>
-    <level>2</level>
+    <level>1</level>
   </score>
   <score>
-    <score>34403</score>
-    <lines>50</lines>
+    <score>1350</score>
+    <lines>12</lines>
     <name>Anon</name>
-    <level>3</level>
+    <level>1</level>
+  </score>
+  <score>
+    <score>3150</score>
+    <lines>29</lines>
+    <name>Anon</name>
+    <level>2</level>
   </score>
 </scores>
