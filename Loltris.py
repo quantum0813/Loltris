@@ -22,9 +22,8 @@ import Menus
 import Load
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
+    ## Load necessarry shared data
     Shared.tetrominos = Load.loadTetrominos()
     Shared.keymap = Load.loadKeymaps()
+
     Menus.MainMenu(caption="Loltris").run()

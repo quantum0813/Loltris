@@ -109,6 +109,8 @@ class TextBox(object):
         #     for update in updatewhen:
         #         pass
 
+        ## FIXME: SHOULD NOT BE DONE ON EVERY SINGLE DRAW
+        ##        In order to avoid this I need to implement "updatewhen".
         self.renderFonts()
 
         if self.background:
@@ -187,9 +189,12 @@ class TimedExecution(object):
         self.cycles -= 1
 
 class Tetromino(object):
-    def __init__(self, board, matrix, _type, color, x=0, y=None, xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None):
+    def __init__(self, board, matrix, _type, color, x=0, y=None, ycenter=False,
+                 xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None
+                 ):
+
         if not matrix:
-            raise TypeError("Will not create matrix with empty matrix")
+            raise TypeError("Will not create tetromino with empty matrix")
 
         self.matrix = matrix
         self.type = _type
@@ -208,13 +213,15 @@ class Tetromino(object):
         if xcenter:
             self.x = (self.board.width//2) - (len(self.matrix[0])//2)
 
+        if y == None:
+            self.y = -(len(self.matrix))
+        if ycenter:
+            self.y = (self.board.height//2) - (len(self.matrix)//2)
+
         self.ghostpiece = None
         if ghostpiece:
             self.ghostpiece = GhostTetromino(board, matrix, _type, GHOST_COLOR, x=x, y=y, xcenter=xcenter)
-            self.ghostpiece.drop()
-
-        if y == None:
-            self.y = -(len(self.matrix))
+            self.ghostpiece.drop(self.y)
 
     def getActiveBlocks(self):
         for y in xrange(len(self.matrix)):
@@ -304,7 +311,7 @@ class Tetromino(object):
             self.ghostpiece.y = self.y
             self.ghostpiece.x = self.x
             getattr(self.ghostpiece, attr)(*args, **kwargs)
-            self.ghostpiece.drop()
+            self.ghostpiece.drop(self.y)
 
     ## It makes the game WAAY to easy, but i kind of always wondered "what if"
     def flip(self):
@@ -347,11 +354,11 @@ class GhostTetromino(Tetromino):
     def __init__(self, *args, **kwargs):
         super(GhostTetromino, self).__init__(*args, ghostpiece=False, **kwargs)
 
-    def drop(self):
-        ## TODO: The drop HAS TO START FROM where the Tetromino being shadowed is, not from the top
-        for y in xrange(self.board.height+1):
+    def drop(self, y_pos):
+        for y in xrange(y_pos, self.board.height):
             self.y = y
             if self.checkBlockCollision() or self.checkWallCollision(self.x, self.y) == "bottom":
+                ## We need to be one step away from the next collision
                 self.y -= 1
                 break
 
@@ -374,7 +381,7 @@ class Notification(TextBox):
 
 class Board(object):
     def __init__(self, screen, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f),
-                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=0, level=1
+                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=0, level=1, draw_grid=True,
                 ):
         self.anchor = (x, y)
         self.x = x
@@ -397,6 +404,7 @@ class Board(object):
         self.score = 0
         self.lines = 0
         self.level_lines = LEVEL_LINES + ((self.level-1) * LEVEL_LINES_INCREASE)
+        self.draw_grid = draw_grid
 
     def drawCube(self, x, y, color):
         if y < 0:
@@ -470,20 +478,21 @@ class Board(object):
                 self.bgcolor,
                 (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
                 0)
-        for x in xrange(1, self.width):
-            Pygame.draw.line(
-                    self.screen,
-                    self.innercolor,
-                    (self.x + self.blockwidth*x, self.y + 1),
-                    (self.x + self.blockwidth*x, self.y + self.height*self.blockwidth - 2),
-                    1)
-        for y in xrange(1, self.height):
-            Pygame.draw.line(
-                    self.screen,
-                    self.innercolor,
-                    (self.x + 1, self.y + self.blockwidth*y),
-                    (self.x + self.width*self.blockwidth - 2, self.y + self.blockwidth*y),
-                    1)
+        if self.draw_grid:
+            for x in xrange(1, self.width):
+                Pygame.draw.line(
+                        self.screen,
+                        self.innercolor,
+                        (self.x + self.blockwidth*x, self.y + 1),
+                        (self.x + self.blockwidth*x, self.y + self.height*self.blockwidth - 2),
+                        1)
+            for y in xrange(1, self.height):
+                Pygame.draw.line(
+                        self.screen,
+                        self.innercolor,
+                        (self.x + 1, self.y + self.blockwidth*y),
+                        (self.x + self.width*self.blockwidth - 2, self.y + self.blockwidth*y),
+                        1)
 
     def getBlockInPos(self, x, y):
         """ Get the block coordinates for pixel coordinates

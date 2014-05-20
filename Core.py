@@ -122,12 +122,12 @@ class Game(object):
                 obj = self.getJob(obj)
                 if obj.update_required:
                     obj.update()
+                    for event in self.events:
+                        if event.type not in self.lock:
+                            obj.eventHandler(event)
                 if obj.draw_required:
                     obj.draw()
 
-                for event in self.events:
-                    if event.type not in self.lock:
-                        obj.eventHandler(event)
 
             Pygame.display.flip()
 
