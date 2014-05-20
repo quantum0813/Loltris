@@ -25,7 +25,19 @@
         ###
     </tetromino>
 <tetromino color="#BBBBBB" name="kek">
-_#_
+###
+###
+###
+</tetromino><tetromino color="#BBBBBB" name="kek">
+##
+_#
+_#
+_#
+_#
+</tetromino><tetromino color="#BBBBBB" name="kek">
 ###
 _#_
+</tetromino><tetromino color="#BBBBBB" name="kek">
+##
+_#
 </tetromino></tetrominos>

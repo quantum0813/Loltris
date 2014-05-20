@@ -17,7 +17,7 @@ from time import time, ctime, strftime, gmtime
 from sys import stdout
 from threading import currentThread
 
-import GlobalVariables as GV
+from Globals import *
 
 enable_color = False
 color = {
@@ -30,11 +30,6 @@ color = {
         "SUCCESS": "\x1b[1;32m",
         "WARNING": "\x1b[1;31m",
         }
-
-try:
-    __logfile__ = open(GV.logfile_name, "a")
-except (IOError, OSError):
-    print("[WARNING]: Error while opening log file, continuing...")
 
 def out(msg, end="\r\n", c="\x1b[0;33m"):
     stdout.write((c if c else "") + str(msg) + ("\x1b[0;00m" if c else "") + str(end))
@@ -52,7 +47,7 @@ def out(msg, end="\r\n", c="\x1b[0;33m"):
 ## we want is the error message function crashing the server...
 
 def fprint(fileobj, data):
-    fileobj.write(data + GV.eol)
+    fileobj.write(data + EOL)
     fileobj.flush()
 
 def genericLog(logtype, message, cr=False, **kwargs):
@@ -67,8 +62,7 @@ def genericLog(logtype, message, cr=False, **kwargs):
         stdout.write(color["DEFAULT"])
     if kwargs.get("trace"):
         ## Print the traceback, indented with four spaces
-        stdout.write("".join(["    "+x+GV.eol for x in traceback.format_exc(kwargs["trace"]).splitlines()]))
-    fprint(__logfile__, log)
+        stdout.write("".join(["    "+x+EOL for x in traceback.format_exc(kwargs["trace"]).splitlines()]))
 
 ## Called by genericLog, which is called by panic/error/log etc, which is called by the [function we want]
 def getCaller():

@@ -1,0 +1,65 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*--
+
+SCREEN_HEIGHT = 360
+SCREEN_WIDTH = 450
+FRAMERATE = 30
+BLOCK_WIDTH = 10
+BLOCK_HEIGHT = 10
+BOARD_WIDTH = 10
+BOARD_HEIGHT = 16
+SOUND_ENABLED = False
+HIGHSCORES = 5
+UBERCOLOR = (0x70, 0x70, 0x22)
+
+## TODO: Need a way to set this, could be done in options, or the player could be asked
+##       to input her name whenever she get's on the top scorers list. This seems most
+##       appropriate, but would require that I write an InputBox class, shouldn't be
+##       particularly difficult.
+PLAYER = "Anon"
+
+BOARD_BLOCKWIDTH = 20
+LEVEL_LINES = 20
+LEVEL_LINES_INCREASE = 5
+UPDATEINTERVAL_DECREASE = FRAMERATE / 10
+
+## TODO: Put font and colorscheme information in JSON files.
+
+GLOBAL_FONT_NAME = "monaco"
+MENU_HEADER_FONT = {
+        "name":"orbitron-bold",
+        "size":55,
+        }
+MENU_OPTION_FONT = {
+        "name":"monaco",
+        "size":20,
+        "bold":False,
+        }
+MENU_COLORSCHEME = {
+        "header": (0xff,0xff,0xff),
+        "selected": (0x66,0x66,0x66),
+        "background":(0x22,0x22,0x22),
+        "option":(0xaa,0xaa,0xaa),
+        }
+TETRIS_STATUSBOX_FONT = {
+        "name":"monaco",
+        "size":15,
+        "bold":False,
+        }
+HIGHSCORELIST_FONT = {
+        "name":"monaco",
+        "size":15,
+        "bold":False,
+        }
+ERRORBOX_FONT = MENU_OPTION_FONT
+ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
+
+# DISPLAY_OPTIONS = FULLSCREEN | DOUBLEBUF | HWSURFACE
+DISPLAY_OPTIONS = 0
+GHOST_COLOR = (0x29, 0x29, 0x29)
+
+SCORES = {
+        "tetris": {1: 100, 2: 250, 3: 500, 4: 1500},
+        }
+
+EOL = "\ǹ"
