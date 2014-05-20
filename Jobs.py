@@ -203,9 +203,47 @@ class Flipper(TextBox):
         self.renderFonts()
 
 class Switch(TextBox):
-    def __init__(self):
-        super(Switch, self).__init__(
+    """ On/Off option, will display a box, which will either be empty or crossed depending on
+        the state of the option.
+    """
+    def __init__(self, game, text, box_center=False, boxwidth=None, whenoff=None, whenon=None, box_offset=0, **kwargs):
+        super(Switch, self).__init__(game, text, textfit=True, onmouseclick=self.flip, **kwargs)
+        self.whenoff = whenoff
+        self.whenon = whenon
+        self.on = False
+        self.box_offset = box_offset
+
+        self.boxwidth = boxwidth
+        if not boxwidth:
+            self.boxwidth = self.height // 2
+        if box_center:
+            self.box_offset = (self.height // 2) - (self.boxwidth // 2)
+            self.y_center = self.y + self.height // 2
+        self.width += self.boxwidth
+
+    def flip(self):
+        self.on = not self.on
+        if self.on:
+            self.whenon()
+        else:
+            self.whenoff()
+
+    def drawBox(self):
+        Pygame.draw.rect(
+                self.game.screen,
+                self.colors.get("checkbox", (0,0,0)),
+                (self.x + self.width, self.y + self.box_offset, self.boxwidth, self.boxwidth),
+                1)
+        if self.on:
+            Pygame.draw.rect(
+                self.game.screen,
+                self.colors.get("inside", (0,0,0)),
+                (self.x + self.width + 1, self.y + self.box_offset + 1, self.boxwidth-1, self.boxwidth-1),
                 )
+
+    def draw(self):
+        super(Switch, self).draw()
+        self.drawBox()
 
 class TimedExecution(object):
     def __init__(self, function, cycles=0, seconds=0, anykey=True):

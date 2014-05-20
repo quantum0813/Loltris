@@ -90,3 +90,9 @@ def loadTetrominos():
             return _loadTetrominos(rf.read())
     except:
         raise ImportError("Error while loading tetrominos from `{}'".format(path))
+
+def _loadOptions(json):
+    pass
+
+def loadOptions():
+    pass

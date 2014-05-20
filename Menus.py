@@ -9,6 +9,7 @@ import MakeTetromino
 import Log
 import pygame as Pygame
 import HighscoreExplorer
+import sys as Sys
 from pygame.locals import *
 from Globals import *
 
@@ -75,8 +76,59 @@ class OptionsMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(OptionsMenu, self).__init__("OptionsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Options"
+        self.options = Load.loadOptions()
         self.menu = [
-                ("Crash", lambda: lololololololololol)
+                ("Keymaps", lambda: self.call(KeymapMenu, caption=self.caption))
                 ]
         self.setupObjects()
+
+        # ## XXX: TEST CODE
+        # self.addJob("test",
+        #             Jobs.Switch(
+        #                 self,
+        #                 "Option",
+        #                 box_center=True,
+        #                 boxwidth=8,
+        #                 whenon=lambda: Log.log("OPTION ENABLED"),
+        #                 whenoff=lambda: Log.log("OPTION DISABLED"),
+        #                 x=0,
+        #                 y=200,
+        #                 font=MENU_OPTION_FONT,
+        #                 colors={
+        #                     "background":(0x22,0x22,0x22),
+        #                     "font":(0xaa,0xaa,0xaa),
+        #                     "checkbox":(0xaa,0xaa,0xaa),
+        #                     "inside":(0x66,0x66,0x66),
+        #                     "border":(0x66,0x66,0x66)
+        #                     }
+        #                 )
+        #             )
+
+class KeymapMenu(Core.Menu):
+    def __init__(self, **kwargs):
+        super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+        self.header = "Pause"
+        self.menu = [
+                ("Tetris", lambda: self.call(self.Tetris)),
+                ("Menu", lambda: self.call(self.Menu)),
+                ]
+        self.setupObjects()
+
+    class Tetris(Core.Menu):
+        def __init__(self, **kwargs):
+            super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+            self.header = "Tetris keymap"
+            self.menu = [
+                    ("Rotate left", lambda: None)
+                    ]
+            self.setupObjects()
+    class Menu(Core.Menu):
+        def __init__(self, **kwargs):
+            super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+            self.header = "Menu keymap"
+            self.menu = [
+                    ("Move down", lambda: None)
+                    ]
+            self.setupObjects()
+
 

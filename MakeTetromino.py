@@ -63,8 +63,8 @@ class MakeTetromino(Core.Game):
         self.addJob(
                 "board",
                 Jobs.Board(self.screen,
-                      x=BOARD_BLOCKWIDTH,
-                      y=BOARD_BLOCKWIDTH,
+                      x=SPACER,
+                      y=SPACER,
                       height=BOARD_HEIGHT,
                       width=BOARD_WIDTH,
                       blockwidth=BOARD_BLOCKWIDTH,
