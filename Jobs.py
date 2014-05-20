@@ -348,6 +348,7 @@ class GhostTetromino(Tetromino):
         super(GhostTetromino, self).__init__(*args, ghostpiece=False, **kwargs)
 
     def drop(self):
+        ## TODO: The drop HAS TO START FROM where the Tetromino being shadowed is, not from the top
         for y in xrange(self.board.height+1):
             self.y = y
             if self.checkBlockCollision() or self.checkWallCollision(self.x, self.y) == "bottom":
@@ -359,7 +360,7 @@ class InputBox(TextBox):
         super(InputBox, self).__init__(
                 "{}{input}",
                 variables={
-                    "level": lambda s: s.getJob("board").level,
+                    "level": lambda self: self.jobs.board.level,
                     }
                 )
 

@@ -5,6 +5,7 @@
 import pygame as Pygame
 import sys as Sys
 import Log
+import Shared
 from pygame.locals import *
 from Globals import *
 from Jobs import TextBox
@@ -235,12 +236,12 @@ class Menu(Game):
             self.quit()
 
         if event.type == KEYDOWN:
-            if event.key == keymap["menu"]["back"]:
+            if event.key == Shared.keymap["menu"]["back"]:
                 self.close()
-            elif event.key == keymap["menu"]["down"]:
+            elif event.key == Shared.keymap["menu"]["down"]:
                 self.move(1)
-            elif event.key == keymap["menu"]["up"]:
+            elif event.key == Shared.keymap["menu"]["up"]:
                 self.move(-1)
-            elif event.key == keymap["menu"]["select"]:
+            elif event.key == Shared.keymap["menu"]["select"]:
                 self.execOption()
 

@@ -8,6 +8,7 @@ import TetrisGame
 import MakeTetromino
 import Log
 import pygame as Pygame
+import HighscoreExplorer
 from pygame.locals import *
 from Globals import *
 
@@ -25,7 +26,7 @@ class MainMenu(Core.Menu):
                 ("Start Game", self.startTetrisGame,),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options"),),
                 ("Creator", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator"),),
-                ("Highscores", lambda: self.call(HighscoreList, caption="Loltris - Highscores"),),
+                ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores"),),
                 ("Exit", self.quit,),
                 ]
         self.highscores = Load.loadHighscores(top=HIGHSCORES)
@@ -62,9 +63,9 @@ class PauseMenu(Core.Menu):
         super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, **kwargs)
         self.header = "Pause"
         self.menu = [
-                ("Exit Game", self.quit,),
-                ("Exit to main menu", lambda: self.quitGame("MainMenu"),),
-                ("Continue", self.quitGame,),
+                ("Continue", self.quitGame),
+                ("Exit to main menu", lambda: self.quitGame("MainMenu")),
+                ("Exit Game", self.quit),
                 ]
         self.setupObjects()
 
