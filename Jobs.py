@@ -80,7 +80,7 @@ class TextBox(object):
                                 italic=self.font.get("italic")
                                 )
             except IOError:
-                raise IOError("Unable to load font: `{}'".format(self.font["name"]))
+                Log.panic("Unable to load font: `{}'".format(self.font["name"]))
 
         self.rendered_fonts = []
         self.fontwidth = 0
@@ -160,6 +160,52 @@ class TextBox(object):
 
     def update(self):
         pass
+
+class Slider(TextBox):
+    def __init__(self, game, text, x=0, y=0, height=5, width=0, colors=None):
+        self.colors = colors or {
+                "background": (0,0,0),
+                "filled": (0,0,0),
+                "empty": (0,0,0),
+                "slider": (0,0,0),
+                }
+
+        super(Slider, self).__init__(
+                game, text, x=x, y=y, background=True, colors=colors,
+                )
+        self.onmouseclick = lambda: self.moveBar(Pygame.mouse.get_pos()[0])
+
+    def getPercentage(self):
+        pass
+
+class Flipper(TextBox):
+    def __init__(self, game, title, options, x=0, y=0, height=5, width=0, colors=None):
+        super(Flipper, self).__init__(
+                game, title + options[0], x=x, y=y, background=True, colors=colors,
+                )
+        self.option = 0
+        self.title = title
+
+    def nextOption(self):
+        if self.option+1 == len(self.options):
+            self.option = 0
+        else:
+            self.option += 1
+        self.text = self.title + self.options[self.option]
+        self.renderFonts()
+
+    def previousOption(self):
+        if self.option == 0:
+            self.option == len(self.options)-1
+        else:
+            self.option -= 1
+        self.text = self.title + self.options[self.option]
+        self.renderFonts()
+
+class Switch(TextBox):
+    def __init__(self):
+        super(Switch, self).__init__(
+                )
 
 class TimedExecution(object):
     def __init__(self, function, cycles=0, seconds=0, anykey=True):

@@ -178,6 +178,7 @@ class Menu(Game):
         x, y = self.options_pos
         self.options = []
         for option, func in self.menu:
+            Log.debug("Creating TextBox with {} at {}".format(repr(option), (x, y)))
             self.options.append("{}".format(option))
             self.addJob("{}".format(option),
                     TextBox(self, option, y=y, x=x, textfit=True,

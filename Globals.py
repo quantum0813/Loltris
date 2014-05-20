@@ -1,18 +1,15 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*--
 
-SCREEN_HEIGHT = 360
-SCREEN_WIDTH = 450
 FRAMERATE = 30
-BLOCK_WIDTH = 10
-BLOCK_HEIGHT = 10
 BOARD_WIDTH = 10
-BOARD_HEIGHT = 16
+BOARD_HEIGHT = 20
+SPACER = 10
 SOUND_ENABLED = False
 HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
 PREVIEW_HEIGHT = 5
-PREVIEW_WIDTH = 5
+PREVIEW_WIDTH = 7
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
 ##       to input her name whenever she get's on the top scorers list. This seems most
@@ -24,6 +21,9 @@ BOARD_BLOCKWIDTH = 20
 LEVEL_LINES = 20
 LEVEL_LINES_INCREASE = 5
 UPDATEINTERVAL_DECREASE = FRAMERATE / 10
+
+SCREEN_HEIGHT = (BOARD_BLOCKWIDTH * BOARD_HEIGHT) + BOARD_BLOCKWIDTH*2
+SCREEN_WIDTH = 450
 
 ## TODO: Put font and colorscheme information in JSON files.
 
