@@ -82,5 +82,7 @@
     <lines>65</lines>
     <name>Anon</name>
     <level>3</level>
+    <!-- TODO: Add state information, contains a bzipped version of the pickled board -->
+    <state>0.state.bz2</state>
   </score>
 </scores>

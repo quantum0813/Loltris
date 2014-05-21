@@ -1,19 +1,26 @@
 #!/usr/bin/python2 
 #-*- coding: utf-8 -*-
 
-## ======================================================================
-## Contains functions for logging and debugging.
+## =====================================================================
+## Tools for logging
+## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
 ##
-## Copyright (C) 2013-2014 Jonas Møller
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## ======================================================================
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## =====================================================================
 
 import inspect, sys, traceback
-from time import time, ctime, strftime, gmtime
+from time import time, ctime, strftime, localtime
 from sys import stdout
 from threading import currentThread
 
@@ -70,7 +77,7 @@ def getCaller():
     return inspect.getouterframes(curframe, 2)[3][3]
 
 def getTime():
-    return strftime("%H:%M:%S", gmtime())
+    return strftime("%H:%M:%S", localtime(time()))
 
 def panic(comment, **kwargs):
     genericLog("PANIC", comment, **kwargs)

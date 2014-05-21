@@ -1,4 +1,23 @@
-#!/usr/bin/python
+#!/usr/bin/python2
+#-*- coding: utf-8 -*-
+
+## =====================================================================
+## All the jobs (or game objects) used in Game derived instances
+## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## =====================================================================
 
 import pygame as Pygame
 import Queue
@@ -43,15 +62,14 @@ class TextBox(object):
         self.queue = queue if queue != None else Queue.TEXTBOX
         self.text = text
         self.font = font
-        self.colors = colors
         self.textfit = textfit
         self.ycenter = ycenter
         self.xcenter = xcenter
         self.padding = padding
         self.variables = variables
-        self.onmouseclick = onmouseclick
 
-        ## TODO: This
+        ## Mouse-related business
+        self.onmouseclick = onmouseclick
         self.onmouseenter = onmouseenter
         self.onmouseleave = onmouseleave
         self.hasmouse = False
@@ -61,8 +79,14 @@ class TextBox(object):
 
         self.renderFonts()
 
+        ## Copy from colors
+        self.colors = {}
+        for color in colors:
+            self.colors[color] = colors[color]
+
     def renderFonts(self):
         variables = {}
+
         for var in self.variables:
             variables[var] = self.variables[var](self.game)
         text = self.text.format(**variables)
@@ -80,7 +104,7 @@ class TextBox(object):
                                 italic=self.font.get("italic")
                                 )
             except IOError:
-                Log.panic("Unable to load font: `{}'".format(self.font["name"]))
+                Log.panic("Unable to load font: `{}' for {}".format(self.font["name"], self))
 
         self.rendered_fonts = []
         self.fontwidth = 0
@@ -146,10 +170,12 @@ class TextBox(object):
             isin = Utils.isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height))
             if isin and not self.hasmouse:
                 self.hasmouse = True
+                Log.debug("Mouse has entered {}".format(self))
                 if self.onmouseenter:
                     self.onmouseenter(self)
             if not isin and self.hasmouse:
                 self.hasmouse = False
+                Log.debug("Mouse has left {}".format(self))
                 if self.onmouseleave:
                     self.onmouseleave(self)
 
@@ -322,13 +348,6 @@ class Tetromino(object):
     def insert(self):
         if self.y < 0:
             ## XXX: GAME OVER
-            Log.log("Game over, displaying game state")
-            matrix = [
-                    [(x, y) in self.board.blocks for x in xrange(self.board.width)]
-                    for y in xrange(self.board.height)
-                    ]
-            Matrix.put(matrix, f="_")
-
             self.board.update_required = False
 
         for x, y in self.getActiveBlocks():
@@ -399,10 +418,8 @@ class Tetromino(object):
 
     ## It makes the game WAAY to easy, but i kind of always wondered "what if"
     def flip(self):
-        Matrix.flip(self.matrix)
-        if self.checkWallCollision(self.x, self.y) or self.checkBlockCollision():
+        if not (self.checkWallCollision(self.x, self.y) or self.checkBlockCollision()):
             Matrix.flip(self.matrix)
-        else:
             self.updateGhost("flip")
 
     def eventHandler(self, event):
@@ -449,10 +466,17 @@ class GhostTetromino(Tetromino):
 class InputBox(TextBox):
     def __init__(self, prompt):
         super(InputBox, self).__init__(
-                "{}{input}",
+                "{prompt}{input}",
                 variables={
-                    "level": lambda self: self.jobs.board.level,
+                    "input": lambda self: self.jobs.board.level,
+                    "prompt": lambda self: self.prompt,
                     }
+                )
+
+class AutoTextBox(TextBox):
+    def __init__(self, game, text, **kwargs):
+        super(AutoTextBox, self).__init__(
+                game, text, textfit=True, background=False, border=False, **kwargs
                 )
 
 class Notification(TextBox):

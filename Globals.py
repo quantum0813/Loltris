@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 #-*- coding: utf-8 -*--
 
 FRAMERATE = 30
@@ -60,6 +60,8 @@ ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa),
 # DISPLAY_OPTIONS = FULLSCREEN | DOUBLEBUF | HWSURFACE
 DISPLAY_OPTIONS = 0
 GHOST_COLOR = (0x29, 0x29, 0x29)
+
+PROJECT_SITE = "https://github.com/UndeadMastodon/Loltris"
 
 SCORES = {
         "tetris": {1: 100, 2: 250, 3: 500, 4: 1500},

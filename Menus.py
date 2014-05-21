@@ -1,4 +1,23 @@
-#!/usr/bin/python
+#!/usr/bin/python2
+#-*- coding: utf-8 -*-
+
+## =====================================================================
+## Menus for Loltris
+## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## =====================================================================
 
 import Shared
 import Core
@@ -10,26 +29,28 @@ import Log
 import pygame as Pygame
 import HighscoreExplorer
 import sys as Sys
+import Factory
+import webbrowser as Webbrowser
+import os.path
 from pygame.locals import *
 from Globals import *
 
-class MenuAction(object):
-    def __init__(self, seq, text, function):
-        self.text = text
-        self.function = function
-        self.seq = seq
-
-class MainMenu(Core.Menu):
+class MainMenu(Core.NMenu):
     def __init__(self, **kwargs):
-        super(MainMenu, self).__init__("MainMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, **kwargs)
+        super(MainMenu, self).__init__(
+                "MainMenu", onHeaderClick=lambda: Webbrowser.open(PROJECT_SITE),
+                header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True,
+                soundtrack=os.path.join(Load.MUSICDIR, "jazz_cat.mp3"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.header = "Loltris"
-        self.menu = [
-                ("Start Game", self.startTetrisGame,),
-                ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options"),),
-                ("Creator", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator"),),
-                ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores"),),
-                ("Exit", self.quit,),
-                ]
+        self.menu = Factory.textBoxes([
+                ("Start Game", self.startTetrisGame),
+                ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
+                ("Creator", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
+                ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
+                ("Exit", self.quit),
+                ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
+                                                        "font":self.colorscheme["option"], },
+                )
         self.highscores = Load.loadHighscores(top=HIGHSCORES)
         self.setupObjects()
         if self.highscores:
@@ -41,7 +62,8 @@ class MainMenu(Core.Menu):
                            "".join(["{}: {}\n".format(x["name"], x["score"]) for x in self.highscores]) + ## The scores
                            ("\n" * (HIGHSCORES - len(self.highscores))) ## Empty lines
                            ),
-                         y=self.jobs.header.y+self.jobs.header.height+10, textfit=True,
+                         y=self.jobs.header.y+self.jobs.header.height+10,
+                         textfit=True,
                          colors={
                              "background":self.colorscheme["background"],
                              "font":self.colorscheme["option"],
@@ -107,7 +129,7 @@ class OptionsMenu(Core.Menu):
 class KeymapMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
-        self.header = "Pause"
+        self.header = "Keymaps"
         self.menu = [
                 ("Tetris", lambda: self.call(self.Tetris)),
                 ("Menu", lambda: self.call(self.Menu)),
