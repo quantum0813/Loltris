@@ -34,6 +34,7 @@ import webbrowser as Webbrowser
 import os.path as Path
 import Credits
 import Save
+import functools as Func
 from pygame.locals import *
 from Globals import *
 
@@ -113,17 +114,17 @@ class OptionsMenu(Core.Menu):
                 )
 
         ## >inb4 immature jokes
-        def turnOn(option):
+        def turnOn(option, options):
             Log.debug(option)
-            if not Shared.options.get(option):
+            if options.get(option) != None:
                 Log.warning("Turning on non-existent option: {}".format(repr(option)))
-            Shared.options[option] = True
+            options[option] = True
             Save.saveOptions()
-        def turnOff(option):
+        def turnOff(option, options):
             Log.debug(option)
-            if not Shared.options.get(option):
+            if options.get(option) != None:
                 Log.warning("Turning off non-existent option: {}".format(repr(option)))
-            Shared.options[option] = None
+            options[option] = False
             Save.saveOptions()
 
         self.menu.extend(
@@ -140,46 +141,21 @@ class OptionsMenu(Core.Menu):
 
         self.setupObjects()
 
-        # ## XXX: TEST CODE
-        # self.addJob("test",
-        #             Jobs.Switch(
-        #                 self,
-        #                 "Option",
-        #                 box_center=True,
-        #                 boxwidth=8,
-        #                 whenon=lambda: Log.log("OPTION ENABLED"),
-        #                 whenoff=lambda: Log.log("OPTION DISABLED"),
-        #                 x=0,
-        #                 y=200,
-        #                 font=MENU_OPTION_FONT,
-        #                 colors={
-        #                     "background":(0x22,0x22,0x22),
-        #                     "font":(0xaa,0xaa,0xaa),
-        #                     "checkbox":(0xaa,0xaa,0xaa),
-        #                     "inside":(0x66,0x66,0x66),
-        #                     "border":(0x66,0x66,0x66)
-        #                     }
-        #                 )
-        #             )
-
-
 ## Closure that generates a mainloop for getting a single character
 ## used in KeymapMenu.*
 def getKeyLoop(self, keys):
-    ## Will act just like a class method when called with no arguments
-    def inner():
-        if not self.jobs.input_box.update_required:
-            keys[self.getting] = self.jobs.input_box.value
-            self.removeJob("input_box")
-            ## Restore
-            self.running = self.mainLoop
-    return inner
+    if not self.jobs.input_box.update_required:
+        keys[self.getting] = self.jobs.input_box.value
+        self.removeJob("input_box")
+        Save.saveKeymap()
+        ## Restore
+        self.running = self.mainLoop
 
 ## Sets the appropriate values for setting a key in a keymap.
-def getKey(self, keys, getting):
-    self.addJob("input_box", Jobs.GetKeyBox(self, "Press any key", font=MENU_OPTION_FONT, colors=SWITCH_OPTION_COLORS))
+def modifyKeymap(self, keys, getting):
+    self.addJob("input_box", Jobs.GetKeyBox(self, "Press key for {}".format(getting), font=MENU_OPTION_FONT, colors=SWITCH_OPTION_COLORS))
     self.getting = getting
-    self.running = getKeyLoop(self, keys)
+    self.running = Func.partial(getKeyLoop, self, keys)
 
 class KeymapMenu(Core.Menu):
     def __init__(self, **kwargs):
@@ -199,15 +175,15 @@ class KeymapMenu(Core.Menu):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Tetris keymap"
             self.menu = Factory.textBoxes([
-                    ("Rotate left", lambda: getKey(self, Shared.keymap["game"], "rotate_left")),
-                    ("Pause", lambda: getKey(self, Shared.keymap["game"], "pause")),
-                    ("Speed up", lambda: getKey(self, Shared.keymap["game"], "speed_up")),
-                    ("Move left", lambda: getKey(self, Shared.keymap["game"], "move_left")),
-                    ("Move right", lambda: getKey(self, Shared.keymap["game"], "move_right")),
-                    ("Drop down", lambda: getKey(self, Shared.keymap["game"], "drop_down")),
-                    ("Rotate right", lambda: getKey(self, Shared.keymap["game"], "rotate_right")),
-                    ("Reverse", lambda: getKey(self, Shared.keymap["game"], "reverse")),
-                    ("Spawn Uber-Tetromino", lambda: getKey(self, Shared.keymap["game"], "uber_tetromino")),
+                    ("Rotate left", lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_left")),
+                    ("Pause", lambda: modifyKeymap(self, Shared.keymap["game"], "pause")),
+                    ("Speed up", lambda: modifyKeymap(self, Shared.keymap["game"], "speed_up")),
+                    ("Move left", lambda: modifyKeymap(self, Shared.keymap["game"], "move_left")),
+                    ("Move right", lambda: modifyKeymap(self, Shared.keymap["game"], "move_right")),
+                    ("Drop down", lambda: modifyKeymap(self, Shared.keymap["game"], "drop_down")),
+                    ("Rotate right", lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_right")),
+                    ("Reverse", lambda: modifyKeymap(self, Shared.keymap["game"], "reverse")),
+                    ("Spawn Uber-Tetromino", lambda: modifyKeymap(self, Shared.keymap["game"], "uber_tetromino")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     )
@@ -218,10 +194,10 @@ class KeymapMenu(Core.Menu):
             super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Menu keymap"
             self.menu = Factory.textBoxes([
-                    ("Move down", lambda: getKey(self, Shared.keymap["menu"], "down")),
-                    ("Move up", lambda: getKey(self, Shared.keymap["menu"], "up")),
-                    ("Select", lambda: getKey(self, Shared.keymap["menu"], "select")),
-                    ("Go back", lambda: getKey(self, Shared.keymap["menu"], "back")),
+                    ("Move down", lambda: modifyKeymap(self, Shared.keymap["menu"], "down")),
+                    ("Move up", lambda: modifyKeymap(self, Shared.keymap["menu"], "up")),
+                    ("Select", lambda: modifyKeymap(self, Shared.keymap["menu"], "select")),
+                    ("Go back", lambda: modifyKeymap(self, Shared.keymap["menu"], "back")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     )

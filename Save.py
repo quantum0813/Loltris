@@ -29,6 +29,15 @@ import Log
 import Shared
 import json as Json
 
+def dictToXml(rootname, sub):
+    root = ElementTree.Element(rootname)
+    if type(sub).__name__ == "dict":
+        for d in sub:
+            root.append(dictToXml(d, sub[d]))
+    else:
+        root.text = str(sub)
+    return root
+
 def dictsToXml(rootname, sub):
     root = ElementTree.Element(rootname)
     if type(sub).__name__ == "list":
@@ -81,4 +90,11 @@ def saveTetromino(color, name, matrix):
 
 def saveOptions():
     with open(Path.join(JSONDIR, "Settings.json"), "w") as wf:
-        Json.dump(Shared.options, wf)
+        Json.dump(Shared.options, wf, indent=4)
+
+def _saveKeymaps(keymaps):
+    return ElementTree.tostring(dictToXml("keymaps", keymaps), pretty_print=True)
+
+def saveKeymap():
+    with open(Path.join(XMLDIR, "Keymap.xml"), "w") as wf:
+        wf.write(_saveKeymaps(Shared.keymap))

@@ -231,7 +231,7 @@ class Switch(TextBox):
     """ On/Off option, will display a box, which will either be empty or crossed depending on
         the state of the option.
     """
-    def __init__(self, game, text, ison=False, box_center=False, boxwidth=None, whenoff=None, whenon=None, box_offset=0, **kwargs):
+    def __init__(self, game, text, whenon, whenoff, ison=False, box_center=False, boxwidth=None, box_offset=0, **kwargs):
         Log.debug("Initializing Switch instance")
         super(Switch, self).__init__(game, text, textfit=True, onmouseclick=self.flip, **kwargs)
         self.whenoff = whenoff
@@ -436,7 +436,7 @@ class Tetromino(object):
                 self.rotate(1)
             elif event.key == Shared.keymap["game"]["rotate_left"]:
                 self.rotate(-1)
-            elif event.key == Shared.keymap["game"]["reverse"]:
+            elif event.key == Shared.keymap["game"]["reverse"] and Shared.options.get("flip_tetromino"):
                 self.flip()
 
             elif event.key == Shared.keymap["game"]["move_right"]:
@@ -494,6 +494,7 @@ class GetKeyBox(TextBox):
             self.value = event.key
             self.update_required = False
             self.draw_required = False
+            self.game.lock[KEYDOWN] = self
 
 class ScrollingText(AutoTextBox):
     def __init__(self, game, text, speed=1, **kwargs):

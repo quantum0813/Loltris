@@ -1,1 +1,5 @@
-{"flip_tetromino": null}
+{
+    "uber_tetromino": false, 
+    "top_kek": true, 
+    "flip_tetromino": false
+}
