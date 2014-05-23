@@ -51,3 +51,8 @@ def rot90(matrix):
         plane = []
 
     return ret
+
+def setToMatrix(blocks, width, height):
+    return[ [(x, y) in blocks for x in xrange(height)]
+            for y in xrange(height)
+            ]

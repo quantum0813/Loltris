@@ -32,6 +32,9 @@ IMAGEDIR = Path.join(DATADIR, "Images")
 MUSICDIR = Path.join(DATADIR, "Music")
 TXTDIR = Path.join(DATADIR, "TXT")
 JSONDIR = Path.join(DATADIR, "JSON")
+## Not sure where this should be really
+HIGHSCOREDIR = Path.join(DATADIR, "Highscores")
+SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
 
 ## TODO: Switch to specifying the types manually everywhere
 typeConvert = {
@@ -46,7 +49,7 @@ def duck(text):
     return text.strip()
 
 def loadHighscores(top=10):
-    with open(Path.join(XMLDIR, "Scores.xml")) as rf:
+    with open(Path.join(HIGHSCOREDIR, "Scores.xml")) as rf:
         return _loadScores(rf.read())[:top]
 
 def _loadScores(xml):

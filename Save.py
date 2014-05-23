@@ -20,10 +20,11 @@
 ## =====================================================================
 
 
-from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR, JSONDIR
+from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR
 # from lxml.etree import ElementTree
 import lxml.etree as ElementTree
 import os.path as Path
+import os as OS
 import RGB
 import Log
 import Shared
@@ -45,7 +46,7 @@ def dictsToXml(rootname, sub):
             for key in d:
                 root.append(dictsToXml(key, d[key]))
     else:
-        root.text = str(sub)
+        root.text = unicode(sub)
     return root
 
 def _appendScores(root, scores):
@@ -55,16 +56,27 @@ def _appendScores(root, scores):
 def saveScores(scores):
     ## Get current scores
     parser = ElementTree.XMLParser(remove_blank_text=True, encoding="utf-8")
-    xml =  ElementTree.parse(Path.join(XMLDIR, "Scores.xml"), parser)
+    xml = ElementTree.parse(Path.join(HIGHSCOREDIR, "Scores.xml"), parser)
     root = xml.getroot()
+    children = root.getchildren()
+    if not children:
+        seq = 0
+    else:
+        seq = int(children[-1].get("seq"))+1
 
     ## Append new scores to current scores
-    _appendScores(root, scores)
+    for score in scores:
+        state = score.pop("state")
+        elem = dictToXml("score", score)
+        elem.set("seq", str(seq))
+        root.append(elem)
+        with open(Path.join(SNAPSHOTDIR, "{}.state.bz2".format(seq)), "w") as wf:
+            wf.write(state)
+        seq += 1
 
     ## Store the new scores along with the old ones
-    xml.write(Path.join(XMLDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
-
-    Log.log("Saved new scores to `Scores.xml'")
+    xml.write(Path.join(HIGHSCOREDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
+    Log.log("Saved new scores to `Scores.xml', displaying below\n{}".format(ElementTree.tostring(root, pretty_print=True)))
 
 def matrixToAscii(matrix, true="#", false="_", newline="\n"):
     ret = ""
