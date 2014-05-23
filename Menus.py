@@ -32,6 +32,7 @@ import sys as Sys
 import Factory
 import webbrowser as Webbrowser
 import os.path
+import Credits
 from pygame.locals import *
 from Globals import *
 
@@ -40,13 +41,14 @@ class MainMenu(Core.NMenu):
         super(MainMenu, self).__init__(
                 "MainMenu", onHeaderClick=lambda: Webbrowser.open(PROJECT_SITE),
                 header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True,
-                soundtrack=os.path.join(Load.MUSICDIR, "jazz_cat.mp3"), sound_enabled=SOUND_ENABLED, **kwargs)
+                soundtrack=os.path.join(Load.MUSICDIR, "jazz_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.header = "Loltris"
         self.menu = Factory.textBoxes([
                 ("Start Game", self.startTetrisGame),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
-                ("Creator", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
+                ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
+                ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
                 ("Exit", self.quit),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },

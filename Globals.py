@@ -54,6 +54,12 @@ HIGHSCORELIST_FONT = {
         "size":15,
         "bold":False,
         }
+CREDITS_FONT = {
+        "name":"monaco",
+        "size":15,
+        "bold":False,
+        }
+CREDITS_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
 ERRORBOX_FONT = MENU_OPTION_FONT
 ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
 

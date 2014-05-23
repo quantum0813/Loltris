@@ -170,17 +170,16 @@ class TextBox(object):
             isin = Utils.isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height))
             if isin and not self.hasmouse:
                 self.hasmouse = True
-                Log.debug("Mouse has entered {}".format(self))
                 if self.onmouseenter:
                     self.onmouseenter(self)
             if not isin and self.hasmouse:
                 self.hasmouse = False
-                Log.debug("Mouse has left {}".format(self))
                 if self.onmouseleave:
                     self.onmouseleave(self)
 
         if event.type == MOUSEBUTTONDOWN and self.onmouseclick:
             if Utils.isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height)):
+                Log.log("Mouseclick on `{}'".format(self))
                 self.onmouseclick()
                 self.game.lock[MOUSEBUTTONDOWN] = self
 
@@ -272,13 +271,15 @@ class Switch(TextBox):
         self.drawBox()
 
 class TimedExecution(object):
-    def __init__(self, function, cycles=0, seconds=0, anykey=True):
+    def __init__(self, function, cycles=0, seconds=0, timed=True, anykey=True):
         self.update_required = True
         self.draw_required = False
         self.queue = 0
         self.anykey = True
         self.function = function
+        self.timed = timed
 
+        self.cycles = 0
         if cycles:
             self.cycles = cycles
         elif seconds:
@@ -293,7 +294,7 @@ class TimedExecution(object):
         pass
 
     def update(self):
-        if self.cycles <= 0:
+        if self.cycles <= 0 and self.timed:
             self.update_required = False
             self.function()
         self.cycles -= 1
@@ -478,6 +479,26 @@ class AutoTextBox(TextBox):
         super(AutoTextBox, self).__init__(
                 game, text, textfit=True, background=False, border=False, **kwargs
                 )
+
+class ScrollingText(AutoTextBox):
+    def __init__(self, game, text, speed=1, **kwargs):
+        super(ScrollingText, self).__init__(game, text, **kwargs)
+        if speed > 0:
+            self.y = -(self.height)
+        elif speed < 0:
+            self.y = self.game.height
+        else:
+            raise TypeError("Scrolling speed must be non-zero")
+        self.speed = speed
+
+    def update(self):
+        super(ScrollingText, self).update()
+
+        if (self.y >= self.game.height and self.speed > 0) or (self.y + self.height <= 0 and self.speed < 0):
+            self.update_required = False
+            return
+
+        self.y += self.speed
 
 class Notification(TextBox):
     def __init__(self, game, _id, text):

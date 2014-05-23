@@ -29,6 +29,7 @@ FONTDIR = os.path.join(DATADIR, "Fonts")
 XMLDIR = os.path.join(DATADIR, "XML")
 IMAGEDIR = os.path.join(DATADIR, "Images")
 MUSICDIR = os.path.join(DATADIR, "Music")
+TXTDIR = os.path.join(DATADIR, "TXT")
 
 ## TODO: Switch to specifying the types manually everywhere
 typeConvert = {
@@ -71,7 +72,18 @@ def loadKeymaps():
         with open(path) as rf:
             return _loadKeymaps(rf.read())
     except:
-        raise ImportError("Error while loading keymaps from `{}'".format(path))
+        Log.panic("Error while loading keymaps from `{}'".format(path))
+    return 
+
+def _loadText(path):
+    try:
+        with open(path) as rf:
+            return rf.read()
+    except:
+        Log.panic("Error while loading plain text from file `{}'".format(path))
+
+def loadCredits():
+    return _loadText(os.path.join(TXTDIR, "Credits.txt"))
 
 def _loadTetrominos(xml, verbose=True):
     tree = ElementTree.XML(xml)
