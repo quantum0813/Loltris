@@ -88,7 +88,7 @@ class MainMenu(Core.Menu):
 
 class PauseMenu(Core.Menu):
     def __init__(self, **kwargs):
-        super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, **kwargs)
+        super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, xcenter=True, **kwargs)
         self.header = "Pause"
         self.menu = Factory.textBoxes([
                 ("Continue", self.quitGame),
@@ -103,7 +103,7 @@ class PauseMenu(Core.Menu):
 ## for an option menu to be doable.
 class OptionsMenu(Core.Menu):
     def __init__(self, **kwargs):
-        super(OptionsMenu, self).__init__("OptionsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+        super(OptionsMenu, self).__init__("OptionsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
         self.header = "Options"
         self.options = Load.loadOptions()
         self.menu = Factory.textBoxes([
@@ -165,21 +165,25 @@ class OptionsMenu(Core.Menu):
 
 ## Closure that generates a mainloop for getting a single character
 ## used in KeymapMenu.*
-def getKeyLoop(self, obj):
+def getKeyLoop(self, keys):
+    ## Will act just like a class method when called with no arguments
     def inner():
         if not self.jobs.input_box.update_required:
-            obj[self.getting] = self.jobs.input_box.value
+            keys[self.getting] = self.jobs.input_box.value
+            self.removeJob("input_box")
+            ## Restore
             self.running = self.mainLoop
     return inner
 
-def getKey(self, obj, getting):
+## Sets the appropriate values for setting a key in a keymap.
+def getKey(self, keys, getting):
     self.addJob("input_box", Jobs.GetKeyBox(self, "Press any key", font=MENU_OPTION_FONT, colors=SWITCH_OPTION_COLORS))
     self.getting = getting
-    self.running = getKeyLoop(self, obj)
+    self.running = getKeyLoop(self, keys)
 
 class KeymapMenu(Core.Menu):
     def __init__(self, **kwargs):
-        super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+        super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
         self.header = "Keymaps"
         self.menu = Factory.textBoxes([
                 ("Tetris", lambda: self.call(self.Tetris)),
@@ -192,10 +196,18 @@ class KeymapMenu(Core.Menu):
 
     class Tetris(Core.Menu):
         def __init__(self, **kwargs):
-            super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+            super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Tetris keymap"
             self.menu = Factory.textBoxes([
-                    ("Rotate left", lambda: getKey(self, Shared.keymap["game"], "rotate_left"))
+                    ("Rotate left", lambda: getKey(self, Shared.keymap["game"], "rotate_left")),
+                    ("Pause", lambda: getKey(self, Shared.keymap["game"], "pause")),
+                    ("Speed up", lambda: getKey(self, Shared.keymap["game"], "speed_up")),
+                    ("Move left", lambda: getKey(self, Shared.keymap["game"], "move_left")),
+                    ("Move right", lambda: getKey(self, Shared.keymap["game"], "move_right")),
+                    ("Drop down", lambda: getKey(self, Shared.keymap["game"], "drop_down")),
+                    ("Rotate right", lambda: getKey(self, Shared.keymap["game"], "rotate_right")),
+                    ("Reverse", lambda: getKey(self, Shared.keymap["game"], "reverse")),
+                    ("Spawn Uber-Tetromino", lambda: getKey(self, Shared.keymap["game"], "uber_tetromino")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     )
@@ -203,10 +215,13 @@ class KeymapMenu(Core.Menu):
 
     class Menu(Core.Menu):
         def __init__(self, **kwargs):
-            super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
+            super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Menu keymap"
             self.menu = Factory.textBoxes([
-                    ("Move down", lambda: None)
+                    ("Move down", lambda: getKey(self, Shared.keymap["game"], "down")),
+                    ("Move up", lambda: getKey(self, Shared.keymap["game"], "up")),
+                    ("Select", lambda: getKey(self, Shared.keymap["game"], "select")),
+                    ("Go back", lambda: getKey(self, Shared.keymap["game"], "back")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     )

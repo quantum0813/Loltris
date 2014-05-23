@@ -162,7 +162,7 @@ class Game(object):
 ## TODO: Add sliders and other fancy shit
 class Menu(Game):
     def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
-                 isroot=False, onHeaderClick=None, **kwargs):
+                 isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
         self.id = _id
         super(Menu, self).__init__(self.id, **kwargs)
         self.running = self.mainLoop
@@ -177,6 +177,7 @@ class Menu(Game):
         self.option_font = option_font
         self.isroot = isroot
         self.onHeaderClick = onHeaderClick
+        self.xcenter = xcenter
 
     def setupObjects(self):
         def mouseLeave(box):
@@ -207,7 +208,11 @@ class Menu(Game):
         ## Set options, then add the job
         for option in self.menu:
             option.x = x
+            if self.xcenter:
+                option.x = (self.width // 2) - (option.width // 2)
             option.y = y
+            if option.text == "Back":
+                option.y = y + SPACER
             option.onmouseleave = mouseLeave
             option.onmouseenter = mouseEnter
             self.addJob(option.text, option)
