@@ -36,6 +36,8 @@ import Credits
 from pygame.locals import *
 from Globals import *
 
+## TODO: You know what would be cool? A DSL for doing this, may do that later.
+
 class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(
@@ -110,6 +112,29 @@ class OptionsMenu(Core.Menu):
                 )
         self.setupObjects()
 
+        ## >inb4 immature jokes
+        def turnOn(option):
+            Log.debug(option)
+            if not Shared.options.get(option):
+                Log.warning("Turning on non-existent option: {}".format(repr(option)))
+            Shared.options[option] = True
+        def turnOff(option):
+            Log.debug(option)
+            if not Shared.options.get(option):
+                Log.warning("Turning off non-existent option: {}".format(repr(option)))
+            Shared.options[option] = None
+
+        self.menu.extend(
+                Factory.basicSwitches([
+                    ("Uber-Tetromino", "uber_tetromino"),
+                    ("Flip tetromino", "flip_tetromino"),
+                    ], self, turnOn, turnOff,
+                    font=MENU_OPTION_FONT,
+                    colors={ "background":self.colorscheme["background"],
+                             "font":self.colorscheme["option"], }
+                    )
+                )
+        Log.log(self.menu)
         # ## XXX: TEST CODE
         # self.addJob("test",
         #             Jobs.Switch(

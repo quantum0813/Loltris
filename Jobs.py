@@ -179,7 +179,7 @@ class TextBox(object):
 
         if event.type == MOUSEBUTTONDOWN and self.onmouseclick:
             if Utils.isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height)):
-                Log.log("Mouseclick on `{}'".format(self))
+                Log.debug("Mouseclick on `{}'".format(self))
                 self.onmouseclick()
                 self.game.lock[MOUSEBUTTONDOWN] = self
 
@@ -232,6 +232,7 @@ class Switch(TextBox):
         the state of the option.
     """
     def __init__(self, game, text, box_center=False, boxwidth=None, whenoff=None, whenon=None, box_offset=0, **kwargs):
+        Log.debug("Initializing Switch instance")
         super(Switch, self).__init__(game, text, textfit=True, onmouseclick=self.flip, **kwargs)
         self.whenoff = whenoff
         self.whenon = whenon

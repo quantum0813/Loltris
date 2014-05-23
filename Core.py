@@ -33,7 +33,7 @@ from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 class Game(object):
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
                  width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=False, soundtrack=None):
-        Log.log("Initializing Game object `{}'".format(_id))
+        Log.debug("Initializing Game object `{}'".format(_id))
         self.jobs = Struct()
         self.caption = caption
         self.mouse_visible = mouse_visible
@@ -69,7 +69,7 @@ class Game(object):
             Pygame.mixer.music.play(loops)
             Log.log("Playing sountrack `{}'".format(path))
             self.playing = path
-        except:
+        except Pygame.error:
             Log.error("Unable to play music file: `{}'".format(path))
 
     def getJob(self, name):
@@ -79,9 +79,9 @@ class Game(object):
         setattr(self.jobs, name, obj)
 
     ## Why not just call Sys.exit(), why create a separate method for this?
-    ## Because finishing of can get more complex as this program develops.
+    ## Because finishing off can get more complex as this program develops.
     def quit(self):
-        Log.log("Exiting from `{}'".format(self))
+        Log.debug("Exiting from `{}'".format(self))
         Sys.exit()
 
     ## We just "exploit" the stack to create things like pause menus or other "contexts"
@@ -101,7 +101,7 @@ class Game(object):
         if self.playing:
             self.stopMusic()
         self.running = None
-        Log.log("Returning from Game `{}'".format(self))
+        Log.debug("Returning from Game `{}'".format(self))
 
     def setup(self):
         Pygame.init()
@@ -230,7 +230,7 @@ class Menu(Game):
         obj.hasmouse = False
         newobj.onmouseenter(newobj)
         newobj.hasmouse = True
-        Log.log("Moving cursor to {}".format(repr(newobj.text)))
+        Log.debug("Moving cursor to {}".format(repr(newobj.text)))
 
     def getSelectedItem(self):
         for i in xrange(len(self.menu)):

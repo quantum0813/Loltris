@@ -28,13 +28,13 @@ SCREEN_WIDTH = 450
 
 ## TODO: Put font and colorscheme information in JSON files.
 
-GLOBAL_FONT_NAME = "monaco"
+GLOBAL_FONT_NAME = "orbitron"
 MENU_HEADER_FONT = {
         "name":"orbitron-bold",
         "size":55,
         }
 MENU_OPTION_FONT = {
-        "name":"monaco",
+        "name":"orbitron",
         "size":20,
         "bold":False,
         }
@@ -45,17 +45,17 @@ MENU_COLORSCHEME = {
         "option":(0xaa,0xaa,0xaa),
         }
 TETRIS_STATUSBOX_FONT = {
-        "name":"monaco",
+        "name":"orbitron",
         "size":15,
         "bold":False,
         }
 HIGHSCORELIST_FONT = {
-        "name":"monaco",
+        "name":"orbitron",
         "size":15,
         "bold":False,
         }
 CREDITS_FONT = {
-        "name":"monaco",
+        "name":"orbitron",
         "size":15,
         "bold":False,
         }
