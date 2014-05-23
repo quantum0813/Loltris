@@ -36,7 +36,7 @@ import Credits
 from pygame.locals import *
 from Globals import *
 
-class MainMenu(Core.NMenu):
+class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(
                 "MainMenu", onHeaderClick=lambda: Webbrowser.open(PROJECT_SITE),
@@ -87,16 +87,18 @@ class PauseMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, **kwargs)
         self.header = "Pause"
-        self.menu = [
+        self.menu = Factory.textBoxes([
                 ("Continue", self.quitGame),
                 ("Exit to main menu", lambda: self.quitGame("MainMenu")),
                 ("Exit Game", self.quit),
-                ]
+                ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
+                                                        "font":self.colorscheme["option"], },
+                )
         self.setupObjects()
 
 ## Placeholder, need to add sliders and other stuff to the Menu class
 ## for an option menu to be doable.
-class OptionsMenu(Core.NMenu):
+class OptionsMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(OptionsMenu, self).__init__("OptionsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Options"
@@ -134,27 +136,33 @@ class KeymapMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Keymaps"
-        self.menu = [
+        self.menu = Factory.textBoxes([
                 ("Tetris", lambda: self.call(self.Tetris)),
                 ("Menu", lambda: self.call(self.Menu)),
-                ]
+                ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
+                                                        "font":self.colorscheme["option"], },
+                )
         self.setupObjects()
 
     class Tetris(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
             self.header = "Tetris keymap"
-            self.menu = [
+            self.menu = Factory.textBoxes([
                     ("Rotate left", lambda: None)
-                    ]
+                    ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
+                                                            "font":self.colorscheme["option"], },
+                    )
             self.setupObjects()
     class Menu(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
             self.header = "Menu keymap"
-            self.menu = [
+            self.menu = Factory.textBoxes([
                     ("Move down", lambda: None)
-                    ]
+                    ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
+                                                            "font":self.colorscheme["option"], },
+                    )
             self.setupObjects()
 
 
