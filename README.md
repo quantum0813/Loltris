@@ -11,9 +11,16 @@ features.
     * Status information
     * "Ghostpiece"
   * Highscore list
-  * Menus
+  * Interactive menus, with mouse support (wow...)
+    * Mouse and arrow-keys can be used interchangeably
   * "Über-Tetromino" joke feature that automatically creates a "perfect" tetromino
   * Flipping (flip the blocks)
+
+## Screenshots
+
+![alt tag](Screenshots/loltris_uberblock.png)
+
+![alt tag](Screenshots/loltris_mainmenu.png)
 
 * The following bugs:
   * Inefficient drawing of blocks, draws too much CPU power for a tetris clone.
