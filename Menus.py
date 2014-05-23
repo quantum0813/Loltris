@@ -96,14 +96,16 @@ class PauseMenu(Core.Menu):
 
 ## Placeholder, need to add sliders and other stuff to the Menu class
 ## for an option menu to be doable.
-class OptionsMenu(Core.Menu):
+class OptionsMenu(Core.NMenu):
     def __init__(self, **kwargs):
         super(OptionsMenu, self).__init__("OptionsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
         self.header = "Options"
         self.options = Load.loadOptions()
-        self.menu = [
-                ("Keymaps", lambda: self.call(KeymapMenu, caption=self.caption))
-                ]
+        self.menu = Factory.textBoxes([
+                ("Keymaps", lambda: self.call(KeymapMenu, caption=self.caption)),
+                ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
+                                                        "font":self.colorscheme["option"], },
+                )
         self.setupObjects()
 
         # ## XXX: TEST CODE

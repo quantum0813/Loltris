@@ -27,17 +27,14 @@ import Log
 import Shared
 from pygame.locals import *
 from Globals import *
-from Jobs import TextBox
-
-class Jobs(object):
-    def __init__(self):
-        pass
+import Jobs
+from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 class Game(object):
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
                  width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=False, soundtrack=None):
         Log.log("Initializing Game object `{}'".format(_id))
-        self.jobs = Jobs()
+        self.jobs = Struct()
         self.caption = caption
         self.mouse_visible = mouse_visible
         self.bgcolor = bgcolor
@@ -189,7 +186,7 @@ class Menu(Game):
             self.menu.append(("Back", self.quitGame))
 
         self.addJob("header",
-                TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
+                Jobs.TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
                         colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
                         )
                 )
@@ -200,7 +197,7 @@ class Menu(Game):
             Log.debug("Creating TextBox with {} at {}".format(repr(option), (x, y)))
             self.options.append("{}".format(option))
             self.addJob("{}".format(option),
-                    TextBox(self, option, y=y, x=x, textfit=True,
+                    Jobs.TextBox(self, option, y=y, x=x, textfit=True,
                         colors={
                             "background":self.colorscheme["background"],
                             "font":self.colorscheme["option"],
@@ -292,11 +289,17 @@ class NMenu(Game):
             Log.debug(box)
             box.colors["font"] = self.colorscheme["selected"]
 
-        if not self.isroot and self.menu[-1][0] != "Back":
-            self.menu.append(("Back", self.quitGame))
+        if not self.isroot and self.menu[-1].text != "Back":
+            self.menu.append(Jobs.AutoTextBox(self, "Back", onmouseclick=self.quitGame,
+                                              font=MENU_OPTION_FONT,
+                                              colors={
+                                                  "background":self.colorscheme["background"],
+                                                  "font":self.colorscheme["option"],
+                                                  }
+                                              ))
 
         self.addJob("header",
-                TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
+                Jobs.TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
                         colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
                         onmouseclick=self.onHeaderClick
                         )
