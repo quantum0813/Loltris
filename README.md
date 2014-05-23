@@ -18,11 +18,13 @@ features.
 
 ## Screenshots
 
-![alt tag](Screenshots/loltris_uberblock.png)
+![Überblock](Screenshots/loltris_uberblock.png)
 
-![alt tag](Screenshots/loltris_mainmenu.png)
+![Main menu](Screenshots/loltris_mainmenu.png)
 
-* The following bugs:
+## Issues
+
+* Bugs:
   * Inefficient drawing of blocks, draws too much CPU power for a tetris clone.
     * This is partly due to the Python/SDL combination, but can be fixed.
   * Music does not continue playing after another Game instance has started/finished.
