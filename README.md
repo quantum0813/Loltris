@@ -10,12 +10,13 @@ features.
     * Preview of next block
     * Status information
     * "Ghostpiece"
+    * "Über-Tetromino" joke feature that automatically creates a "perfect" tetromino
+    * Flipping (flip the blocks)
   * Highscore list
   * Interactive menus, with mouse support (wow...)
     * Mouse and arrow-keys can be used interchangeably
-  * "Über-Tetromino" joke feature that automatically creates a "perfect" tetromino
-  * Flipping (flip the blocks)
   * Modifiable keymap
+  * Options-menu
 
 ## Screenshots
 
@@ -31,8 +32,6 @@ features.
   * Music does not continue playing after another Game instance has started/finished.
 
 * Planed features
-  * Options-menu
-    * "With sliders and shit"
   * Detailed highscore list
   * Online/multiplayer functionality
     * server/client
