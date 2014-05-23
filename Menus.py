@@ -31,8 +31,9 @@ import HighscoreExplorer
 import sys as Sys
 import Factory
 import webbrowser as Webbrowser
-import os.path
+import os.path as Path
 import Credits
+import Save
 from pygame.locals import *
 from Globals import *
 
@@ -43,7 +44,7 @@ class MainMenu(Core.Menu):
         super(MainMenu, self).__init__(
                 "MainMenu", onHeaderClick=lambda: Webbrowser.open(PROJECT_SITE),
                 header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True,
-                soundtrack=os.path.join(Load.MUSICDIR, "jazz_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
+                soundtrack=Path.join(Load.MUSICDIR, "jazz_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.header = "Loltris"
         self.menu = Factory.textBoxes([
                 ("Start Game", self.startTetrisGame),
@@ -110,7 +111,6 @@ class OptionsMenu(Core.Menu):
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 )
-        self.setupObjects()
 
         ## >inb4 immature jokes
         def turnOn(option):
@@ -118,23 +118,28 @@ class OptionsMenu(Core.Menu):
             if not Shared.options.get(option):
                 Log.warning("Turning on non-existent option: {}".format(repr(option)))
             Shared.options[option] = True
+            Save.saveOptions()
         def turnOff(option):
             Log.debug(option)
             if not Shared.options.get(option):
                 Log.warning("Turning off non-existent option: {}".format(repr(option)))
             Shared.options[option] = None
+            Save.saveOptions()
 
         self.menu.extend(
                 Factory.basicSwitches([
                     ("Uber-Tetromino", "uber_tetromino"),
                     ("Flip tetromino", "flip_tetromino"),
-                    ], self, turnOn, turnOff,
+                    ], self, turnOn, turnOff, Shared.options,
                     font=MENU_OPTION_FONT,
-                    colors={ "background":self.colorscheme["background"],
-                             "font":self.colorscheme["option"], }
+                    colors=SWITCH_OPTION_COLORS,
+                    boxwidth=8,
+                    box_center=True,
                     )
                 )
-        Log.log(self.menu)
+
+        self.setupObjects()
+
         # ## XXX: TEST CODE
         # self.addJob("test",
         #             Jobs.Switch(
@@ -157,6 +162,21 @@ class OptionsMenu(Core.Menu):
         #                 )
         #             )
 
+
+## Closure that generates a mainloop for getting a single character
+## used in KeymapMenu.*
+def getKeyLoop(self, obj):
+    def inner():
+        if not self.jobs.input_box.update_required:
+            obj[self.getting] = self.jobs.input_box.value
+            self.running = self.mainLoop
+    return inner
+
+def getKey(self, obj, getting):
+    self.addJob("input_box", Jobs.GetKeyBox(self, "Press any key", font=MENU_OPTION_FONT, colors=SWITCH_OPTION_COLORS))
+    self.getting = getting
+    self.running = getKeyLoop(self, obj)
+
 class KeymapMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
@@ -168,17 +188,19 @@ class KeymapMenu(Core.Menu):
                                                         "font":self.colorscheme["option"], },
                 )
         self.setupObjects()
+        self.getting = None
 
     class Tetris(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
             self.header = "Tetris keymap"
             self.menu = Factory.textBoxes([
-                    ("Rotate left", lambda: None)
+                    ("Rotate left", lambda: getKey(self, Shared.keymap["game"], "rotate_left"))
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     )
             self.setupObjects()
+
     class Menu(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, **kwargs)
@@ -189,5 +211,4 @@ class KeymapMenu(Core.Menu):
                                                             "font":self.colorscheme["option"], },
                     )
             self.setupObjects()
-
 

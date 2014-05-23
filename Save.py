@@ -20,12 +20,14 @@
 ## =====================================================================
 
 
-from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR
+from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR, JSONDIR
 # from lxml.etree import ElementTree
 import lxml.etree as ElementTree
-import os.path
+import os.path as Path
 import RGB
 import Log
+import Shared
+import json as Json
 
 def dictsToXml(rootname, sub):
     root = ElementTree.Element(rootname)
@@ -44,14 +46,14 @@ def _appendScores(root, scores):
 def saveScores(scores):
     ## Get current scores
     parser = ElementTree.XMLParser(remove_blank_text=True, encoding="utf-8")
-    xml =  ElementTree.parse(os.path.join(XMLDIR, "Scores.xml"), parser)
+    xml =  ElementTree.parse(Path.join(XMLDIR, "Scores.xml"), parser)
     root = xml.getroot()
 
     ## Append new scores to current scores
     _appendScores(root, scores)
 
     ## Store the new scores along with the old ones
-    xml.write(os.path.join(XMLDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
+    xml.write(Path.join(XMLDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
 
     Log.log("Saved new scores to `Scores.xml'")
 
@@ -67,7 +69,7 @@ def _appendTetromino(root, color, name, matrix):
     root.append(element)
 
 def saveTetromino(color, name, matrix):
-    path = os.path.join(XMLDIR, "Tetrominos.xml")
+    path = Path.join(XMLDIR, "Tetrominos.xml")
     parser = ElementTree.XMLParser(encoding="utf-8")
     xml =  ElementTree.parse(path, parser)
     root = xml.getroot()
@@ -76,3 +78,7 @@ def saveTetromino(color, name, matrix):
 
     xml.write(path)
     Log.log("Saved new tetromino to `{}'".format(path))
+
+def saveOptions():
+    with open(Path.join(JSONDIR, "Settings.json"), "w") as wf:
+        Json.dump(Shared.options, wf)

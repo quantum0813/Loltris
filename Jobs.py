@@ -231,12 +231,12 @@ class Switch(TextBox):
     """ On/Off option, will display a box, which will either be empty or crossed depending on
         the state of the option.
     """
-    def __init__(self, game, text, box_center=False, boxwidth=None, whenoff=None, whenon=None, box_offset=0, **kwargs):
+    def __init__(self, game, text, ison=False, box_center=False, boxwidth=None, whenoff=None, whenon=None, box_offset=0, **kwargs):
         Log.debug("Initializing Switch instance")
         super(Switch, self).__init__(game, text, textfit=True, onmouseclick=self.flip, **kwargs)
         self.whenoff = whenoff
         self.whenon = whenon
-        self.on = False
+        self.on = ison
         self.box_offset = box_offset
 
         self.boxwidth = boxwidth
@@ -480,6 +480,19 @@ class AutoTextBox(TextBox):
         super(AutoTextBox, self).__init__(
                 game, text, textfit=True, background=False, border=False, **kwargs
                 )
+
+class GetKeyBox(TextBox):
+    def __init__(self, game, text, **kwargs):
+        super(GetKeyBox, self).__init__(
+                game, text, textfit=True, background=True, border=True, xcenter=True, ycenter=True, **kwargs
+                )
+        self.value = None
+
+    def eventHandler(self, event):
+        if event.type == KEYDOWN:
+            self.value = event.key
+            self.update_required = False
+            self.draw_required = False
 
 class ScrollingText(AutoTextBox):
     def __init__(self, game, text, speed=1, **kwargs):

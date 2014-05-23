@@ -21,15 +21,17 @@
 
 from xml.etree import ElementTree
 from RGB import rgbHexDecode
-import os.path
+import os.path as Path
 import Log
+import json as Json
 
 DATADIR = "data"
-FONTDIR = os.path.join(DATADIR, "Fonts")
-XMLDIR = os.path.join(DATADIR, "XML")
-IMAGEDIR = os.path.join(DATADIR, "Images")
-MUSICDIR = os.path.join(DATADIR, "Music")
-TXTDIR = os.path.join(DATADIR, "TXT")
+FONTDIR = Path.join(DATADIR, "Fonts")
+XMLDIR = Path.join(DATADIR, "XML")
+IMAGEDIR = Path.join(DATADIR, "Images")
+MUSICDIR = Path.join(DATADIR, "Music")
+TXTDIR = Path.join(DATADIR, "TXT")
+JSONDIR = Path.join(DATADIR, "JSON")
 
 ## TODO: Switch to specifying the types manually everywhere
 typeConvert = {
@@ -44,7 +46,7 @@ def duck(text):
     return text.strip()
 
 def loadHighscores(top=10):
-    with open(os.path.join(XMLDIR, "Scores.xml")) as rf:
+    with open(Path.join(XMLDIR, "Scores.xml")) as rf:
         return _loadScores(rf.read())[:top]
 
 def _loadScores(xml):
@@ -66,7 +68,7 @@ def _loadKeymaps(xml):
     return keymaps
 
 def loadKeymaps():
-    path = os.path.join(XMLDIR, "Keymap.xml")
+    path = Path.join(XMLDIR, "Keymap.xml")
     Log.log("Loading keymaps from `{}'".format(path))
     try:
         with open(path) as rf:
@@ -83,7 +85,7 @@ def _loadText(path):
         Log.panic("Error while loading plain text from file `{}'".format(path))
 
 def loadCredits():
-    return _loadText(os.path.join(TXTDIR, "Credits.txt"))
+    return _loadText(Path.join(TXTDIR, "Credits.txt"))
 
 def _loadTetrominos(xml, verbose=True):
     tree = ElementTree.XML(xml)
@@ -113,7 +115,7 @@ def _loadTetrominos(xml, verbose=True):
     return tetrominos
 
 def loadTetrominos():
-    path = os.path.join(XMLDIR, "Tetrominos.xml")
+    path = Path.join(XMLDIR, "Tetrominos.xml")
     Log.log("Loading tetrominos from `{}'".format(path))
     try:
         with open(path) as rf:
@@ -122,7 +124,8 @@ def loadTetrominos():
         raise ImportError("Error while loading tetrominos from `{}'".format(path))
 
 def _loadOptions(json):
-    pass
+    return Json.loads(json)
 
 def loadOptions():
-    pass
+    path = Path.join(JSONDIR, "Settings.json")
+    return _loadOptions(_loadText(path))

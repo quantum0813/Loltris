@@ -86,8 +86,8 @@ class Game(object):
 
     ## We just "exploit" the stack to create things like pause menus or other "contexts"
     ## that take over the screen.
-    def call(self, obj, **kwargs):
-        game = obj(screen=self.screen, **kwargs)
+    def call(self, obj, *args, **kwargs):
+        game = obj(screen=self.screen, *args, **kwargs)
         ret = game.run()
 
         self.setup()
@@ -219,13 +219,13 @@ class Menu(Game):
 
     def move(self, direction):
         item = self.getSelectedItem()
-        obj = self.getJob(self.menu[item][0])
+        obj = self.menu[item]
         if item == len(self.menu)-1 and direction == 1:
-            newobj = self.getJob(self.menu[0][0])
+            newobj = self.menu[0]
         elif item == 0 and direction == -1:
-            newobj = self.getJob(self.menu[len(self.menu)-1][0])
+            newobj = self.menu[len(self.menu)-1]
         else:
-            newobj = self.getJob(self.menu[item+direction][0])
+            newobj = self.menu[item+direction]
         obj.onmouseleave(obj)
         obj.hasmouse = False
         newobj.onmouseenter(newobj)
@@ -234,7 +234,8 @@ class Menu(Game):
 
     def getSelectedItem(self):
         for i in xrange(len(self.menu)):
-            option, func = self.menu[i]
+            option = self.menu[i].text
+            func = self.menu[i].onmouseclick
             if self.getJob(option).hasmouse:
                 break
         else:
@@ -250,7 +251,7 @@ class Menu(Game):
     def execOption(self):
         ## Right now each option just runs a function, this may change
         option = self.lookup[self.options[self.getSelectedItem()]]
-        option()
+        option.onmouseclick()
 
     def eventHandler(self, event):
         if event.type == QUIT:
