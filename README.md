@@ -15,6 +15,7 @@ features.
     * Mouse and arrow-keys can be used interchangeably
   * "Über-Tetromino" joke feature that automatically creates a "perfect" tetromino
   * Flipping (flip the blocks)
+  * Modifiable keymap
 
 ## Screenshots
 
@@ -35,4 +36,3 @@ features.
   * Detailed highscore list
   * Online/multiplayer functionality
     * server/client
-  * Modifiable keymap

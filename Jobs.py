@@ -428,7 +428,7 @@ class Tetromino(object):
         if event.type == KEYUP:
             if event.key == Shared.keymap["game"]["speed_up"] and self.sped_up:
                 self.sped_up = False
-                self.updateinterval *= 10
+                self.updateinterval = self.normal_speed
                 self.time_until_update = self.updateinterval
 
         if event.type == KEYDOWN:
@@ -449,7 +449,8 @@ class Tetromino(object):
 
             elif event.key == Shared.keymap["game"]["speed_up"]:
                 self.sped_up = True
-                self.updateinterval /= 10
+                self.normal_speed = self.updateinterval
+                self.updateinterval = SPED_UP_UPDATEINTERVAL
                 self.time_until_update = self.updateinterval
 
 ## This object will be managed by a Tetromino(), it should not be managed as a Job

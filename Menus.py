@@ -218,10 +218,10 @@ class KeymapMenu(Core.Menu):
             super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Menu keymap"
             self.menu = Factory.textBoxes([
-                    ("Move down", lambda: getKey(self, Shared.keymap["game"], "down")),
-                    ("Move up", lambda: getKey(self, Shared.keymap["game"], "up")),
-                    ("Select", lambda: getKey(self, Shared.keymap["game"], "select")),
-                    ("Go back", lambda: getKey(self, Shared.keymap["game"], "back")),
+                    ("Move down", lambda: getKey(self, Shared.keymap["menu"], "down")),
+                    ("Move up", lambda: getKey(self, Shared.keymap["menu"], "up")),
+                    ("Select", lambda: getKey(self, Shared.keymap["menu"], "select")),
+                    ("Go back", lambda: getKey(self, Shared.keymap["menu"], "back")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     )

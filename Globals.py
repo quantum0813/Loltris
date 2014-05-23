@@ -10,6 +10,7 @@ HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
 PREVIEW_HEIGHT = 5
 PREVIEW_WIDTH = 7
+SPED_UP_UPDATEINTERVAL = 2
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
 ##       to input her name whenever she get's on the top scorers list. This seems most
