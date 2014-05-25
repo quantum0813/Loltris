@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 #-*- coding: utf-8 -*--
 
-FRAMERATE = 30
+FRAMERATE = 25
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 20
 SPACER = 10

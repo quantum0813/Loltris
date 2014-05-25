@@ -570,6 +570,7 @@ class Board(object):
         self.lines = 0
         self.level_lines = LEVEL_LINES + ((self.level-1) * LEVEL_LINES_INCREASE)
         self.draw_grid = draw_grid
+        self.forced = True
 
         ## XXX: Currently does not support filling, because the width and height
         ##      are in BOARD_BLOCKWIDTH.
@@ -621,7 +622,9 @@ class Board(object):
         self.isupdated = True
 
     def draw(self):
-        self.drawBoard()
+        if self.forced:
+            self.drawBoard()
+            self.forced = False
         ## Store the blocks that are currently drawn for later use
         oldblocks = self.drawncubes
         ## Draw the new blocks
@@ -654,12 +657,12 @@ class Board(object):
                 self.outercolor,
                 (self.x, self.y, self.width * self.blockwidth, self.height * self.blockwidth + 1),
                 1)
-        # if self.fill:
-        #     Pygame.draw.rect(
-        #             self.screen,
-        #             self.bgcolor,
-        #             (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
-        #             0)
+        if self.fill:
+            Pygame.draw.rect(
+                    self.screen,
+                    self.bgcolor,
+                    (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
+                    0)
         if self.draw_grid:
             for x in xrange(1, self.width):
                 Pygame.draw.line(
