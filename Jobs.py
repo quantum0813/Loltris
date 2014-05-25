@@ -554,7 +554,7 @@ class Board(object):
         self.width = width
         self.height = height
         self.blocks = {}
-        self.drawnblocks = set()
+        self.drawncubes = set()
         self.blockwidth = blockwidth
         self.screen = screen
         self.bgcolor = bgcolor
@@ -584,6 +584,8 @@ class Board(object):
                 color,
                 (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
                 )
+
+        self.drawncubes.add((x, y))
 
     def checkTetris(self, rows=None):
         if rows == None:
@@ -620,22 +622,25 @@ class Board(object):
 
     def draw(self):
         self.drawBoard()
-        oldblocks = self.drawnblocks
+        ## Store the blocks that are currently drawn for later use
+        oldblocks = self.drawncubes
+        ## Draw the new blocks
         self.drawNewBlocks()
+        ## Empty out the blocks that where drawn last time, but are no longer occupied
         self.emptyBlocks(oldblocks.difference(self.blocks))
         self.isupdated = False
 
     def emptyBlocks(self, blocks):
         for x, y in blocks:
-            Log.log((x, y))
             self.drawCube(x, y, self.bgcolor)
+            self.drawncubes.discard((x, y))
 
     ## TODO: Switch to this method, drawing every single block each time is a waste
     ##       of resources. Just need to figure some more stuff out.
     def drawNewBlocks(self):
-        for block in self.drawnblocks.difference(self.blocks):
-            self.drawCube(block[0], block[1], self.blocks[block])
-            self.drawnblocks.add(block)
+        for block in self.drawncubes.difference(self.blocks):
+            if self.blocks.get(block):
+                self.drawCube(block[0], block[1], self.blocks[block])
 
     def drawAllBlocks(self):
         for block in self.blocks:
@@ -649,11 +654,12 @@ class Board(object):
                 self.outercolor,
                 (self.x, self.y, self.width * self.blockwidth, self.height * self.blockwidth + 1),
                 1)
-        Pygame.draw.rect(
-                self.screen,
-                self.bgcolor,
-                (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
-                0)
+        # if self.fill:
+        #     Pygame.draw.rect(
+        #             self.screen,
+        #             self.bgcolor,
+        #             (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
+        #             0)
         if self.draw_grid:
             for x in xrange(1, self.width):
                 Pygame.draw.line(

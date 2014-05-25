@@ -130,8 +130,6 @@ class Game(object):
         while self.running:
 
             self.clock.tick(self.ticktime)
-            if self.fill:
-                self.screen.fill(self.bgcolor)
             self.events = Pygame.event.get()
 
             queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
@@ -145,6 +143,12 @@ class Game(object):
                         if event.type not in self.lock:
                             obj.eventHandler(event)
                 if obj.draw_required:
+                    if obj.fill:
+                        Pygame.draw.rect(
+                                self.screen,
+                                self.bgcolor,
+                                (obj.x, obj.y, obj.width, obj.height)
+                                )
                     obj.draw()
 
 
