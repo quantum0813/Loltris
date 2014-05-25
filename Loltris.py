@@ -24,16 +24,11 @@
 import Shared
 import Menus
 import Load
-import Setup
 
 if __name__ == '__main__':
-    ## Run setup
-    Setup.setupFiles()
-
     ## Load necessarry shared data
     Shared.tetrominos = Load.loadTetrominos()
     Shared.keymap = Load.loadKeymaps()
     Shared.options = Load.loadOptions()
 
-    ## Launch game
     Menus.MainMenu(caption="Loltris").run()
