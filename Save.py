@@ -29,6 +29,8 @@ import RGB
 import Log
 import Shared
 import json as Json
+import bz2 as Bz2
+import pickle as Pickle
 
 def dictToXml(rootname, sub):
     root = ElementTree.Element(rootname)
@@ -66,7 +68,7 @@ def saveScores(scores):
 
     ## Append new scores to current scores
     for score in scores:
-        state = score.pop("state")
+        state = Bz2.compress(Pickle.dumps(score.pop("state")))
         elem = dictToXml("score", score)
         elem.set("seq", str(seq))
         root.append(elem)

@@ -32,7 +32,8 @@ from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 class Game(object):
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
-                 width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=False, soundtrack=None):
+                 width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=False, soundtrack=None,
+                 fill=True):
         Log.debug("Initializing Game object `{}'".format(_id))
         self.jobs = Struct()
         self.caption = caption
@@ -50,6 +51,7 @@ class Game(object):
         self.sound_enabled = sound_enabled
         self.playing = ""
         self.lock = {}
+        self.fill = fill
 
         self.setup()
 
@@ -128,7 +130,8 @@ class Game(object):
         while self.running:
 
             self.clock.tick(self.ticktime)
-            self.screen.fill(self.bgcolor)
+            if self.fill:
+                self.screen.fill(self.bgcolor)
             self.events = Pygame.event.get()
 
             queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)

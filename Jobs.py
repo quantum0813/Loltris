@@ -30,15 +30,29 @@ import os.path
 from pygame.locals import *
 from Globals import *
 
-## TODO: Finish this
+## The basic structure of a Job
 class Job(object):
-    def __init__(self):
+    def __init__(self, game, x, y):
+        self.game = game
+        self.x = x
+        self.y = y
+
+    def forceDraw(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def eventHandler(self, event):
+        pass
+
+    def update(self):
         pass
 
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, font={"name": ""}, padding=12, queue=None, variables={},
-                 updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None):
+                 updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True):
         # Log.log("Initializing TextBox for `{}' with {}".format(
         #     game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
 
@@ -67,6 +81,7 @@ class TextBox(object):
         self.xcenter = xcenter
         self.padding = padding
         self.variables = variables
+        self.fill = fill
 
         ## Mouse-related business
         self.onmouseclick = onmouseclick
@@ -279,6 +294,7 @@ class TimedExecution(object):
         self.anykey = True
         self.function = function
         self.timed = timed
+        self.fill = False
 
         self.cycles = 0
         if cycles:
@@ -302,7 +318,8 @@ class TimedExecution(object):
 
 class Tetromino(object):
     def __init__(self, board, matrix, _type, color, x=0, y=None, ycenter=False,
-                 xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None
+                 xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None,
+                 fill=False,
                  ):
 
         if not matrix:
@@ -321,6 +338,9 @@ class Tetromino(object):
         self.y = y
         self.queue = queue if queue != None else Queue.TETROMINO
         self.level = 1
+        self.fill = fill
+        self.width = len(self.matrix[0]) * BOARD_BLOCKWIDTH
+        self.height = len(self.matrix) * BOARD_BLOCKWIDTH
 
         if xcenter:
             self.x = (self.board.width//2) - (len(self.matrix[0])//2)
@@ -551,6 +571,10 @@ class Board(object):
         self.level_lines = LEVEL_LINES + ((self.level-1) * LEVEL_LINES_INCREASE)
         self.draw_grid = draw_grid
 
+        ## XXX: Currently does not support filling, because the width and height
+        ##      are in BOARD_BLOCKWIDTH.
+        self.fill = False
+
     def drawCube(self, x, y, color):
         if y < 0:
             return
@@ -596,8 +620,15 @@ class Board(object):
 
     def draw(self):
         self.drawBoard()
-        self.drawAllBlocks()
+        oldblocks = self.drawnblocks
+        self.drawNewBlocks()
+        self.emptyBlocks(oldblocks.difference(self.blocks))
         self.isupdated = False
+
+    def emptyBlocks(self, blocks):
+        for x, y in blocks:
+            Log.log((x, y))
+            self.drawCube(x, y, self.bgcolor)
 
     ## TODO: Switch to this method, drawing every single block each time is a waste
     ##       of resources. Just need to figure some more stuff out.
