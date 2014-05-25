@@ -28,5 +28,8 @@ def setupFiles():
     with open(Path.join(Load.HIGHSCOREDIR, "Scores.xml"), "w") as wf:
         wf.write(SCORES_CONTENTS)
 
-    OS.mkdir(Path.join(Load.HIGHSCOREDIR, "Snapshots"))
+    try:
+        OS.mkdir(Path.join(Load.HIGHSCOREDIR, "Snapshots"))
+    except OSError:
+        pass
 
