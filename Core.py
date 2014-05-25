@@ -94,6 +94,9 @@ class Game(object):
 
         self.setup()
 
+        for job in self.jobs.__dict__:
+            self.jobs.__dict__[job].force_draw = True
+
         if ret and self.id != ret:
             self.quitGame(ret)
 

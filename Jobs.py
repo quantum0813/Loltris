@@ -51,8 +51,9 @@ class Job(object):
 
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
-                 xcenter=False, x=0, y=0, height=0, width=0, textfit=False, font={"name": ""}, padding=12, queue=None, variables={},
-                 updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True):
+                 xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
+                 queue=None, variables={}, updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True):
+
         # Log.log("Initializing TextBox for `{}' with {}".format(
         #     game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
 
@@ -82,6 +83,8 @@ class TextBox(object):
         self.padding = padding
         self.variables = variables
         self.fill = fill
+        self.xfit = xfit
+        self.yfit = yfit
 
         ## Mouse-related business
         self.onmouseclick = onmouseclick
@@ -131,9 +134,16 @@ class TextBox(object):
         self.fontheight = height
 
         if self.textfit:
-            self.width, self.height = self.fontwidth, self.fontheight*len(self.rendered_fonts)
+            ## XXX: LEGACY
+            self.yfit = True
+            self.xfit = True
+
+        if self.xfit:
+            self.width = self.fontwidth
             self.xpadding = (self.width/self.padding)
             self.width += self.xpadding
+        if self.yfit:
+            self.height = self.fontheight*len(self.rendered_fonts)
             self.ypadding = (self.height/self.padding)
             self.height += self.ypadding
 
@@ -275,11 +285,18 @@ class Switch(TextBox):
                 self.colors.get("checkbox", (0,0,0)),
                 (self.x + self.width, self.y + self.box_offset, self.boxwidth, self.boxwidth),
                 1)
+
         if self.on:
             Pygame.draw.rect(
                 self.game.screen,
-                self.colors.get("inside", (0,0,0)),
+                self.colors.get("on", (0,0,0)),
                 (self.x + self.width + 1, self.y + self.box_offset + 1, self.boxwidth-1, self.boxwidth-1),
+                )
+        else:
+            Pygame.draw.rect(
+                self.game.screen,
+                self.colors.get("off", (0,0,0)),
+                (self.x + self.width + 1, self.y + self.box_offset + 1, self.boxwidth-2, self.boxwidth-2),
                 )
 
     def draw(self):
@@ -546,7 +563,7 @@ class Notification(TextBox):
 
 class Board(object):
     def __init__(self, screen, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f),
-                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=0, level=1, draw_grid=True,
+                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=Queue.BOARD, level=1, draw_grid=True,
                 ):
         self.anchor = (x, y)
         self.x = x
@@ -570,7 +587,7 @@ class Board(object):
         self.lines = 0
         self.level_lines = LEVEL_LINES + ((self.level-1) * LEVEL_LINES_INCREASE)
         self.draw_grid = draw_grid
-        self.forced = True
+        self.force_draw = True
 
         ## XXX: Currently does not support filling, because the width and height
         ##      are in BOARD_BLOCKWIDTH.
@@ -622,16 +639,20 @@ class Board(object):
         self.isupdated = True
 
     def draw(self):
-        if self.forced:
+        if self.force_draw:
             self.drawBoard()
-            self.forced = False
+
         ## Store the blocks that are currently drawn for later use
         oldblocks = self.drawncubes
         ## Draw the new blocks
-        self.drawNewBlocks()
+        if self.force_draw:
+            self.drawAllBlocks()
+        else:
+            self.drawNewBlocks()
+            self.emptyBlocks(oldblocks.difference(self.blocks))
         ## Empty out the blocks that where drawn last time, but are no longer occupied
-        self.emptyBlocks(oldblocks.difference(self.blocks))
         self.isupdated = False
+        self.force_draw = False
 
     def emptyBlocks(self, blocks):
         for x, y in blocks:
@@ -655,14 +676,13 @@ class Board(object):
         Pygame.draw.rect(
                 self.screen,
                 self.outercolor,
-                (self.x, self.y, self.width * self.blockwidth, self.height * self.blockwidth + 1),
+                (self.x, self.y, (self.width * self.blockwidth) + 1, self.height * self.blockwidth + 1,),
                 1)
-        if self.fill:
-            Pygame.draw.rect(
-                    self.screen,
-                    self.bgcolor,
-                    (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
-                    0)
+        Pygame.draw.rect(
+                self.screen,
+                self.bgcolor,
+                (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
+                0)
         if self.draw_grid:
             for x in xrange(1, self.width):
                 Pygame.draw.line(
