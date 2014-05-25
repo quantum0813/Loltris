@@ -605,6 +605,9 @@ class Board(object):
 
         self.drawncubes.add((x, y))
 
+    ## TODO: The unexpected-ghost-bug occurs in here
+    ##       the bug occurs when you have a block higher than all the others,
+    ##       and then "get" a row.
     def checkTetris(self, rows=None):
         if rows == None:
             rows = xrange(self.height)
@@ -626,7 +629,11 @@ class Board(object):
                 self.blocks = new_blocks
 
         if lines:
+            ## XXX: Temporary bugfix for the unexpected-ghost-bug, re-draw everything when
+            ##      the player gets one or more lines.
+            self.force_draw = True
             self.score += SCORES["tetris"].get(lines, 9001)
+
         self.lines += lines
 
         self.level_lines -= lines

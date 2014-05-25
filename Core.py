@@ -145,6 +145,7 @@ class Game(object):
                     for event in self.events:
                         if event.type not in self.lock:
                             obj.eventHandler(event)
+
                 if obj.draw_required:
                     if obj.fill:
                         Pygame.draw.rect(
