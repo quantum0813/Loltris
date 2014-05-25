@@ -5,6 +5,7 @@
 import Load
 import Log
 import os.path as Path
+import os as OS
 
 SETUP_FILE = ".set_up"
 
@@ -26,4 +27,6 @@ def setupFiles():
 
     with open(Path.join(Load.HIGHSCOREDIR, "Scores.xml"), "w") as wf:
         wf.write(SCORES_CONTENTS)
+
+    OS.mkdir(Path.join(Load.HIGHSCOREDIR, "Snapshots")
 
