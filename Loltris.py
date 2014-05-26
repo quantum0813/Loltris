@@ -35,5 +35,5 @@ if __name__ == '__main__':
     Shared.keymap = Load.loadKeymaps()
     Shared.options = Load.loadOptions()
 
-    ## Launch game
+    ## Launch the game
     Menus.MainMenu(caption="Loltris").run()
