@@ -80,7 +80,7 @@ class MainMenu(Core.Menu):
                          background=True,
                          )
                     )
-            ## 5 pixels from the right edge
+            ## The highscore-list should be 5 pixels from the right edge
             self.jobs.highscorelist.x = SCREEN_WIDTH - self.jobs.highscorelist.width - 5
 
     def startTetrisGame(self):

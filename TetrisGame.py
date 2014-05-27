@@ -59,7 +59,9 @@ def randomTetromino(board, updateinterval=FRAMERATE/2):
 class TetrisGame(Core.Game):
     def __init__(self, player_name="", *args, **kwargs):
         self.id = "TetrisGame"
-        super(TetrisGame, self).__init__(self.id, *args, fill=True, soundtrack=os.path.join(Load.MUSICDIR, "uprising.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
+        super(TetrisGame, self).__init__(
+                self.id, *args, fill=True, soundtrack=os.path.join(Load.MUSICDIR, "uprising.ogg"), sound_enabled=SOUND_ENABLED, **kwargs
+                )
         self.running = self.mainLoop
         self.highscores = Load.loadHighscores(top=HIGHSCORES)
         self.player_name = player_name
@@ -73,7 +75,7 @@ class TetrisGame(Core.Game):
                           width=BOARD_WIDTH,
                           blockwidth=BOARD_BLOCKWIDTH,
                           level=kwargs.get("level", 1),
-                          bgcolor=self.bgcolor
+                          bgcolor=self.bgcolor,
                           )
                     )
         self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))

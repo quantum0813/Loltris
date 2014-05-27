@@ -33,3 +33,6 @@ def basicSwitches(pairs, game, turnOn, turnOff, lookup, **kwargs):
                     )
                 )
     return switches
+
+def sliders(pairs, game, **kwargs):
+    pass

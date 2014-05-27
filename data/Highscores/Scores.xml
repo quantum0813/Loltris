@@ -77,4 +77,10 @@
     <name>Anon</name>
     <level>1</level>
   </score>
+  <score seq="13">
+    <score>800</score>
+    <lines>7</lines>
+    <name>Anon</name>
+    <level>1</level>
+  </score>
 </scores>

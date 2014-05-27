@@ -78,7 +78,7 @@ def saveScores(scores):
 
     ## Store the new scores along with the old ones
     xml.write(Path.join(HIGHSCOREDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
-    Log.log("Saved new scores to `Scores.xml', displaying below")
+    Log.log("Saved new scores to `Scores.xml'")
 
 def matrixToAscii(matrix, true="#", false="_", newline="\n"):
     ret = ""

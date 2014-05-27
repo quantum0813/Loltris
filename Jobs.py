@@ -36,18 +36,44 @@ class Job(object):
         self.game = game
         self.x = x
         self.y = y
-
-    def forceDraw(self):
-        pass
+        self.force_draw = True
 
     def draw(self):
-        pass
+        self.force_draw = False
 
     def eventHandler(self, event):
         pass
 
     def update(self):
         pass
+
+class ColorPalette(Job):
+    def __init__(self, game, x, y):
+        super(ColorPalette, self).__init__(game, x, y)
+        self.red = 0
+        self.green = 0
+        self.blue = 0
+        # self.sliders = Factory.sliders
+
+    def value(self):
+        return (self.red, self.green, self.blue)
+
+    def drawLines(self):
+        pass
+
+    def drawSliders(self):
+        for slider in sliders:
+            slider.draw()
+
+    def draw(self):
+        self.drawLines()
+        self.drawSliders()
+        self.force_draw = False
+
+    def eventHandler(self, event):
+        if event.type == MOUSEBUTTONDOWN:
+            pass
+
 
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
@@ -134,7 +160,7 @@ class TextBox(object):
         self.fontheight = height
 
         if self.textfit:
-            ## XXX: LEGACY
+            ## XXX: LEGACY, textfit was used before xfit and yfit were introduced
             self.yfit = True
             self.xfit = True
 
@@ -148,9 +174,9 @@ class TextBox(object):
             self.height += self.ypadding
 
         if self.xcenter:
-            self.x = (self.game.width / 2) - (self.width / 2)
+            self.x = (self.game.width // 2) - (self.width // 2)
         if self.ycenter:
-            self.y = (self.game.height / 2) - (self.height / 2)
+            self.y = (self.game.height // 2) - (self.height // 2)
 
     def draw(self):
         ## XXX: Hold that thought
@@ -212,7 +238,7 @@ class TextBox(object):
         pass
 
 class Slider(TextBox):
-    def __init__(self, game, text, x=0, y=0, height=5, width=0, colors=None):
+    def __init__(self, game, text, from_pos, to_pos, height=5, width=0, colors=None):
         self.colors = colors or {
                 "background": (0,0,0),
                 "filled": (0,0,0),
@@ -224,9 +250,13 @@ class Slider(TextBox):
                 game, text, x=x, y=y, background=True, colors=colors,
                 )
         self.onmouseclick = lambda: self.moveBar(Pygame.mouse.get_pos()[0])
+        self.from_pos = from_pos
+        self.to_pos = to_pos
 
     def getPercentage(self):
         pass
+
+## TODO: Create VerticalSlider and HorizontalSlider from Slider
 
 class Flipper(TextBox):
     def __init__(self, game, title, options, x=0, y=0, height=5, width=0, colors=None):
@@ -656,8 +686,9 @@ class Board(object):
             self.drawAllBlocks()
         else:
             self.drawNewBlocks()
+            ## Empty out the blocks that where drawn last time, but are no longer occupied
             self.emptyBlocks(oldblocks.difference(self.blocks))
-        ## Empty out the blocks that where drawn last time, but are no longer occupied
+
         self.isupdated = False
         self.force_draw = False
 

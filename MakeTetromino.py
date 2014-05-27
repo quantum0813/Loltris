@@ -31,16 +31,6 @@ import pygame as Pygame
 from Globals import *
 from pygame.locals import *
 
-class ColorPalette(object):
-    def __init__(self):
-        self.red = 0
-        self.green = 0
-        self.blue = 0
-
-    def eventHandler(self, event):
-        if event.type == MOUSEBUTTONDOWN:
-            pass
-
 def islands(dictionary):
     class Block(object):
         def __init__(self, x, y):
@@ -74,7 +64,8 @@ def islands(dictionary):
 class MakeTetromino(Core.Game):
     def __init__(self, *args, **kwargs):
         self.id = "MakeTetromino"
-        super(MakeTetromino, self).__init__(self.id, *args, **kwargs)
+        super(MakeTetromino, self).__init__(
+                self.id, *args, fill=True, **kwargs)
         self.running = self.mainLoop
 
         ## TODO: The user should be able to change the color, create a "color palette thingy"
@@ -88,8 +79,8 @@ class MakeTetromino(Core.Game):
                       height=BOARD_HEIGHT,
                       width=BOARD_WIDTH,
                       blockwidth=BOARD_BLOCKWIDTH,
-                      level=kwargs.get("level", 1),
-                      bgcolor=self.bgcolor
+                      level=0,
+                      bgcolor=self.bgcolor,
                       ),
                 )
 
@@ -131,6 +122,7 @@ class MakeTetromino(Core.Game):
                 pass
             elif not self.jobs.board.blocks.get((x, y)):
                 self.jobs.board.blocks[(x, y)] = self.color
+                self.jobs.board.drawCube(x, y, self.color)
             else:
                 self.jobs.board.blocks.pop((x, y))
 
