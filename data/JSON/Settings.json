@@ -1,4 +1,4 @@
 {
-    "uber_tetromino": false, 
+    "uber_tetromino": true, 
     "flip_tetromino": false
 }

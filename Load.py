@@ -49,6 +49,7 @@ def duck(text):
     return text.strip()
 
 def loadHighscores(top=10):
+    Log.log("Loading highscores from `{}'".format(Path.join(HIGHSCOREDIR, "Scores.xml")))
     with open(Path.join(HIGHSCOREDIR, "Scores.xml")) as rf:
         return _loadScores(rf.read())[:top]
 

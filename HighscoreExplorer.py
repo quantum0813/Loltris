@@ -25,7 +25,33 @@ import pygame as Pygame
 from pygame.locals import *
 from Globals import *
 
-class HighscoreList(Core.Game):
+class Preview(Core.Game):
+    def __init__(self, blocks, *args, **kwargs):
+        super(Preview, self).__init__("Preview", *args, **kwargs)
+        self.running = self.mainLoop
+
+        self.addJob("board",
+                    Jobs.Board(self.screen,
+                          x=SPACER,
+                          y=SPACER,
+                          height=BOARD_HEIGHT,
+                          width=BOARD_WIDTH,
+                          blockwidth=BOARD_BLOCKWIDTH,
+                          level=kwargs.get("level", 1),
+                          bgcolor=self.bgcolor,
+                          )
+                )
+        ## XXX: Beware that this dict is RW
+        self.jobs.board.blocks = blocks
+
+    def eventHandler(self):
+        if event.type == QUIT:
+            self.quit()
+
+    def mainLoop(self):
+        pass
+
+class HighscoreList(Core.Menu):
     def __init__(self, top=HIGHSCORES, *args, **kwargs):
         super(HighscoreList, self).__init__("HighscoreList", *args, **kwargs)
         self.running = self.mainLoop

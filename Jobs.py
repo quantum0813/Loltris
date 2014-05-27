@@ -84,6 +84,7 @@ class TextBox(object):
         #     game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
 
         if not text:
+            Log.log("Error in TextBox.__init__, called by {}".format(Log.getCaller()))
             raise TypeError("No text given to TextBox")
 
         self.game = game
@@ -188,7 +189,7 @@ class TextBox(object):
         ##        In order to avoid this I need to implement "updatewhen".
         self.renderFonts()
 
-        if self.background:
+        if self.background and self.fill:
             Pygame.draw.rect(
                     self.game.screen,
                     self.colors["background"],
@@ -677,17 +678,12 @@ class Board(object):
 
     def draw(self):
         if self.force_draw:
+            Log.log("Forced redraw")
             self.drawBoard()
-
-        ## Store the blocks that are currently drawn for later use
-        oldblocks = self.drawncubes
-        ## Draw the new blocks
-        if self.force_draw:
             self.drawAllBlocks()
         else:
-            self.drawNewBlocks()
             ## Empty out the blocks that where drawn last time, but are no longer occupied
-            self.emptyBlocks(oldblocks.difference(self.blocks))
+            self.emptyBlocks(self.drawncubes.difference(self.blocks))
 
         self.isupdated = False
         self.force_draw = False
@@ -696,13 +692,6 @@ class Board(object):
         for x, y in blocks:
             self.drawCube(x, y, self.bgcolor)
             self.drawncubes.discard((x, y))
-
-    ## TODO: Switch to this method, drawing every single block each time is a waste
-    ##       of resources. Just need to figure some more stuff out.
-    def drawNewBlocks(self):
-        for block in self.drawncubes.difference(self.blocks):
-            if self.blocks.get(block):
-                self.drawCube(block[0], block[1], self.blocks[block])
 
     def drawAllBlocks(self):
         for block in self.blocks:

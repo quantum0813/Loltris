@@ -76,8 +76,8 @@ def getCaller():
     curframe = inspect.currentframe()
     return inspect.getouterframes(curframe, 2)[3][3]
 
-def getTime():
-    return strftime("%H:%M:%S", localtime(time()))
+def getTime(spec="%H:%M:%S"):
+    return strftime(spec, localtime(time()))
 
 def panic(comment, **kwargs):
     genericLog("PANIC", comment, **kwargs)

@@ -136,12 +136,13 @@ class TetrisGame(Core.Game):
 
             if len(self.highscores) < HIGHSCORES or any(board.score > score["score"] for score in self.highscores):
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "New Highscore!"))
-                Save.saveScores([{"name": self.player_name,
-                                  "score": board.score,
-                                  "level": board.level,
-                                  "lines": board.lines,
-                                  "state": self.jobs.board.blocks
-                                  }])
+                Save.saveScore({"name": self.player_name,
+                                "score": board.score,
+                                "level": board.level,
+                                "lines": board.lines,
+                                },
+                                state=self.jobs.board.blocks,
+                                )
             else:
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "Game Over"))
             self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, seconds=2, anykey=True))

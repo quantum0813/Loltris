@@ -39,4 +39,7 @@
         ###
     </tetromino>
 
-</tetrominos>
+<tetromino color="#BBBBBB" name="kek">
+###
+_##
+</tetromino></tetrominos>

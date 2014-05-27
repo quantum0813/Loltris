@@ -51,12 +51,12 @@ def dictsToXml(rootname, sub):
         root.text = unicode(sub)
     return root
 
-def _appendScores(root, scores):
-    for score in scores:
-        root.append(dictsToXml("score", scores))
+def _appendScores(root, score):
+    for score in score:
+        root.append(dictsToXml("score", score))
 
-def saveScores(scores):
-    ## Get current scores
+def saveScore(score, state=set()):
+    ## Get current score
     parser = ElementTree.XMLParser(remove_blank_text=True, encoding="utf-8")
     xml = ElementTree.parse(Path.join(HIGHSCOREDIR, "Scores.xml"), parser)
     root = xml.getroot()
@@ -66,19 +66,20 @@ def saveScores(scores):
     else:
         seq = int(children[-1].get("seq"))+1
 
-    ## Append new scores to current scores
-    for score in scores:
-        state = Bz2.compress(Pickle.dumps(score.pop("state")))
-        elem = dictToXml("score", score)
-        elem.set("seq", str(seq))
-        root.append(elem)
-        with open(Path.join(SNAPSHOTDIR, "{}.state.bz2".format(seq)), "w") as wf:
-            wf.write(state)
-        seq += 1
+    ## Set date
+    score["date"] = Log.getTime(spec="%Y:%m:%d")
 
-    ## Store the new scores along with the old ones
+    ## Append the new score to current scores
+    elem = dictToXml("score", score)
+    elem.set("seq", str(seq))
+    root.append(elem)
+    with open(Path.join(SNAPSHOTDIR, "{}.state.bz2".format(seq)), "w") as wf:
+        wf.write(Bz2.compress(Pickle.dumps(state)))
+    seq += 1
+
+    ## Store the new score along with the old ones
     xml.write(Path.join(HIGHSCOREDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
-    Log.log("Saved new scores to `Scores.xml'")
+    Log.log("Saved new score to `Scores.xml'")
 
 def matrixToAscii(matrix, true="#", false="_", newline="\n"):
     ret = ""

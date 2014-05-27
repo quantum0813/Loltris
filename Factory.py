@@ -5,7 +5,13 @@ import Log
 import functools as Func
 
 def textBoxes(pairs, game, **kwargs):
-    return [Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs) for text, func in pairs]
+    boxes = []
+    for text, func in pairs:
+        Log.debug("Generating textbox: {}".format(text))
+        boxes.append(Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs))
+    return boxes
+    ## XXX: Needed debug
+    # return [Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs) for text, func in pairs]
 
 def switches(pairs, game, **kwargs):
     return [

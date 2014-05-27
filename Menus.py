@@ -35,6 +35,7 @@ import os.path as Path
 import Credits
 import Save
 import functools as Func
+import LongMenuTest
 from pygame.locals import *
 from Globals import *
 
@@ -48,17 +49,22 @@ class MainMenu(Core.Menu):
                 soundtrack=Path.join(Load.MUSICDIR, "jazz_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.header = "Loltris"
         self.menu = Factory.textBoxes([
-                ("Start Game", self.startTetrisGame),
+                ("Start Game", lambda: self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
                 ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
+                ("Too long", lambda: self.call(LongMenuTest.LongMenu, caption="Long menu test")),
                 ("Exit", self.quit),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 )
-        self.highscores = Load.loadHighscores(top=HIGHSCORES)
         self.setupObjects()
+        self.loadHighscores()
+
+    def loadHighscores(self):
+        """ Load scores from disk, then add the highscorelist job to see them """
+        self.highscores = Load.loadHighscores(top=HIGHSCORES)
         if self.highscores:
             self.addJob(
                      "highscorelist",
@@ -82,10 +88,6 @@ class MainMenu(Core.Menu):
                     )
             ## The highscore-list should be 5 pixels from the right edge
             self.jobs.highscorelist.x = SCREEN_WIDTH - self.jobs.highscorelist.width - 5
-
-    def startTetrisGame(self):
-        self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)
-        self.highscores = Load.loadHighscores(top=HIGHSCORES)
 
 class PauseMenu(Core.Menu):
     def __init__(self, **kwargs):
