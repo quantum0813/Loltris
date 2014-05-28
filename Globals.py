@@ -2,6 +2,8 @@
 #-*- coding: utf-8 -*--
 
 FRAMERATE = 30
+MOVING_TETROMINO_TIMEOUT = 0.05
+MOVE_TETROMINO_TIMEOUT = 0.4
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 20
 # BOARD_WIDTH = 40
@@ -12,7 +14,7 @@ HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
 PREVIEW_HEIGHT = 5
 PREVIEW_WIDTH = 7
-SPED_UP_UPDATEINTERVAL = FRAMERATE / 30
+SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
 ##       to input her name whenever she get's on the top scorers list. This seems most

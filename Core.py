@@ -193,10 +193,10 @@ class Game(object):
 
                 obj = self.getJob(objname)
                 if obj.update_required:
-                    obj.update()
                     for event in self.events:
                         if event.type not in self.lock:
                             obj.eventHandler(event)
+                    obj.update()
 
                 if objname not in self.jobs.__dict__:
                     ## In case a Job modifies self.jobs, removing itself during update.

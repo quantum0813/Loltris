@@ -153,7 +153,6 @@ class TextBox(object):
         self.fontwidth = 0
         self.fontheight = 0
         for line in self.filled_text.splitlines():
-            Log.debug("loop the loop on `{}'".format(line))
             self.rendered_fonts.append(fontobj.render(line.rstrip("\n"), True, self.colors["font"]))
             width, height = fontobj.size(line)
             self.fontwidth = self.fontwidth if self.fontwidth > width else width
@@ -295,18 +294,24 @@ class Switch(TextBox):
     """
     def __init__(self, game, text, whenon, whenoff, ison=False, box_center=False, boxwidth=None, box_offset=0, **kwargs):
         Log.debug("Initializing Switch instance")
-        super(Switch, self).__init__(game, text, textfit=True, onmouseclick=self.flip, **kwargs)
+        super(Switch, self).__init__(game, text, border=True, textfit=True, onmouseclick=self.flip, **kwargs)
         self.whenoff = whenoff
         self.whenon = whenon
         self.on = ison
         self.box_offset = box_offset
-
         self.boxwidth = boxwidth
-        if not boxwidth:
-            self.boxwidth = self.height // 2
-        if box_center:
-            self.box_offset = (self.height // 2) - (self.boxwidth // 2)
-            self.y_center = self.y + self.height // 2
+        self.box_center = box_center
+
+        self.renderFonts()
+
+    def renderFonts(self):
+        super(Switch, self).renderFonts()
+
+        if hasattr(self, "boxwidth"):
+            self.boxwidth = self.height // 3
+            if self.box_center:
+                self.box_offset = (self.height // 2) - (self.boxwidth // 2)
+                self.y_center = self.y + self.height // 2
 
     def flip(self):
         self.on = not self.on
@@ -394,6 +399,8 @@ class Tetromino(object):
         self.fill = fill
         self.width = len(self.matrix[0]) * BOARD_BLOCKWIDTH
         self.height = len(self.matrix) * BOARD_BLOCKWIDTH
+        self.move_right_timeout = None
+        self.move_left_timeout = None
 
         if xcenter:
             self.x = (self.board.width//2) - (len(self.matrix[0])//2)
@@ -435,6 +442,18 @@ class Tetromino(object):
         if self.time_until_update <= 0:
             self.moveDiagonal(1)
             self.time_until_update = self.updateinterval
+
+        if self.move_right_timeout != None:
+            self.move_right_timeout -= 1
+        if self.move_left_timeout != None:
+            self.move_left_timeout -= 1
+
+        if self.move_right_timeout != None and self.move_right_timeout <= 0:
+            self.move_right_timeout = Shared.options.get("moving_tetromino_timeout", MOVING_TETROMINO_TIMEOUT) * FRAMERATE
+            self.moveHorizontal(1)
+        if self.move_left_timeout != None and self.move_left_timeout <= 0:
+            self.move_left_timeout = Shared.options.get("moving_tetromino_timeout", MOVING_TETROMINO_TIMEOUT) * FRAMERATE
+            self.moveHorizontal(-1)
 
     def drop(self):
         while self.update_required:
@@ -504,6 +523,12 @@ class Tetromino(object):
                 self.updateinterval = self.normal_speed
                 self.time_until_update = self.updateinterval
 
+            elif event.key == Shared.keymap["game"]["move_right"] and self.move_right_timeout != None:
+                self.move_right_timeout = None
+
+            elif event.key == Shared.keymap["game"]["move_left"] and self.move_left_timeout != None:
+                self.move_left_timeout = None
+
         if event.type == KEYDOWN:
             if event.key == Shared.keymap["game"]["rotate_right"]:
                 self.rotate(1)
@@ -514,8 +539,10 @@ class Tetromino(object):
 
             elif event.key == Shared.keymap["game"]["move_right"]:
                 self.moveHorizontal(1)
+                self.move_right_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * FRAMERATE
             elif event.key == Shared.keymap["game"]["move_left"]:
                 self.moveHorizontal(-1)
+                self.move_left_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * FRAMERATE
 
             elif event.key == Shared.keymap["game"]["drop_down"]:
                 self.drop()
