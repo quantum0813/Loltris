@@ -172,7 +172,7 @@ class TetrisGame(Core.Game):
 
         elif event.type == KEYDOWN:
             if event.key == Shared.keymap["game"]["pause"]:
-                self.call(Menus.PauseMenu, caption="Tetris - Paused")
+                self.call(Menus.PauseMenu, sound_enabled=False, caption="Tetris - Paused")
 
             if event.key == Shared.keymap["game"]["uber_tetromino"] and Shared.options.get("uber_tetromino"):
                 self.addJob("tetromino", makeUberTetromino(self.getJob("board")))

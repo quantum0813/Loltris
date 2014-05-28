@@ -101,6 +101,7 @@ class PauseMenu(Core.Menu):
                                                         "font":self.colorscheme["option"], },
                 )
         self.setupObjects()
+        self.running = self.mainLoop
 
 ## Placeholder, need to add sliders and other stuff to the Menu class
 ## for an option menu to be doable.

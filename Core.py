@@ -30,8 +30,7 @@ from Globals import *
 import Jobs
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
-def fillJob(screen, job, color):
-    Log.debug("`{}'".format(job))
+def fillJob(screen, color, job):
     Pygame.draw.rect(
             screen,
             color,
@@ -63,9 +62,9 @@ class Game(object):
 
     def removeJob(self, removed_job_str):
         removed_job = self.jobs.__dict__[removed_job_str]
-        ## For now this is the solution, fill the entire screen
+        ## For now this is the solution, fill the entire screen. When the todo below is finished,
+        ## I'll just fill  the job instead.
         self.screen.fill(self.bgcolor)
-        Log.debug("FILLING SCREEN")
         for job in (getattr(self.jobs, x) for x in self.jobs.__dict__):
             ## TODO: This should only apply to the jobs that are actually below the removed job
             ##       not in terms of queue, but in terms of placement on the screen. This
@@ -114,16 +113,17 @@ class Game(object):
     def call(self, obj, *args, **kwargs):
         game = obj(screen=self.screen, *args, **kwargs)
 
-        Log.debug("Calling `{}'".format(game.id))
+        Log.debug("Calling `{}' from `{}'".format(game.id, self.id))
+
         if game.soundtrack:
             Log.debug("New game has soundtrack")
 
-        if Pygame.mixer.get_init():
+        if Pygame.mixer.music.get_busy():
             music_pos = Pygame.mixer.music.get_pos()
 
-        if self.playing and game.soundtrack:
+        if self.playing and not game.sound_enabled:
             Log.log("Stopping soundtrack `{}' at {}".format(self.playing, Pygame.mixer.music.get_pos()))
-            Pygame.mixer.music.stop()
+            Pygame.mixer.music.pause()
 
         game.setup()
         ret = game.run()
@@ -134,6 +134,10 @@ class Game(object):
         if game.soundtrack and self.playing:
             Log.debug("Restarting music, was playing `{}'".format(self.playing))
             self.playMusic(self.playing, pos=music_pos)
+
+        ## XXX: What if the game with no sound playing launches a game that plays sound?
+        if self.playing and not game.sound_enabled:
+            Pygame.mixer.music.unpause()
 
         self.setup()
 
@@ -158,7 +162,7 @@ class Game(object):
             Log.log("Initializing mixer")
             Pygame.mixer.init()
         if self.soundtrack and self.sound_enabled and not self.playing:
-            Log.log("Playing music")
+            Log.debug("Playing music: {}".format((self.soundtrack, self.sound_enabled, self.playing)))
             self.playMusic(self.soundtrack, loops=-1)
         else:
             Log.debug("Not playing music: {}".format((self.soundtrack, self.sound_enabled, self.playing)))
@@ -185,7 +189,7 @@ class Game(object):
             for objname in queue:
 
                 if objname not in self.jobs.__dict__:
-                    ## In case a Job modifies self.jobs
+                    ## In case a Job modifies self.jobs, removing this job.
                     continue
 
                 obj = self.getJob(objname)
@@ -196,16 +200,12 @@ class Game(object):
                             obj.eventHandler(event)
 
                 if objname not in self.jobs.__dict__:
-                    ## In case a Job modifies self.jobs
+                    ## In case a Job modifies, removing itself during update.
                     continue
 
                 if obj.draw_required:
                     if obj.fill:
-                        Pygame.draw.rect(
-                                self.screen,
-                                self.bgcolor,
-                                (obj.x, obj.y, obj.width, obj.height)
-                                )
+                        fillJob(self.screen, self.bgcolor, obj)
                     obj.draw()
 
 
