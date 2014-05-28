@@ -49,7 +49,7 @@ class MainMenu(Core.Menu):
                 soundtrack=Path.join(Load.MUSICDIR, "jazz_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.header = "Loltris"
         self.menu = Factory.textBoxes([
-                ("Start Game", lambda: self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)),
+                ("Start Game", self.launchTetrisGame),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
@@ -65,6 +65,8 @@ class MainMenu(Core.Menu):
     def loadHighscores(self):
         """ Load scores from disk, then add the highscorelist job to see them """
         self.highscores = Load.loadHighscores(top=HIGHSCORES)
+        Log.debug("Loaded new highscores from disk, displaying below")
+        Log.dump("".join(["{}: {}\n".format(d["name"], d["score"]) for d in self.highscores]))
         if self.highscores:
             self.addJob(
                      "highscorelist",
@@ -88,6 +90,10 @@ class MainMenu(Core.Menu):
                     )
             ## The highscore-list should be 5 pixels from the right edge
             self.jobs.highscorelist.x = SCREEN_WIDTH - self.jobs.highscorelist.width - 5
+
+    def launchTetrisGame(self):
+        self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)
+        self.loadHighscores()
 
 class PauseMenu(Core.Menu):
     def __init__(self, **kwargs):

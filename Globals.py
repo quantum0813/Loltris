@@ -12,7 +12,7 @@ SPACER = 10
 SOUND_ENABLED = False
 HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
-PREVIEW_HEIGHT = 5
+PREVIEW_HEIGHT = 6
 PREVIEW_WIDTH = 7
 SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT
 
@@ -72,6 +72,7 @@ SWITCH_OPTION_COLORS = {
         "off":MENU_COLORSCHEME["background"],
         "border":(0x66,0x66,0x66),
         }
+TETRIS_STATUSBOX_COLORSCHEME = {"border":(0x50,0x50,0x50), "font":(0x90,0x90,0x90)}
 CREDITS_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
 ERRORBOX_FONT = MENU_OPTION_FONT
 ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }

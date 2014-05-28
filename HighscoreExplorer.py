@@ -26,8 +26,8 @@ from pygame.locals import *
 from Globals import *
 
 class Preview(Core.Game):
-    def __init__(self, blocks, *args, **kwargs):
-        super(Preview, self).__init__("Preview", *args, **kwargs)
+    def __init__(self, **kwargs):
+        super(Preview, self).__init__("Preview", caption="Preview")
         self.running = self.mainLoop
 
         self.addJob("board",
@@ -41,6 +41,18 @@ class Preview(Core.Game):
                           bgcolor=self.bgcolor,
                           )
                 )
+        self.addJob("status",
+                    Jobs.TextBox(
+                        self, "".join(["{}: {}".format(x, kwargs[x]) for x in kwargs]),
+                        border=True,
+                        y=self.jobs.preview_window.y + (PREVIEW_HEIGHT * BOARD_BLOCKWIDTH) + SPACER,
+                        x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
+                        yfit=True,
+                        width=BOARD_BLOCKWIDTH * PREVIEW_WIDTH,
+                        colors=TETRIS_STATUSBOX_COLORSCHEME,
+                        font=TETRIS_STATUSBOX_FONT,
+                        )
+                    )
         ## XXX: Beware that this dict is RW
         self.jobs.board.blocks = blocks
 

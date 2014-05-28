@@ -101,7 +101,7 @@ class TetrisGame(Core.Game):
                         x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                         yfit=True,
                         width=self.jobs.preview_window.width * BOARD_BLOCKWIDTH,
-                        colors={"border":(0x50,0x50,0x50), "font":(0x90,0x90,0x90)},
+                        colors=TETRIS_STATUSBOX_COLORSCHEME,
                         font=TETRIS_STATUSBOX_FONT,
                         variables={
                             "level": lambda self: self.getJob("board").level,
