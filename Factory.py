@@ -40,5 +40,9 @@ def basicSwitches(pairs, game, turnOn, turnOff, lookup, **kwargs):
                 )
     return switches
 
+# def variableTextBoxes(trips, game):
+#     for text, variables, func in trips:
+#         pass
+
 def sliders(pairs, game, **kwargs):
     pass

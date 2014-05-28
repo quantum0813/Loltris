@@ -63,13 +63,17 @@ def genericLog(logtype, message, cr=False, **kwargs):
         stdout.write("\r")
     if enable_color:
         stdout.write(color.get(logtype, ""))
-    log = "[%s] %8s: %14s: %20s: %s" % (getTime(), logtype, currentThread().getName(), getCaller(), message)
+    log = "[%s] %8s: %20s: %s" % (getTime(), logtype, getCaller(), message)
     print(log)
     if enable_color:
         stdout.write(color["DEFAULT"])
     if kwargs.get("trace"):
         ## Print the traceback, indented with four spaces
         stdout.write("".join(["    "+x+EOL for x in traceback.format_exc(kwargs["trace"]).splitlines()]))
+
+## Just so that everything is uniform
+def dump(message):
+    stdout.write(message)
 
 ## Called by genericLog, which is called by panic/error/log etc, which is called by the [function we want]
 def getCaller():

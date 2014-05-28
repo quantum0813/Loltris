@@ -2,7 +2,9 @@
 #-*- coding: utf-8 -*-
 
 ## =====================================================================
-## Core classes that are derived from
+## Core functionality of the game, multi-purpose classes that are derived
+## from elsewhere (and here)
+## 
 ## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
 ##
 ## This program is free software: you can redistribute it and/or modify
@@ -115,14 +117,11 @@ class Game(object):
 
         Log.debug("Calling `{}' from `{}'".format(game.id, self.id))
 
-        if game.soundtrack:
-            Log.debug("New game has soundtrack")
-
         if Pygame.mixer.music.get_busy():
             music_pos = Pygame.mixer.music.get_pos()
 
         if self.playing and not game.sound_enabled:
-            Log.log("Stopping soundtrack `{}' at {}".format(self.playing, Pygame.mixer.music.get_pos()))
+            Log.debug("Stopping soundtrack `{}' at {}".format(self.playing, Pygame.mixer.music.get_pos()))
             Pygame.mixer.music.pause()
 
         game.setup()
@@ -156,7 +155,6 @@ class Game(object):
 
     def setup(self):
         Pygame.init()
-        Pygame.display.set_caption(self.caption)
         Pygame.mouse.set_visible(int(self.mouse_visible))
         if not Pygame.mixer.get_init() and self.sound_enabled:
             Log.log("Initializing mixer")
@@ -171,6 +169,7 @@ class Game(object):
         self.screen.fill(self.bgcolor)
         Pygame.display.flip()
         self.clock = Pygame.time.Clock()
+        Pygame.display.set_caption("{}".format(self.caption))
 
     def eventHandler(self, event):
         pass
@@ -200,7 +199,7 @@ class Game(object):
                             obj.eventHandler(event)
 
                 if objname not in self.jobs.__dict__:
-                    ## In case a Job modifies, removing itself during update.
+                    ## In case a Job modifies self.jobs, removing itself during update.
                     continue
 
                 if obj.draw_required:
@@ -221,9 +220,15 @@ class Game(object):
             ## Remove locks
             self.lock = {}
 
+            ## View framerate in caption
+            # Pygame.display.set_caption(self.caption + " - " + str(round(self.clock.get_fps())) + " FPS")
+
         return self.ret
 
-## TODO: Add sliders and other fancy shit
+## TODO: Add sliders and other fancy shit.
+## TODO: Make the menu into a job, but keep the Game-derived class. This way it would be easy
+##       to create small pop-up menus, as well as full-screen menus. The Game-derived Menu class would
+##       register a Job.Menu with the width/height of the screen and the coordinates (0, 0)
 class Menu(Game):
     def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
                  isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
@@ -236,7 +241,7 @@ class Menu(Game):
         self.lookup = {}
         self.options = []
         self.selected = 0
-        self.options_pos = (10, 80)
+        self.options_pos = (SPACER, SPACER)
         self.header_font = header_font
         self.option_font = option_font
         self.isroot = isroot
@@ -247,9 +252,11 @@ class Menu(Game):
         def mouseLeave(box):
             Log.debug(box)
             box.colors["font"] = self.colorscheme["option"]
+            box.renderFonts()
         def mouseEnter(box):
             Log.debug(box)
             box.colors["font"] = self.colorscheme["selected"]
+            box.renderFonts()
 
         if not self.isroot and self.menu[-1].text != "Back":
             self.menu.append(Jobs.AutoTextBox(self, "Back", onmouseclick=self.quitGame,
@@ -261,13 +268,14 @@ class Menu(Game):
                                               ))
 
         self.addJob("header",
-                Jobs.TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
-                        colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                        onmouseclick=self.onHeaderClick
-                        )
+                Jobs.TextBox(self, self.header, y=10, xcenter=True, textfit=True, underline=True,
+                    colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border": (0xaa,0xaa,0xaa)}, font=self.header_font,
+                    onmouseclick=self.onHeaderClick,
+                    )
                 )
         self.lookup = dict([(option.text, option) for option in self.menu])
         x, y = self.options_pos
+        y += self.jobs.header.y + self.jobs.header.height
         self.options = []
         ## Set options, then add the job
         for option in self.menu:
@@ -399,6 +407,7 @@ class ScrollMenu(Game):
                 option.x = (self.width // 2) - (option.width // 2)
             option.y = y
             if option.text == "Back":
+                ## XXX: This will yield "unexpected" results, if someone where to create an option with the text 'Back'.
                 option.y = y + SPACER
             option.onmouseleave = mouseLeave
             option.onmouseenter = mouseEnter

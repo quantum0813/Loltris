@@ -112,6 +112,7 @@ class TextBox(object):
         self.fill = fill
         self.xfit = xfit
         self.yfit = yfit
+        self.last_variables = {}
 
         ## Mouse-related business
         self.onmouseclick = onmouseclick
@@ -119,8 +120,10 @@ class TextBox(object):
         self.onmouseleave = onmouseleave
         self.hasmouse = False
 
-        ## XXX: Hold that thought
-        self.updatewhen = updatewhen
+        if variables:
+            self.update()
+        else:
+            self.filled_text = text
 
         self.renderFonts()
 
@@ -130,11 +133,6 @@ class TextBox(object):
             self.colors[color] = colors[color]
 
     def renderFonts(self):
-        variables = {}
-
-        for var in self.variables:
-            variables[var] = self.variables[var](self.game)
-        text = self.text.format(**variables)
 
         if not self.font.get("name"):
             self.font["name"] = Pygame.font.get_default_font()
@@ -154,24 +152,27 @@ class TextBox(object):
         self.rendered_fonts = []
         self.fontwidth = 0
         self.fontheight = 0
-        for line in text.splitlines():
+        for line in self.filled_text.splitlines():
+            Log.debug("loop the loop on `{}'".format(line))
             self.rendered_fonts.append(fontobj.render(line.rstrip("\n"), True, self.colors["font"]))
             width, height = fontobj.size(line)
             self.fontwidth = self.fontwidth if self.fontwidth > width else width
         self.fontheight = height
 
         if self.textfit:
-            ## XXX: LEGACY, textfit was used before xfit and yfit were introduced
+            ## XXX: LEGACY, textfit was used before xfit and yfit were introduced, textfit now implies
+            ##      yfit and xfit.
             self.yfit = True
             self.xfit = True
 
         if self.xfit:
             self.width = self.fontwidth
-            self.xpadding = (self.width/self.padding)
+            if self.padding:
+                self.xpadding = (self.width/self.padding) if self.padding else 0
             self.width += self.xpadding
         if self.yfit:
             self.height = self.fontheight*len(self.rendered_fonts)
-            self.ypadding = (self.height/self.padding)
+            self.ypadding = (self.height/self.padding) if self.padding else 0
             self.height += self.ypadding
 
         if self.xcenter:
@@ -180,14 +181,6 @@ class TextBox(object):
             self.y = (self.game.height // 2) - (self.height // 2)
 
     def draw(self):
-        ## XXX: Hold that thought
-        # if self.updatewhen:
-        #     for update in updatewhen:
-        #         pass
-
-        ## FIXME: SHOULD NOT BE DONE ON EVERY SINGLE DRAW
-        ##        In order to avoid this I need to implement "updatewhen".
-        self.renderFonts()
 
         if self.background and self.fill:
             Pygame.draw.rect(
@@ -236,7 +229,20 @@ class TextBox(object):
                 self.game.lock[MOUSEBUTTONDOWN] = self
 
     def update(self):
-        pass
+        if self.variables:
+            variables = {}
+            ## Generate new variables hash
+            for var in self.variables:
+                variables[var] = self.variables[var](self.game)
+            text = self.text.format(**variables)
+
+            ## Check if an update is required
+            if variables != self.last_variables:
+                Log.debug("Rendering fonts in TextBox `{}' variables have changed".format(self))
+                self.filled_text = text
+                self.renderFonts()
+                self.last_variables = variables
+
 
 class Slider(TextBox):
     def __init__(self, game, text, from_pos, to_pos, height=5, width=0, colors=None):
@@ -301,7 +307,6 @@ class Switch(TextBox):
         if box_center:
             self.box_offset = (self.height // 2) - (self.boxwidth // 2)
             self.y_center = self.y + self.height // 2
-        self.width += self.boxwidth
 
     def flip(self):
         self.on = not self.on
@@ -678,7 +683,6 @@ class Board(object):
 
     def draw(self):
         if self.force_draw:
-            Log.log("Forced redraw")
             self.drawBoard()
             self.drawAllBlocks()
         else:

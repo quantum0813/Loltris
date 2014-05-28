@@ -176,7 +176,7 @@ class KeymapMenu(Core.Menu):
     class Tetris(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
-            self.header = "Tetris keymap"
+            self.header = "Tetris-map"
             self.menu = Factory.textBoxes([
                     ("Rotate left", lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_left")),
                     ("Pause", lambda: modifyKeymap(self, Shared.keymap["game"], "pause")),
@@ -195,7 +195,7 @@ class KeymapMenu(Core.Menu):
     class Menu(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
-            self.header = "Menu keymap"
+            self.header = "Menu-map"
             self.menu = Factory.textBoxes([
                     ("Move down", lambda: modifyKeymap(self, Shared.keymap["menu"], "down")),
                     ("Move up", lambda: modifyKeymap(self, Shared.keymap["menu"], "up")),

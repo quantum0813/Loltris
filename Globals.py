@@ -1,18 +1,18 @@
 #!/usr/bin/python2
 #-*- coding: utf-8 -*--
 
-FRAMERATE = 25
+FRAMERATE = 30
 BOARD_WIDTH = 10
 BOARD_HEIGHT = 20
 # BOARD_WIDTH = 40
 # BOARD_HEIGHT = 30
 SPACER = 10
-SOUND_ENABLED = True
+SOUND_ENABLED = False
 HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
 PREVIEW_HEIGHT = 5
 PREVIEW_WIDTH = 7
-SPED_UP_UPDATEINTERVAL = 2
+SPED_UP_UPDATEINTERVAL = FRAMERATE / 30
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
 ##       to input her name whenever she get's on the top scorers list. This seems most
@@ -34,7 +34,7 @@ SCREEN_WIDTH = SPACER + (BOARD_WIDTH * BOARD_BLOCKWIDTH) + SPACER + (PREVIEW_WID
 GLOBAL_FONT_NAME = "orbitron"
 MENU_HEADER_FONT = {
         "name":"orbitron-bold",
-        "size":55,
+        "size":50,
         }
 MENU_OPTION_FONT = {
         "name":"orbitron",
@@ -49,7 +49,7 @@ MENU_COLORSCHEME = {
         }
 TETRIS_STATUSBOX_FONT = {
         "name":"orbitron",
-        "size":15,
+        "size":14,
         "bold":False,
         }
 HIGHSCORELIST_FONT = {
