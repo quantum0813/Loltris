@@ -1,6 +1,8 @@
 #!/usr/bin/python2
 #-*- coding: utf-8 -*--
 
+from pygame.locals import *
+
 FRAMERATE = 30
 MOVING_TETROMINO_TIMEOUT = 0.05
 MOVE_TETROMINO_TIMEOUT = 0.4
@@ -9,6 +11,7 @@ BOARD_HEIGHT = 20
 # BOARD_WIDTH = 40
 # BOARD_HEIGHT = 30
 SPACER = 10
+LOGLEVEL = 4
 SOUND_ENABLED = False
 HIGHSCORES = 5
 UBERCOLOR = (0x70, 0x70, 0x22)
@@ -73,7 +76,7 @@ SWITCH_OPTION_COLORS = {
         "off":MENU_COLORSCHEME["background"],
         "border":(0x66,0x66,0x66),
         }
-TETRIS_STATUSBOX_COLORSCHEME = {"border":(0x50,0x50,0x50), "font":(0x90,0x90,0x90)}
+TETRIS_STATUSBOX_COLORSCHEME = {"border":(0x50,0x50,0x50), "font":(0x90,0x90,0x90), "background":(0x22,0x22,0x22)}
 CREDITS_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
 ERRORBOX_FONT = MENU_OPTION_FONT
 ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }

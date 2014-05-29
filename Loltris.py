@@ -25,12 +25,13 @@ import Shared
 import Menus
 import Load
 import Setup
+import profile as Profile
 import pygame as Pygame
 
 if __name__ == '__main__':
     Pygame.font.init()
 
-    ## Run setup
+    ## Run setup (will decide for itself whether or not it is necessary)
     Setup.setupFiles()
 
     ## Load necessarry shared data
@@ -41,4 +42,5 @@ if __name__ == '__main__':
     ## Launch the game
     main_menu = Menus.MainMenu(caption="Loltris")
     main_menu.setup()
+    # Profile.run("main_menu.run()")
     main_menu.run()

@@ -34,8 +34,16 @@ color = {
         "NOTICE": "",
         "DEBUG": "",
         "ERROR": "\x1b[1;33m",
-        "SUCCESS": "\x1b[1;32m",
         "WARNING": "\x1b[1;31m",
+        }
+
+loglevel = {
+        "FAIL": 0,
+        "PANIC": 0,
+        "ERROR": 1,
+        "WARNING": 2,
+        "NOTICE": 3,
+        "DEBUG": 4,
         }
 
 def out(msg, end="\r\n", c="\x1b[0;33m"):
@@ -47,6 +55,9 @@ def fprint(fileobj, data):
     fileobj.flush()
 
 def genericLog(logtype, message, cr=False, **kwargs):
+    if loglevel[logtype] > LOGLEVEL:
+        return
+
     if cr:
         ## Carriage return
         stdout.write("\r")
@@ -62,6 +73,8 @@ def genericLog(logtype, message, cr=False, **kwargs):
 
 ## Just so that everything is uniform
 def dump(message):
+    if loglevel["DEBUG"] > LOGLEVEL:
+        return
     stdout.write(str(message))
 
 ## Called by genericLog, which is called by panic/error/log etc, which is called by [function we want]
@@ -91,9 +104,6 @@ def error(comment, **kwargs):
 
 def log(comment, **kwargs):
     genericLog("NOTICE", comment, **kwargs)
-
-def success(comment, **kwargs):
-    genericLog("SUCCESS", comment, **kwargs)
 
 def warning(comment, **kwargs):
     genericLog("WARNING", comment, **kwargs)

@@ -29,6 +29,24 @@ import Matrix
 import os.path
 from pygame.locals import *
 from Globals import *
+from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
+
+def loadFont(font):
+    if not font.get("name"):
+        font["name"] = Pygame.font.get_default_font()
+    fontobj = Shared.globfonts.get(Utils.genKey(font))
+    if not fontobj:
+        try:
+            fontobj = Shared.globfonts[Utils.genKey(font)] = \
+                    Pygame.font.Font(
+                            os.path.join(Load.FONTDIR, "{}.ttf".format(font["name"])),
+                            font.get("size", 40),
+                            bold=font.get("bold"),
+                            italic=font.get("italic")
+                            )
+        except IOError:
+            Log.panic("Unable to load font: `{}'".format(font["name"]))
+    return fontobj
 
 ## The basic structure of a Job
 class Job(object):
@@ -83,10 +101,6 @@ class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
                  queue=None, variables={}, updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True):
-
-        # Log.log("Initializing TextBox for `{}' with {}".format(
-        #     game.id, repr(text) if len(repr(text)) < 20 else repr(text)[:17]+"...'"))
-
         if not text:
             Log.log("Error in TextBox.__init__, called by {}".format(Log.getCaller()))
             raise TypeError("No text given to TextBox")
@@ -97,7 +111,8 @@ class TextBox(object):
         self.height = height
         self.width = width
         self.border = border
-        self.colors = colors
+        self.colors = {}
+        self.colors.update(colors)
         self.borderwidth = 1
         self.update_required = True
         self.draw_required = True
@@ -107,7 +122,8 @@ class TextBox(object):
         self.background = background
         self.queue = queue if queue != None else Queue.TEXTBOX
         self.text = text
-        self.font = font
+        self.font = {}
+        self.font.update(font)
         self.textfit = textfit
         self.ycenter = ycenter
         self.xcenter = xcenter
@@ -408,6 +424,7 @@ class Tetromino(object):
         self.height = len(self.matrix) * BOARD_BLOCKWIDTH
         self.move_right_timeout = None
         self.move_left_timeout = None
+        self.force_draw = True
 
         if xcenter:
             self.x = (self.board.width//2) - (len(self.matrix[0])//2)
@@ -428,11 +445,21 @@ class Tetromino(object):
                 if self.matrix[y][x]:
                     yield self.x + x, self.y + y
 
+    def getBlocksDict(self):
+        blocks = {}
+        for block in self.getActiveBlocks():
+            blocks[block] = self.color
+        return blocks
+
     def draw(self):
-        if self.ghostpiece:
-            self.ghostpiece.draw()
-        for x, y in self.getActiveBlocks():
-            self.board.drawCube(x, y, self.color)
+        if self.force_draw:
+            if self.ghostpiece:
+                self.ghostpiece.draw()
+            for x, y in self.getActiveBlocks():
+                self.board.drawCube(x, y, self.color)
+            self.board.layers.tetromino = self.getBlocksDict()
+            self.board.emptyBlocks()
+            self.force_draw = False
 
     def insert(self):
         if self.y < 0:
@@ -465,6 +492,7 @@ class Tetromino(object):
     def drop(self):
         while self.update_required:
             self.moveDiagonal(1)
+        self.force_draw = True
 
     def checkBlockCollision(self):
         return any(self.board.blocks.get((x, y)) for x, y in self.getActiveBlocks())
@@ -485,6 +513,7 @@ class Tetromino(object):
     ## Move diagonally, if possible
     def moveDiagonal(self, direction):
         self.y += direction
+        self.force_draw = True
         if self.checkBlockCollision():
             self.y -= direction
             self.insert()
@@ -495,6 +524,7 @@ class Tetromino(object):
     ## Move horizontally, if possible
     def moveHorizontal(self, direction):
         self.updateGhost("moveHorizontal", direction)
+        self.force_draw = True
         self.x += direction
         if self.checkBlockCollision():
             self.x -= direction
@@ -505,8 +535,10 @@ class Tetromino(object):
     def rotate(self, direction):
         last_matrix = self.matrix
         self.matrix = Matrix.rot90(self.matrix)
+        self.force_draw = True
         if self.checkWallCollision(self.x, self.y) or self.checkBlockCollision():
             self.matrix = last_matrix
+            return
         else:
             self.updateGhost("rotate", direction)
 
@@ -519,6 +551,7 @@ class Tetromino(object):
 
     ## It makes the game WAAY to easy, but i kind of always wondered "what if"
     def flip(self):
+        self.force_draw = True
         if not (self.checkWallCollision(self.x, self.y) or self.checkBlockCollision()):
             Matrix.flip(self.matrix)
             self.updateGhost("flip")
@@ -572,6 +605,13 @@ class GhostTetromino(Tetromino):
                 ## We need to be one step away from the next collision
                 self.y -= 1
                 break
+
+    def draw(self):
+        if self.force_draw:
+            for x, y in self.getActiveBlocks():
+                self.board.drawCube(x, y, self.color)
+            self.board.layers.ghost_tetromino = self.getBlocksDict()
+            self.force_draw = False
 
 class InputBox(TextBox):
     def __init__(self, prompt):
@@ -642,6 +682,9 @@ class Board(object):
         self.width = width
         self.height = height
         self.blocks = {}
+        self.layers = Struct()
+        self.layers.tetromino = {}
+        self.layers.ghost_tetromino = {}
         self.drawncubes = set()
         self.blockwidth = blockwidth
         self.screen = screen
@@ -720,17 +763,25 @@ class Board(object):
         if self.force_draw:
             self.drawBoard()
             self.drawAllBlocks()
-        else:
-            ## Empty out the blocks that where drawn last time, but are no longer occupied
-            self.emptyBlocks(self.drawncubes.difference(self.blocks))
 
         self.isupdated = False
         self.force_draw = False
 
-    def emptyBlocks(self, blocks):
+    def emptyBlocks(self):
+        active_blocks = set(self.blocks)
+        for blocks in self.layers.__dict__:
+            active_blocks.update(getattr(self.layers, blocks))
+        blocks = self.drawncubes.difference(active_blocks)
         for x, y in blocks:
             self.drawCube(x, y, self.bgcolor)
             self.drawncubes.discard((x, y))
+
+    ## TODO: Instead of having the Tetromino call Board.drawBlock, this could instead be handled by
+    ##       this (drawNewBlocks) function.
+    def drawNewBlocks(self):
+        for block in self.drawncubes.difference(self.blocks):
+            if self.blocks.get(block):
+                self.drawCube(block[0], block[1], self.blocks[block])
 
     def drawAllBlocks(self):
         for block in self.blocks:
@@ -790,3 +841,83 @@ class Filler(Job):
                 self.color,
                 (self.x, self.y, self.width, self.height),
                 )
+
+class Table(Job):
+    def __init__(self, game, x, y, font, rows, header_font=None, colors={}, onmouseclick=lambda seq, columns: None):
+        super(Table, self).__init__(game, x, y)
+
+        if any(len(rows[0]) != len(row) for row in rows[1:]):
+            raise TypeError("Rows differ in the number of columns")
+
+        self.colors = {}
+        self.colors.update(colors)
+        self.font = font
+        self.spacer = 2
+        self.fill = True
+        self.onmouseclick = onmouseclick
+
+        if not header_font:
+            header_font = font
+
+        ## Simplest method of padding, let the font renderer handle automatically it by adding spaces.
+        self.rows = [
+                [" {} ".format(column) for column in row]
+                for row in rows
+                ]
+
+        self.renderFonts()
+
+    def renderFonts(self):
+        font = loadFont(self.font)
+
+        self.column_widths = [0 for _ in xrange(len(self.rows[0]))]
+        self.row_heights = []
+        self.rendered_rows = []
+        for row in self.rows:
+            columns = []
+            for i in xrange(len(row)):
+                width, height = font.size(row[i])
+                if self.column_widths[i] < width:
+                    self.column_widths[i] = width
+                columns.append(font.render(row[i], True, self.colors["font"]))
+            self.row_heights.append(height)
+            self.rendered_rows.append(columns)
+        self.width = sum(self.column_widths)
+        self.height = sum(self.row_heights)
+
+    def draw(self):
+        ## Fill the area
+        if self.fill:
+            Pygame.draw.rect( self.game.screen, self.colors["background"], (self.x, self.y, self.width, self.height), 0,)
+
+        ## Draw fonts
+        y = self.y
+        for row_i in xrange(len(self.rendered_rows)):
+            row = self.rendered_rows[row_i]
+            x = self.x
+            for column_i in xrange(len(row)):
+                column = row[column_i]
+                self.game.screen.blit( column, (x, y),)
+                x += self.column_widths[column_i]
+            y += self.row_heights[row_i]
+
+        ## Draw borders between rows
+        y = self.y
+        for row_i in xrange(len(self.rendered_rows)):
+            Pygame.draw.line( self.game.screen, self.colors["border"], (self.x, y), (self.x + self.width, y), 1,)
+            y += self.rendered_rows[row_i][0].get_height()
+
+        ## Draw borders between columns
+        x = self.x
+        for column_i in xrange(len(self.rendered_rows[0])):
+            Pygame.draw.line( self.game.screen, self.colors["border"], (x, self.y), (x, self.y + self.height), 1,)
+            x += self.column_widths[column_i]
+
+        ## Draw a box around everything
+        Pygame.draw.rect( self.game.screen, self.colors["border"], (self.x, self.y, self.width + 1, self.height + 1), 1)
+
+    def eventHandler(self, event):
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button in (1, 3):
+                x, y = Pygame.mouse.get_pos()
+

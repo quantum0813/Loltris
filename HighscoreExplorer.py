@@ -20,6 +20,7 @@
 ## =====================================================================
 
 import Core
+import Load
 import Shared
 import Jobs
 import pygame as Pygame
@@ -58,7 +59,6 @@ class Preview(Core.Game):
                     )
         ## XXX: Beware that this dict is RW
         self.jobs.board.blocks = blocks
-        self.scores = Load.load
 
     def eventHandler(self, event):
         if event.type == QUIT:
@@ -71,6 +71,15 @@ class HighscoreList(Core.Menu):
     def __init__(self, top=HIGHSCORES, *args, **kwargs):
         super(HighscoreList, self).__init__("HighscoreList", *args, **kwargs)
         self.running = self.mainLoop
+        self.scores = Load.loadScores()
+        table_list = [(score["name"], score["score"]) for score in self.scores]
+        self.addJob(
+                "table",
+                Jobs.Table(
+                    self, SPACER, SPACER, TETRIS_STATUSBOX_FONT, table_list,
+                    colors=TETRIS_STATUSBOX_COLORSCHEME,
+                    )
+                )
 
     def eventHandler(self, event):
         if event.type == QUIT:

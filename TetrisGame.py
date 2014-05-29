@@ -134,7 +134,9 @@ class TetrisGame(Core.Game):
                     ]
             Matrix.put(matrix, f="_")
 
-            if len(self.highscores) < HIGHSCORES or any(board.score > score["score"] for score in self.highscores):
+            if ((len(self.highscores) < HIGHSCORES or any(board.score > score["score"] for score in self.highscores)) and 
+                    not Shared.options.get("uber_tetromino") and not Shared.options.get("flip_tetromino")
+                    ):
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "New Highscore!"))
                 Save.saveScore({"name": self.player_name,
                                 "score": board.score,
