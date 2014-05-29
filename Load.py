@@ -24,6 +24,8 @@ from RGB import rgbHexDecode
 import os.path as Path
 import Log
 import json as Json
+import pickle as Pickle
+import bz2 as Bz2
 
 DATADIR = "data"
 FONTDIR = Path.join(DATADIR, "Fonts")
@@ -36,50 +38,15 @@ JSONDIR = Path.join(DATADIR, "JSON")
 HIGHSCOREDIR = Path.join(DATADIR, "Highscores")
 SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
 
-## TODO: Switch to specifying the types manually everywhere
-typeConvert = {
-        None: lambda x: x,
-        "int": lambda x: int(x.strip()),
-        }
-
-## As in duck-typing
-def duck(text):
-    if all(x.isdigit() or x.isspace() for x in text):
-        return int(text.strip())
-    return text.strip()
-
 def loadHighscores(top=10):
-    Log.log("Loading highscores from `{}'".format(Path.join(HIGHSCOREDIR, "Scores.xml")))
-    with open(Path.join(HIGHSCOREDIR, "Scores.xml")) as rf:
-        return _loadScores(rf.read())[:top]
-
-def _loadScores(xml):
-    tree = ElementTree.XML(xml)
-    scores = []
-    for score in tree.getchildren():
-        scores.append({})
-        for info in score.getchildren():
-            scores[-1][info.tag] = duck(info.text)
-    return sorted(scores, key=lambda d: d["score"], reverse=True)
-
-def _loadKeymaps(xml):
-    tree = ElementTree.XML(xml)
-    keymaps = {}
-    for part in tree.getchildren():
-        keymaps[part.tag] = {}
-        for mapping in part.getchildren():
-            keymaps[part.tag][mapping.tag] = int(mapping.text.strip("\n").strip(" "))
-    return keymaps
+    path = Path.join(HIGHSCOREDIR, "Scores.json")
+    Log.log("Loading highscores from `{}'".format(path))
+    return sorted(Json.loads(_loadText(path)), key=lambda d: d["score"], reverse=True)[:top]
 
 def loadKeymaps():
-    path = Path.join(XMLDIR, "Keymap.xml")
+    path = Path.join(JSONDIR, "Keymaps.json")
     Log.log("Loading keymaps from `{}'".format(path))
-    try:
-        with open(path) as rf:
-            return _loadKeymaps(rf.read())
-    except:
-        Log.panic("Error while loading keymaps from `{}'".format(path))
-    return 
+    return Json.loads(_loadText(path))
 
 def _loadText(path):
     try:
@@ -133,3 +100,21 @@ def _loadOptions(json):
 def loadOptions():
     path = Path.join(JSONDIR, "Settings.json")
     return _loadOptions(_loadText(path))
+
+def _loadSnapshot(data):
+    return Pickle.loads(Bz2.decompress(data))
+
+def loadSnapshot(seq):
+    return _loadSnapshot(_loadText(Path.join(SNAPSHOTDIR, "{}.state.bz2".format(seq))))
+
+def loadScoresMatching(**kwargs):
+    scores = _loadScores(_loadText(Path.join(HIGHSCOREDIR, "Scores.xml")))
+    for score in scores:
+        if any(kwargs.get(thing) == score[thing] for thing in score):
+            yield score
+
+## XXX: Should this function work with the seq attribute? Or just the order of the scores in the file?
+def loadScore(seq):
+    scores = _loadScores(_loadText(Path.join(HIGHSCOREDIR, "Scores.xml")))
+    return scores[seq]
+

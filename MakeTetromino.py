@@ -117,14 +117,15 @@ class MakeTetromino(Core.Game):
         if event.type == QUIT:
             self.quit()
         if event.type == MOUSEBUTTONDOWN:
-            x, y = self.jobs.board.getBlockInPos(*Pygame.mouse.get_pos())
-            if x > self.jobs.board.width-1 or y > self.jobs.board.height-1 or x < 0 or y < 0:
-                pass
-            elif not self.jobs.board.blocks.get((x, y)):
-                self.jobs.board.blocks[(x, y)] = self.color
-                self.jobs.board.drawCube(x, y, self.color)
-            else:
-                self.jobs.board.blocks.pop((x, y))
+            if event.button in (1, 3):
+                x, y = self.jobs.board.getBlockInPos(*Pygame.mouse.get_pos())
+                if x > self.jobs.board.width-1 or y > self.jobs.board.height-1 or x < 0 or y < 0:
+                    pass
+                elif not self.jobs.board.blocks.get((x, y)):
+                    self.jobs.board.blocks[(x, y)] = self.color
+                    self.jobs.board.drawCube(x, y, self.color)
+                else:
+                    self.jobs.board.blocks.pop((x, y))
 
     def save(self):
         if not self.jobs.board.blocks:

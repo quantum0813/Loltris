@@ -222,10 +222,13 @@ class TextBox(object):
                     self.onmouseleave(self)
 
         if event.type == MOUSEBUTTONDOWN and self.onmouseclick:
-            if Utils.isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height)):
-                Log.debug("Mouseclick on `{}'".format(self))
-                self.onmouseclick()
-                self.game.lock[MOUSEBUTTONDOWN] = self
+            ## TODO: Maybe there should be a different event registered for button 1 and 3?
+            if event.button in (1, 3):
+                ## If the button pressed was either the left or right button
+                if Utils.isInCube(Pygame.mouse.get_pos(), (self.x, self.y, self.width, self.height)):
+                    Log.debug("Mouseclick on `{}'".format(self))
+                    self.onmouseclick()
+                    self.game.lock[MOUSEBUTTONDOWN] = self
 
     def update(self):
         if self.variables:
@@ -294,7 +297,7 @@ class Switch(TextBox):
     """
     def __init__(self, game, text, whenon, whenoff, ison=False, box_center=False, boxwidth=None, box_offset=0, **kwargs):
         Log.debug("Initializing Switch instance")
-        super(Switch, self).__init__(game, text, border=True, textfit=True, onmouseclick=self.flip, **kwargs)
+        super(Switch, self).__init__(game, text, textfit=True, onmouseclick=self.flip, **kwargs)
         self.whenoff = whenoff
         self.whenon = whenon
         self.on = ison
@@ -622,6 +625,7 @@ class Notification(TextBox):
                 game, text, xcenter=True, ycenter=True, font=ERRORBOX_FONT,
                 textfit=True, onmouseclick=lambda: game.removeJob(_id),
                 colors=ERRORBOX_COLORSCHEME, background=True, border=True,
+                padding=6,
                 )
 
 class Board(object):

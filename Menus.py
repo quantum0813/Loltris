@@ -55,6 +55,7 @@ class MainMenu(Core.Menu):
                 ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
                 ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
                 ("Too long", lambda: self.call(LongMenuTest.LongMenu, caption="Long menu test")),
+                # ("Score", lambda: self.call(HighscoreExplorer.Preview, Load.loadSnapshot(3), **Load.loadScore(3))),
                 ("Exit", self.quit),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },

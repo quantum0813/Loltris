@@ -21,13 +21,15 @@
 
 import Core
 import Shared
+import Jobs
 import pygame as Pygame
+import Log
 from pygame.locals import *
 from Globals import *
 
 class Preview(Core.Game):
-    def __init__(self, **kwargs):
-        super(Preview, self).__init__("Preview", caption="Preview")
+    def __init__(self, blocks, date=None, level=None, lines=None, name=None, score=None, *args, **kwargs):
+        super(Preview, self).__init__("Preview", *args, fill=True, **kwargs)
         self.running = self.mainLoop
 
         self.addJob("board",
@@ -41,11 +43,12 @@ class Preview(Core.Game):
                           bgcolor=self.bgcolor,
                           )
                 )
+        kwargs.pop("screen")
         self.addJob("status",
                     Jobs.TextBox(
-                        self, "".join(["{}: {}".format(x, kwargs[x]) for x in kwargs]),
+                        self, "Date: {}\nName: {}\nLines: {}\nLevel: {}\nScore: {}\n".format(date, name, lines, level, score),
                         border=True,
-                        y=self.jobs.preview_window.y + (PREVIEW_HEIGHT * BOARD_BLOCKWIDTH) + SPACER,
+                        y=SPACER,
                         x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                         yfit=True,
                         width=BOARD_BLOCKWIDTH * PREVIEW_WIDTH,
@@ -55,8 +58,9 @@ class Preview(Core.Game):
                     )
         ## XXX: Beware that this dict is RW
         self.jobs.board.blocks = blocks
+        self.scores = Load.load
 
-    def eventHandler(self):
+    def eventHandler(self, event):
         if event.type == QUIT:
             self.quit()
 

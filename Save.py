@@ -20,15 +20,15 @@
 ## =====================================================================
 
 
-from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR
-# from lxml.etree import ElementTree
-import lxml.etree as ElementTree
+from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadText
+# import lxml.etree as ElementTree
+from xml.etree import ElementTree
 import os.path as Path
+import json as Json
 import os as OS
 import RGB
 import Log
 import Shared
-import json as Json
 import bz2 as Bz2
 import pickle as Pickle
 
@@ -51,35 +51,18 @@ def dictsToXml(rootname, sub):
         root.text = unicode(sub)
     return root
 
-def _appendScores(root, score):
-    for score in score:
-        root.append(dictsToXml("score", score))
-
 def saveScore(score, state=set()):
-    ## Get current score
-    parser = ElementTree.XMLParser(remove_blank_text=True, encoding="utf-8")
-    xml = ElementTree.parse(Path.join(HIGHSCOREDIR, "Scores.xml"), parser)
-    root = xml.getroot()
-    children = root.getchildren()
-    if not children:
-        seq = 0
-    else:
-        seq = int(children[-1].get("seq"))+1
-
-    ## Set date
+    try:
+        with open(Path.join(HIGHSCOREDIR, "Scores.json")) as rf:
+            scores = Json.load(rf)
+    except (IOError, OSError):
+        ## File does not exist yet
+        scores = []
     score["date"] = Log.getTime(spec="%Y:%m:%d")
-
-    ## Append the new score to current scores
-    elem = dictToXml("score", score)
-    elem.set("seq", str(seq))
-    root.append(elem)
-    with open(Path.join(SNAPSHOTDIR, "{}.state.bz2".format(seq)), "w") as wf:
-        wf.write(Bz2.compress(Pickle.dumps(state)))
-    seq += 1
-
-    ## Store the new score along with the old ones
-    xml.write(Path.join(HIGHSCOREDIR, "Scores.xml"), pretty_print=True, encoding="utf-8")
-    Log.log("Saved new score to `Scores.xml'")
+    scores.append(score)
+    with open(Path.join(HIGHSCOREDIR, "Scores.json"), "w") as wf:
+        Json.dump(scores, wf, indent=JSON_INDENT)
+    Log.log("Saved new score to `Scores.json'")
 
 def matrixToAscii(matrix, true="#", false="_", newline="\n"):
     ret = ""
@@ -96,20 +79,18 @@ def saveTetromino(color, name, matrix):
     path = Path.join(XMLDIR, "Tetrominos.xml")
     parser = ElementTree.XMLParser(encoding="utf-8")
     xml =  ElementTree.parse(path, parser)
-    root = xml.getroot()
+    root = xml
 
     _appendTetromino(root, color, name, matrix)
 
-    xml.write(path)
+    with open(path, "w") as wf:
+        wf.write(ElementTree.tostring(xml))
     Log.log("Saved new tetromino to `{}'".format(path))
 
 def saveOptions():
     with open(Path.join(JSONDIR, "Settings.json"), "w") as wf:
         Json.dump(Shared.options, wf, indent=4)
 
-def _saveKeymaps(keymaps):
-    return ElementTree.tostring(dictToXml("keymaps", keymaps), pretty_print=True)
-
 def saveKeymap():
-    with open(Path.join(XMLDIR, "Keymap.xml"), "w") as wf:
-        wf.write(_saveKeymaps(Shared.keymap))
+    with open(Path.join(JSONDIR, "Keymaps.json"), "w") as wf:
+        Json.dump(Shared.keymap, wf)

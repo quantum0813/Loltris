@@ -73,7 +73,7 @@ def genericLog(logtype, message, cr=False, **kwargs):
 
 ## Just so that everything is uniform
 def dump(message):
-    stdout.write(message)
+    stdout.write(str(message))
 
 ## Called by genericLog, which is called by panic/error/log etc, which is called by the [function we want]
 def getCaller():
@@ -89,7 +89,6 @@ def panic(comment, **kwargs):
 
 def fail(ret, **kwargs):
     genericLog("FAIL", "Failing due to previous errors", **kwargs)
-    ## All threads are set as daemon, therefore this will halt the entire server
     sys.exit(ret)
 
 def notice(comment, **kwargs):
