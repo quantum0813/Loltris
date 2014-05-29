@@ -26,6 +26,7 @@ import Log
 import json as Json
 import pickle as Pickle
 import bz2 as Bz2
+from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 DATADIR = "data"
 FONTDIR = Path.join(DATADIR, "Fonts")
