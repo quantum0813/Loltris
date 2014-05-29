@@ -19,22 +19,22 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## =====================================================================
 
-from xml.etree import ElementTree
 from RGB import rgbHexDecode
 import os.path as Path
 import Log
 import json as Json
 import pickle as Pickle
 import bz2 as Bz2
+import os as OS
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 DATADIR = "data"
 FONTDIR = Path.join(DATADIR, "Fonts")
-XMLDIR = Path.join(DATADIR, "XML")
 IMAGEDIR = Path.join(DATADIR, "Images")
 MUSICDIR = Path.join(DATADIR, "Music")
 TXTDIR = Path.join(DATADIR, "TXT")
 JSONDIR = Path.join(DATADIR, "JSON")
+TETROMINODIR = Path.join(DATADIR, "Tetrominos")
 ## Not sure where this should be really
 HIGHSCOREDIR = Path.join(DATADIR, "Highscores")
 SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
@@ -59,41 +59,17 @@ def _loadText(path):
 def loadCredits():
     return _loadText(Path.join(TXTDIR, "Credits.txt"))
 
-def _loadTetrominos(xml, verbose=True):
-    tree = ElementTree.XML(xml)
-    tree_items = dict(tree.items())
-
-    def makeTetromino(text):
-        for chars in filter(bool, (l.strip(" ") for l in text.splitlines())):
-            line = []
-            for char in chars:
-                if char == tree_items["true"]:
-                    line.append(1)
-                elif char == tree_items["false"]:
-                    line.append(0)
-            yield line
-
-    tetrominos = []
-    for sub in tree.getchildren():
-        sub_items = dict(sub.items())
-        if verbose:
-            Log.log("Loading tetromino `{}' with color `{}'".format(sub_items["name"], sub_items["color"]))
-        tetrominos.append([
-                rgbHexDecode(sub_items["color"]),
-                sub_items["name"],
-                list(makeTetromino(sub.text)),
-                ])
-
-    return tetrominos
-
 def loadTetrominos():
-    path = Path.join(XMLDIR, "Tetrominos.xml")
-    Log.log("Loading tetrominos from `{}'".format(path))
-    try:
-        with open(path) as rf:
-            return _loadTetrominos(rf.read())
-    except:
-        raise ImportError("Error while loading tetrominos from `{}'".format(path))
+    tetrominos = []
+    for filename in OS.listdir(TETROMINODIR):
+        path = Path.join(TETROMINODIR, filename)
+        tetromino = Pickle.loads(Bz2.decompress(_loadText(path)))
+        tetrominos.append([
+            tetromino["color"],
+            filename.partition(".")[0],
+            tetromino["matrix"],
+            ])
+    return tetrominos
 
 def _loadOptions(json):
     return Json.loads(json)
@@ -106,16 +82,4 @@ def _loadSnapshot(data):
     return Pickle.loads(Bz2.decompress(data))
 
 def loadSnapshot(seq):
-    return _loadSnapshot(_loadText(Path.join(SNAPSHOTDIR, "{}.state.bz2".format(seq))))
-
-def loadScoresMatching(**kwargs):
-    scores = _loadScores(_loadText(Path.join(HIGHSCOREDIR, "Scores.xml")))
-    for score in scores:
-        if any(kwargs.get(thing) == score[thing] for thing in score):
-            yield score
-
-## XXX: Should this function work with the seq attribute? Or just the order of the scores in the file?
-def loadScore(seq):
-    scores = _loadScores(_loadText(Path.join(HIGHSCOREDIR, "Scores.xml")))
-    return scores[seq]
-
+    return _loadSnapshot(_loadText(Path.join(SNAPSHOTDIR, "{}.pyset.bz2".format(seq))))

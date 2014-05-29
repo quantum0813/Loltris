@@ -20,9 +20,7 @@
 ## =====================================================================
 
 
-from Load import IMAGEDIR, XMLDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadText
-# import lxml.etree as ElementTree
-from xml.etree import ElementTree
+from Load import IMAGEDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadText, TETROMINODIR
 import os.path as Path
 import json as Json
 import os as OS
@@ -31,37 +29,22 @@ import Log
 import Shared
 import bz2 as Bz2
 import pickle as Pickle
-
-def dictToXml(rootname, sub):
-    root = ElementTree.Element(rootname)
-    if type(sub).__name__ == "dict":
-        for d in sub:
-            root.append(dictToXml(d, sub[d]))
-    else:
-        root.text = str(sub)
-    return root
-
-def dictsToXml(rootname, sub):
-    root = ElementTree.Element(rootname)
-    if type(sub).__name__ == "list":
-        for d in sub:
-            for key in d:
-                root.append(dictsToXml(key, d[key]))
-    else:
-        root.text = unicode(sub)
-    return root
+from Globals import *
 
 def saveScore(score, state=set()):
     try:
         with open(Path.join(HIGHSCOREDIR, "Scores.json")) as rf:
             scores = Json.load(rf)
     except (IOError, OSError):
-        ## File does not exist yet
+        ## Assume that the file has been deleted, start from scratch with an empty array.
         scores = []
-    score["date"] = Log.getTime(spec="%Y:%m:%d")
+    score["date"] = Log.getTime(spec="%Y-%m-%d %H:%M:%S")
+    seq = len(scores)
     scores.append(score)
     with open(Path.join(HIGHSCOREDIR, "Scores.json"), "w") as wf:
         Json.dump(scores, wf, indent=JSON_INDENT)
+    with open(Path.join(SNAPSHOTDIR, "{}.pyset.bz2".format(seq)), "w") as wf:
+        wf.write(Bz2.compress(Pickle.dumps(state)))
     Log.log("Saved new score to `Scores.json'")
 
 def matrixToAscii(matrix, true="#", false="_", newline="\n"):
@@ -72,20 +55,8 @@ def matrixToAscii(matrix, true="#", false="_", newline="\n"):
 
 def _appendTetromino(root, color, name, matrix):
     element = ElementTree.Element("tetromino", color=RGB.rgbHexEncode(color), name=name)
-    element.text = "\n" + matrixToAscii(matrix)
+    element.text = "\n" + matrixToAscii(matrix) + "\n"
     root.append(element)
-
-def saveTetromino(color, name, matrix):
-    path = Path.join(XMLDIR, "Tetrominos.xml")
-    parser = ElementTree.XMLParser(encoding="utf-8")
-    xml =  ElementTree.parse(path, parser)
-    root = xml
-
-    _appendTetromino(root, color, name, matrix)
-
-    with open(path, "w") as wf:
-        wf.write(ElementTree.tostring(xml))
-    Log.log("Saved new tetromino to `{}'".format(path))
 
 def saveOptions():
     with open(Path.join(JSONDIR, "Settings.json"), "w") as wf:
@@ -94,3 +65,17 @@ def saveOptions():
 def saveKeymap():
     with open(Path.join(JSONDIR, "Keymaps.json"), "w") as wf:
         Json.dump(Shared.keymap, wf)
+
+def _writeText(path, data):
+    try:
+        with open(path, "w") as wf:
+            wf.write(data)
+    except (IOError, OSError):
+        Log.panic("Unable to write data to `{}'".format(path))
+
+def saveTetromino(color, name, matrix):
+    _writeText(
+            Path.join(TETROMINODIR, "{}.pydict.bz2".format(name)),
+            Bz2.compress(Pickle.dumps({"color": color, "matrix": matrix}))
+            )
+

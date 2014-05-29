@@ -9,10 +9,7 @@ import os as OS
 
 SETUP_FILE = ".set_up"
 
-SCORES_CONTENTS = """
-<scores>
-</scores>
-"""
+SCORES_CONTENTS = """[]"""
 
 def setupFiles():
     if Path.exists(Path.join(Load.DATADIR, SETUP_FILE)):
@@ -21,11 +18,12 @@ def setupFiles():
     Log.log("Setting up files for Loltris")
 
     with open(Path.join(Load.DATADIR, SETUP_FILE), "w") as wf:
-        wf.write("This file just tells Loltris that everything has been set up,\n" + \
-                 "do not remove this file unless you want to set up everything\n" + \
-                 "again (deletes all user-files like scores)\n")
+        wf.write("# This file just tells Loltris that everything has been set up,\n" + \
+                 "# do not remove this file unless you want to set up everything\n" + \
+                 "# again (deletes all user-files like scores)\n"
+                 )
 
-    with open(Path.join(Load.HIGHSCOREDIR, "Scores.xml"), "w") as wf:
+    with open(Path.join(Load.HIGHSCOREDIR, "Scores.json"), "w") as wf:
         wf.write(SCORES_CONTENTS)
 
     try:
