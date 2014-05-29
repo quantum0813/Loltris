@@ -30,6 +30,7 @@ import Shared
 from pygame.locals import *
 from Globals import *
 import Jobs
+import Queue
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 def fillJob(screen, color, job):
@@ -229,127 +230,12 @@ class Game(object):
 ## TODO: Make the menu into a job, but keep the Game-derived class. This way it would be easy
 ##       to create small pop-up menus, as well as full-screen menus. The Game-derived Menu class would
 ##       register a Job.Menu with the width/height of the screen and the coordinates (0, 0)
+## Menu with scrolling
 class Menu(Game):
     def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
                  isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
         self.id = _id
         super(Menu, self).__init__(self.id, **kwargs)
-        self.running = self.mainLoop
-        self.colorscheme = MENU_COLORSCHEME
-        self.header = ""
-        self.menu = []
-        self.lookup = {}
-        self.options = []
-        self.selected = 0
-        self.options_pos = (SPACER, SPACER)
-        self.header_font = header_font
-        self.option_font = option_font
-        self.isroot = isroot
-        self.onHeaderClick = onHeaderClick
-        self.xcenter = xcenter
-
-    def setupObjects(self):
-        def mouseLeave(box):
-            Log.debug(box)
-            box.colors["font"] = self.colorscheme["option"]
-            box.renderFonts()
-        def mouseEnter(box):
-            Log.debug(box)
-            box.colors["font"] = self.colorscheme["selected"]
-            box.renderFonts()
-
-        if not self.isroot and self.menu[-1].text != "Back":
-            self.menu.append(Jobs.AutoTextBox(self, "Back", onmouseclick=self.quitGame,
-                                              font=MENU_OPTION_FONT,
-                                              colors={
-                                                  "background":self.colorscheme["background"],
-                                                  "font":self.colorscheme["option"],
-                                                  }
-                                              ))
-
-        self.addJob("header",
-                Jobs.TextBox(self, self.header, y=10, xcenter=True, textfit=True, underline=True,
-                    colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border": (0xaa,0xaa,0xaa)}, font=self.header_font,
-                    onmouseclick=self.onHeaderClick,
-                    )
-                )
-        self.lookup = dict([(option.text, option) for option in self.menu])
-        x, y = self.options_pos
-        y += self.jobs.header.y + self.jobs.header.height
-        self.options = []
-        ## Set options, then add the job
-        for option in self.menu:
-            option.x = x
-            if self.xcenter:
-                option.x = (self.width // 2) - (option.width // 2)
-            option.y = y
-            if option.text == "Back":
-                option.y = y + SPACER
-            option.onmouseleave = mouseLeave
-            option.onmouseenter = mouseEnter
-            self.addJob(option.text, option)
-            self.options.append(option.text)
-            y += option.height
-
-    def mainLoop(self):
-        pass
-
-    def move(self, direction):
-        item = self.getSelectedItem()
-        obj = self.menu[item]
-        if item == len(self.menu)-1 and direction == 1:
-            newobj = self.menu[0]
-        elif item == 0 and direction == -1:
-            newobj = self.menu[len(self.menu)-1]
-        else:
-            newobj = self.menu[item+direction]
-        obj.onmouseleave(obj)
-        obj.hasmouse = False
-        newobj.onmouseenter(newobj)
-        newobj.hasmouse = True
-        Log.debug("Moving cursor to {}".format(repr(newobj.text)))
-
-    def getSelectedItem(self):
-        for i in xrange(len(self.menu)):
-            option = self.menu[i].text
-            func = self.menu[i].onmouseclick
-            if self.getJob(option).hasmouse:
-                break
-        else:
-            return 0
-        return i
-
-    def changeMenu(self, menu):
-        self.call(menu)
-
-    def close(self):
-        self.quitGame()
-
-    def execOption(self):
-        ## Right now each option just runs a function, this may change
-        option = self.lookup[self.options[self.getSelectedItem()]]
-        option.onmouseclick()
-
-    def eventHandler(self, event):
-        if event.type == QUIT:
-            self.quit()
-
-        if event.type == KEYDOWN:
-            if event.key == Shared.keymap["menu"]["back"]:
-                self.close()
-            elif event.key == Shared.keymap["menu"]["down"]:
-                self.move(1)
-            elif event.key == Shared.keymap["menu"]["up"]:
-                self.move(-1)
-            elif event.key == Shared.keymap["menu"]["select"]:
-                self.execOption()
-
-## Menu with scrolling
-class ScrollMenu(Game):
-    def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
-                 isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
-        self.id = _id
-        super(ScrollMenu, self).__init__(self.id, **kwargs)
         self.running = self.mainLoop
         self.colorscheme = MENU_COLORSCHEME
         self.header = ""
@@ -368,9 +254,11 @@ class ScrollMenu(Game):
         def mouseLeave(box):
             Log.debug(box)
             box.colors["font"] = self.colorscheme["option"]
+            box.renderFonts()
         def mouseEnter(box):
             Log.debug(box)
             box.colors["font"] = self.colorscheme["selected"]
+            box.renderFonts()
 
         if not self.isroot and self.menu[-1].text != "Back":
             self.menu.append(Jobs.AutoTextBox(self, "Back", onmouseclick=self.quitGame,
@@ -386,11 +274,19 @@ class ScrollMenu(Game):
             self.addJob("header",
                     Jobs.TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
                             colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                            onmouseclick=self.onHeaderClick
+                            onmouseclick=self.onHeaderClick, queue=Queue.HEADER
                             )
                     )
         else:
             Log.warning("No header text given to Menu `{}'".format(self.id))
+
+        self.addJob(
+                "scroll_filler",
+                Jobs.Filler(
+                    self, 0, 0, self.width, self.options_pos[1],
+                    queue=Queue.SCROLL_FILLER,
+                    )
+                )
 
         self.lookup = dict([(option.text, option) for option in self.menu])
         x, y = self.options_pos
@@ -401,6 +297,7 @@ class ScrollMenu(Game):
             Log.warning("Height of all options combined exceeds height of window")
 
         ## Set options, then add the job
+        self.options_width = 0
         for option in self.menu:
             option.x = x
             if self.xcenter:
@@ -414,6 +311,9 @@ class ScrollMenu(Game):
             self.addJob(option.text, option)
             self.options.append(option.text)
             y += option.height
+            if option.width > self.options_width:
+                self.options_width = option.width
+        Log.debug(self.options_width)
 
     def mainLoop(self):
         pass
@@ -431,6 +331,11 @@ class ScrollMenu(Game):
         obj.hasmouse = False
         newobj.onmouseenter(newobj)
         newobj.hasmouse = True
+
+        ## TODO: Finish this, include key-support in scrolling menus
+        if self.menu[item].y + self.menu[item].height + SPACER >= self.height:
+            self.scroll(-(self.menu[item].height))
+
         Log.debug("Moving cursor to {}".format(repr(newobj.text)))
 
     def getSelectedItem(self):
@@ -449,6 +354,23 @@ class ScrollMenu(Game):
     def close(self):
         self.quitGame()
 
+    def getOptions(self):
+        for menu in self.menu:
+            yield menu
+
+    def scroll(self, amount):
+        if self.menu[0].y >= self.options_pos[1] and amount > 0:
+            return
+        if self.menu[-1].y + self.menu[-1].height <= self.height and amount < 0:
+            return
+        for option in self.getOptions():
+            option.y += amount
+        Pygame.draw.rect(
+                self.screen,
+                self.bgcolor,
+                (self.options_pos[0], self.options_pos[1], self.options_width, self.height - self.options_pos[1])
+                )
+
     def execOption(self):
         ## Right now each option just runs a function, this may change
         option = self.lookup[self.options[self.getSelectedItem()]]
@@ -457,6 +379,12 @@ class ScrollMenu(Game):
     def eventHandler(self, event):
         if event.type == QUIT:
             self.quit()
+
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 4:
+                self.scroll(2)
+            if event.button == 5:
+                self.scroll(-2)
 
         if event.type == KEYDOWN:
             if event.key == Shared.keymap["menu"]["back"]:

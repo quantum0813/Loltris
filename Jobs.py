@@ -37,6 +37,10 @@ class Job(object):
         self.x = x
         self.y = y
         self.force_draw = True
+        self.queue = Queue.GENERIC
+        self.update_required = True
+        self.draw_required = True
+        self.fill = False
 
     def draw(self):
         self.force_draw = False
@@ -772,3 +776,17 @@ class Board(object):
     def eventHandler(self, event):
         pass
 
+class Filler(Job):
+    def __init__(self, game, x, y, width, height, color=None, queue=Queue.GENERIC):
+        super(Filler, self).__init__(game, x, y)
+        self.color = color or self.game.bgcolor
+        self.queue = queue
+        self.width = width
+        self.height = height
+
+    def draw(self):
+        Pygame.draw.rect(
+                self.game.screen,
+                self.color,
+                (self.x, self.y, self.width, self.height),
+                )

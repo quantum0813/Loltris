@@ -42,17 +42,6 @@ def out(msg, end="\r\n", c="\x1b[0;33m"):
     stdout.write((c if c else "") + str(msg) + ("\x1b[0;00m" if c else "") + str(end))
     stdout.flush()
 
-## XXX: Some functions still specify the function argument in log functions,
-##      this is no longer needed and not recommended. No effort is being made
-##      to replace all the occurenses of Log.xxx(function="yyy"), but this
-##      could be accomplished with a not too complicated regex.
-
-## TODO: I should define all these functions to take the arguments (comment, **kwargs)
-##       the problem is that i would have to review all Log calls.
-
-## All the log and error functions will pass all exceptions quietly, the last thing
-## we want is the error message function crashing the server...
-
 def fprint(fileobj, data):
     fileobj.write(data + EOL)
     fileobj.flush()
@@ -75,7 +64,7 @@ def genericLog(logtype, message, cr=False, **kwargs):
 def dump(message):
     stdout.write(str(message))
 
-## Called by genericLog, which is called by panic/error/log etc, which is called by the [function we want]
+## Called by genericLog, which is called by panic/error/log etc, which is called by [function we want]
 def getCaller():
     curframe = inspect.currentframe()
     return inspect.getouterframes(curframe, 2)[3][3]
@@ -88,7 +77,7 @@ def panic(comment, **kwargs):
     fail(255)
 
 def fail(ret, **kwargs):
-    genericLog("FAIL", "Failing due to previous errors", **kwargs)
+    genericLog("FAIL", "Failing due to previous errors... Ignucius help us", **kwargs)
     sys.exit(ret)
 
 def notice(comment, **kwargs):
@@ -97,12 +86,10 @@ def notice(comment, **kwargs):
 def debug(comment, **kwargs):
     genericLog("DEBUG", comment, **kwargs)
 
-## (comment, **kwargs) is used because of the deprecated function kwargument.
 def error(comment, **kwargs):
     genericLog("ERROR", comment, **kwargs)
 
 def log(comment, **kwargs):
-    ## Legacy
     genericLog("NOTICE", comment, **kwargs)
 
 def success(comment, **kwargs):
@@ -110,6 +97,3 @@ def success(comment, **kwargs):
 
 def warning(comment, **kwargs):
     genericLog("WARNING", comment, **kwargs)
-
-if __name__ == '__main__':
-    pass
