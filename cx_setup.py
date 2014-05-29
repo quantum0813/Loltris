@@ -1,3 +1,5 @@
+## cx_freeze setup script for Pygame, auto-generated using cxfreeze
+
 from cx_Freeze import setup, Executable
 
 # Dependencies are automatically detected, but it might need

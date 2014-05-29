@@ -46,7 +46,7 @@ class MainMenu(Core.Menu):
         super(MainMenu, self).__init__(
                 "MainMenu", onHeaderClick=lambda: Webbrowser.open(PROJECT_SITE),
                 header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True,
-                soundtrack=Path.join(Load.MUSICDIR, "jazz_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
+                soundtrack=Path.join(Load.MUSICDIR, "jazz_cat_infinite_loop_cut.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
         self.header = "Loltris"
         self.menu = Factory.textBoxes([
                 ("Start Game", self.launchTetrisGame),
