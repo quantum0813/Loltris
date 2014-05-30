@@ -38,8 +38,9 @@ def saveScore(score, state=set()):
     except (IOError, OSError):
         ## Assume that the file has been deleted, start from scratch with an empty array.
         scores = []
-    score["date"] = Log.getTime(spec="%Y-%m-%d %H:%M:%S")
     seq = len(scores)
+    score["date"] = Log.getTime(spec="%Y-%m-%d %H:%M:%S")
+    score["seq"] = seq
     scores.append(score)
     with open(Path.join(HIGHSCOREDIR, "Scores.json"), "w") as wf:
         Json.dump(scores, wf, indent=JSON_INDENT)

@@ -25,11 +25,12 @@ import Shared
 import Jobs
 import pygame as Pygame
 import Log
+import Queue
 from pygame.locals import *
 from Globals import *
 
 class Preview(Core.Game):
-    def __init__(self, blocks, date=None, level=None, lines=None, name=None, score=None, *args, **kwargs):
+    def __init__(self, blocks, date=None, level=None, lines=None, name=None, score=None, seq=None, *args, **kwargs):
         super(Preview, self).__init__("Preview", *args, fill=True, **kwargs)
         self.running = self.mainLoop
 
@@ -68,22 +69,65 @@ class Preview(Core.Game):
         pass
 
 class HighscoreList(Core.Menu):
-    def __init__(self, top=HIGHSCORES, *args, **kwargs):
+    def __init__(self, top=HIGHSCORES, filler_offset=30, header_font=MENU_HEADER_FONT, *args, **kwargs):
         super(HighscoreList, self).__init__("HighscoreList", *args, **kwargs)
         self.running = self.mainLoop
         self.scores = Load.loadScores()
-        table_list = [(score["name"], score["score"]) for score in self.scores]
+        sorted_score_table = [(("Name", "Score"), None)]
+        sorted_score_table.extend([
+                ((score["name"], score["score"]), score)
+                for score in sorted(self.scores, key=lambda d: d["score"], reverse=True)
+                ])
+        self.header_font = {}
+        self.header_font.update(header_font)
+        self.addJob("header",
+                Jobs.TextBox(
+                    self, "Scores", y=20, xcenter=True, textfit=True, underline=False,
+                    colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
+                    onmouseclick=self.onHeaderClick, queue=Queue.HEADER
+                    )
+                )
         self.addJob(
                 "table",
                 Jobs.Table(
-                    self, SPACER, SPACER, TETRIS_STATUSBOX_FONT, table_list,
-                    colors=TETRIS_STATUSBOX_COLORSCHEME,
+                    self, SPACER, self.jobs.header.y+self.jobs.header.height, TETRIS_STATUSBOX_FONT, sorted_score_table,
+                    colors=TETRIS_STATUSBOX_COLORSCHEME, onmouseclick=self.previewScore,
+                    xcenter=True,# queue=Queue.TEXTBOX,
                     )
                 )
+        self.addJob(
+                "bottom_filler",
+                Jobs.Filler(
+                    self, 0, self.height-filler_offset, self.width, filler_offset,
+                    queue=Queue.SCROLL_FILLER,
+                    )
+                )
+        self.addJob(
+                "top_filler",
+                Jobs.Filler(
+                    self, 0, 0, self.width, self.jobs.header.y,
+                    queue=Queue.SCROLL_FILLER,
+                    )
+                )
+
+    def previewScore(self, seq, reference):
+        ## Don't do anything if the user clicks on the header.
+        if not seq:
+            return
+        blocks = Load.loadSnapshot(reference["seq"])
+        self.call(Preview, blocks, **reference)
 
     def eventHandler(self, event):
         if event.type == QUIT:
             self.quit()
+
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 5 and (self.jobs.table.y + self.jobs.table.height - self.height + self.jobs.bottom_filler.height) >= 0:
+                ## DOWN
+                self.jobs.table.y -= 4
+            if event.button == 4 and self.jobs.table.y < self.jobs.header.y + self.jobs.header.height:
+                ## UP
+                self.jobs.table.y += 4
 
     def mainLoop(self):
         pass

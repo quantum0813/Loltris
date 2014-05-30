@@ -42,5 +42,4 @@ if __name__ == '__main__':
     ## Launch the game
     main_menu = Menus.MainMenu(caption="Loltris")
     main_menu.setup()
-    # Profile.run("main_menu.run()")
     main_menu.run()

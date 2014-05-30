@@ -39,6 +39,11 @@ TETROMINODIR = Path.join(DATADIR, "Tetrominos")
 HIGHSCOREDIR = Path.join(DATADIR, "Highscores")
 SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
 
+def loadScores():
+    path = Path.join(HIGHSCOREDIR, "Scores.json")
+    Log.log("Loading scores from `{}'".format(path))
+    return Json.loads(_loadText(path))
+
 def loadHighscores(top=10):
     path = Path.join(HIGHSCOREDIR, "Scores.json")
     Log.log("Loading highscores from `{}'".format(path))

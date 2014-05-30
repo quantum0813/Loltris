@@ -50,12 +50,12 @@ def loadFont(font):
 
 ## The basic structure of a Job
 class Job(object):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, queue=Queue.GENERIC):
         self.game = game
         self.x = x
         self.y = y
         self.force_draw = True
-        self.queue = Queue.GENERIC
+        self.queue = queue
         self.update_required = True
         self.draw_required = True
         self.fill = False
@@ -843,10 +843,11 @@ class Filler(Job):
                 )
 
 class Table(Job):
-    def __init__(self, game, x, y, font, rows, header_font=None, colors={}, onmouseclick=lambda seq, columns: None):
-        super(Table, self).__init__(game, x, y)
+    def __init__(self, game, x, y, font, table, xcenter=False, ycenter=False, header_font=None, colors={}, onmouseclick=(lambda seq, columns: None), **kwargs):
+        super(Table, self).__init__(game, x, y, **kwargs)
 
-        if any(len(rows[0]) != len(row) for row in rows[1:]):
+        self.rows = [columns for columns, _ in table]
+        if any(len(self.rows[0]) != len(row) for row in self.rows[1:]):
             raise TypeError("Rows differ in the number of columns")
 
         self.colors = {}
@@ -855,25 +856,26 @@ class Table(Job):
         self.spacer = 2
         self.fill = True
         self.onmouseclick = onmouseclick
+        self.table = table
+        self.xcenter = xcenter
+        self.ycenter = ycenter
 
         if not header_font:
             header_font = font
-
-        ## Simplest method of padding, let the font renderer handle automatically it by adding spaces.
-        self.rows = [
-                [" {} ".format(column) for column in row]
-                for row in rows
-                ]
 
         self.renderFonts()
 
     def renderFonts(self):
         font = loadFont(self.font)
 
-        self.column_widths = [0 for _ in xrange(len(self.rows[0]))]
+        ## Simplest method of padding, let the font renderer handle automatically it by adding spaces.
+        rows = [ [" {} ".format(column) for column in row]
+                 for row in self.rows ]
+
+        self.column_widths = [0 for _ in xrange(len(rows[0]))]
         self.row_heights = []
         self.rendered_rows = []
-        for row in self.rows:
+        for row in rows:
             columns = []
             for i in xrange(len(row)):
                 width, height = font.size(row[i])
@@ -884,6 +886,11 @@ class Table(Job):
             self.rendered_rows.append(columns)
         self.width = sum(self.column_widths)
         self.height = sum(self.row_heights)
+
+        if self.xcenter:
+            self.x = (self.game.width // 2) - (self.width // 2)
+        if self.ycenter:
+            self.y = (self.game.height // 2) - (self.height // 2)
 
     def draw(self):
         ## Fill the area
@@ -920,4 +927,7 @@ class Table(Job):
         if event.type == MOUSEBUTTONDOWN:
             if event.button in (1, 3):
                 x, y = Pygame.mouse.get_pos()
+                row = (y - self.y) / self.row_heights[0]
+                if (0 <= row <= len(self.rows)-1) and (self.x <= x <= self.x + self.width):
+                    self.onmouseclick(row, self.table[row][1])
 

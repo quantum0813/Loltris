@@ -167,6 +167,8 @@ class Game(object):
             Log.debug("Not playing music: {}".format((self.soundtrack, self.sound_enabled, self.playing)))
         if not self.screen:
             self.screen = Pygame.display.set_mode((self.width, self.height), DISPLAY_OPTIONS)
+        if self.width != self.screen.get_width() or self.height != self.screen.get_height():
+            self.screen.set_mode((self.width, self.height), DISPLAY_OPTIONS)
         self.screen.fill(self.bgcolor)
         Pygame.display.flip()
         self.clock = Pygame.time.Clock()

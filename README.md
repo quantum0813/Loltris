@@ -26,11 +26,6 @@ features.
 
 ## Issues
 
-* Bugs:
-  * Inefficient drawing of blocks, draws too much CPU power for a tetris clone.
-    * This is partly due to the Python/SDL combination, but can be fixed.
-  * Music does not continue playing after another Game instance has started/finished.
-
 * Planed features
   * Detailed highscore list
   * Online/multiplayer functionality
