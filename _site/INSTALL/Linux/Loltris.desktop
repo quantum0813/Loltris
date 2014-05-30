@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Loltris
+Comment=A tetris clone
+Exec=sh -c 'cd /home/jonas/NewProg/Loltris/ && ./Loltris.py'
+Encoding=UTF-8
+Icon=/usr/share/pixmaps/loltris.png
+Categories=Game;ArcadeGame;
+Terminal=false
+StartupNotify=false

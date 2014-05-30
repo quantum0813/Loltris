@@ -1,0 +1,48 @@
+Specific legal information like license are put in
+the LEGAL directory, in a directory with the name
+of the work. Unless the license has been specified
+otherwise in this file.
+
+Contact <shrubber@tfwno.gf> if links are dead.
+
+Programming/Gameplay/Design:
+    Jonas Møller     : Everything programming or design related except for the work done
+                       by Thomas Ballinger.
+Programming:
+    Thomas Ballinger : Wrote the Jobs.Tetromino.getActiveBlocks generator that replaced the
+                       Jobs.Tetromino.forBlocks higher-order function. Also rewrote the code
+                       that depended on forBlocks.
+
+Music:
+    Nyan cat jazz cover:
+        Copyright: Lucas Heil
+        URL1: https://soundcloud.com/lucasheil
+        URL2: http://www.lucasheil.com/songs
+
+Fonts:
+    Anakinmono:
+        Copyright: opipik
+        URL: http://fontstruct.com/fontstructions/show/773756
+    Basic Manual:
+        Copyright: Johan Winge
+        URL: http://www.fontspace.com/johan-winge/svi-basic-manual
+    Consola:
+        Copyright: wmk69
+    Droid Sans:
+        Copyright: Google Inc.
+    Freemono:
+        Copyright: GNU
+    Orbitron:
+        Copyright: Matt McInerney
+
+========================={The line of professionalism}=========================
+Since I can't give praise directly to all of the people mentioned in this file.
+You- creative person- are awesome for making your work publicly available for
+others to enjoy, modify and share.
+
+<muh freedoms rant>
+If you represent a corporation and think that I am violating your rights by
+including works into this work, please send complaints to the Norwegian
+government and implore them to relieve me of my human rights. You don't own
+anything. Fuck you and your bullshit, sincerely Jonas Møller.
+</muh freedoms rant>
