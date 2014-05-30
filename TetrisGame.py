@@ -39,16 +39,16 @@ def makeUberTetromino(board):
     """ Creates a perfect tetromino (for the current board) """
 
     tetromino = []
-    for y in xrange(board.height+1):
-        if any(board.blocks.get((x, y)) for x in xrange(board.width+1)):
+    for y in xrange(board.blocks_height+1):
+        if any(board.blocks.get((x, y)) for x in xrange(board.blocks_width+1)):
             break
     def clearUpwards(xpos, ypos):
         for y in xrange(ypos):
             if board.blocks.get((xpos, y)):
                 return False
         return True
-    for y in xrange(y, board.height+1):
-        tetromino.append([clearUpwards(x, y) for x in xrange(0, board.width)])
+    for y in xrange(y, board.blocks_height+1):
+        tetromino.append([clearUpwards(x, y) for x in xrange(0, board.blocks_width)])
     return Jobs.Tetromino(board, tetromino, "UBER", UBERCOLOR, xcenter=True)
 
 def randomTetromino(board, updateinterval=FRAMERATE/2):
@@ -100,7 +100,7 @@ class TetrisGame(Core.Game):
                         y=self.jobs.preview_window.y + (PREVIEW_HEIGHT * BOARD_BLOCKWIDTH) + SPACER,
                         x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                         yfit=True,
-                        width=self.jobs.preview_window.width * BOARD_BLOCKWIDTH,
+                        width=self.jobs.preview_window.width,
                         colors=TETRIS_STATUSBOX_COLORSCHEME,
                         font=TETRIS_STATUSBOX_FONT,
                         variables={
@@ -123,6 +123,7 @@ class TetrisGame(Core.Game):
         self.jobs.preview_block.update_required = False
 
     def getName(self):
+        self.getJobsIn("name_inputbox")
         if not self.jobs.name_inputbox.update_required:
             Save.saveScore({"name": self.jobs.name_inputbox.value,
                             "score": self.jobs.board.score,
@@ -140,8 +141,8 @@ class TetrisGame(Core.Game):
 
             Log.log("Game over, displaying game state")
             matrix = [
-                    [(x, y) in board.blocks for x in xrange(board.width)]
-                    for y in xrange(board.height)
+                    [(x, y) in board.blocks for x in xrange(board.blocks_width)]
+                    for y in xrange(board.blocks_height)
                     ]
             Matrix.put(matrix, f="_")
 

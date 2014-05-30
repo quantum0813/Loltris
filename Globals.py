@@ -95,6 +95,7 @@ SCORES = {
 
 EOL = "\ǹ"
 
+## Keys that do not directly represent a single character
 NONCHARACTERS = (
         Pygame.K_LSHIFT,
         Pygame.K_RSHIFT,

@@ -37,7 +37,7 @@ def fillJob(screen, color, job):
     Pygame.draw.rect(
             screen,
             color,
-            (job.x, job.y, job.width, job.height),
+            (job.x-1, job.y-1, job.width+1, job.height+1),
             0)
 
 class Game(object):
@@ -67,16 +67,9 @@ class Game(object):
         removed_job = self.jobs.__dict__[removed_job_str]
         ## For now this is the solution, fill the entire screen. When the todo below is finished,
         ## I'll just fill  the job instead.
-        self.screen.fill(self.bgcolor)
-        for job in (getattr(self.jobs, x) for x in self.jobs.__dict__):
-            ## TODO: This should only apply to the jobs that are actually below the removed job
-            ##       not in terms of queue, but in terms of placement on the screen. This
-            ##       means that I'll have to make sure that every Job has valid height/width values.
-            ##       Off the top of my head I can think of two offending jobs:
-            ##           1) Jobs.Board: height/width is given in blocksizes (BOARD_BLOCKWIDTH)
-            ##           2) Jobs.Switch: height/width doesn't take the checkbox into account.
+        fillJob(self.screen, self.bgcolor, removed_job)
+        for job in self.getJobsIn(removed_job_str):
             job.force_draw = True
-
         delattr(self.jobs, removed_job_str)
 
     def stopMusic(self):
@@ -177,6 +170,22 @@ class Game(object):
     def eventHandler(self, event):
         pass
 
+    def getJobsIn(self, basename):
+        base = self.getJob(basename)
+        for jobname in self.jobs.__dict__:
+            if jobname == basename:
+                ## Skip the base itself
+                continue
+
+            job = self.getJob(jobname)
+
+            if not job.draw_required:
+                ## Does not draw anything to the screen
+                continue
+
+            if job.x <= base.x <= job.width + job.x and job.y <= base.y <= job.height + job.y:
+                yield job
+
     def run(self):
         if not hasattr(self, "running") or not hasattr(self, "eventHandler"):
             raise GameError("Game has not been properly initialized")
@@ -188,6 +197,14 @@ class Game(object):
 
             queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
 
+            ## Handle resizing (redraw everything underneath the resized job)
+            for objname in queue:
+                obj = self.getJob(objname)
+                if obj.__dict__.get("resize"):
+                    for job in self.getJobsIn(objname):
+                        job.force_draw = True
+                    obj.resize = False
+
             for objname in queue:
 
                 if objname not in self.jobs.__dict__:
@@ -195,6 +212,7 @@ class Game(object):
                     continue
 
                 obj = self.getJob(objname)
+
                 if obj.update_required:
                     for event in self.events:
                         if event.type not in self.lock:
@@ -222,9 +240,6 @@ class Game(object):
 
             ## Remove locks
             self.lock = {}
-
-            ## View framerate in caption
-            # Pygame.display.set_caption(self.caption + " - " + str(round(self.clock.get_fps())) + " FPS")
 
         return self.ret
 

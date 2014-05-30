@@ -60,6 +60,7 @@ class Job(object):
         self.update_required = True
         self.draw_required = True
         self.fill = False
+        self.resize = False
 
     def draw(self):
         self.force_draw = False
@@ -101,7 +102,8 @@ class ColorPalette(Job):
 class TextBox(object):
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
-                 queue=None, variables={}, updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True):
+                 queue=None, variables={}, updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True,
+                 border_width=1):
         if not text:
             Log.log("Error in TextBox.__init__, called by {}".format(Log.getCaller()))
             raise TypeError("No text given to TextBox")
@@ -114,7 +116,6 @@ class TextBox(object):
         self.border = border
         self.colors = {}
         self.colors.update(colors)
-        self.borderwidth = 1
         self.update_required = True
         self.draw_required = True
         self.xpadding = 0
@@ -134,6 +135,7 @@ class TextBox(object):
         self.xfit = xfit
         self.yfit = yfit
         self.last_variables = {}
+        self.border_width = border_width
 
         ## Mouse-related business
         self.onmouseclick = onmouseclick
@@ -195,6 +197,10 @@ class TextBox(object):
             self.ypadding = (self.height/self.padding) if self.padding else 0
             self.height += self.ypadding
 
+        if self.border:
+            self.height += self.border_width
+            self.width += self.border_width
+
         if self.xcenter:
             self.x = (self.game.width // 2) - (self.width // 2)
         if self.ycenter:
@@ -213,8 +219,8 @@ class TextBox(object):
             Pygame.draw.rect(
                     self.game.screen,
                     self.colors["border"],
-                    (self.x-self.borderwidth, self.y-self.borderwidth, self.width+self.borderwidth, self.height+self.borderwidth),
-                    self.borderwidth,
+                    (self.x-self.border_width, self.y-self.border_width, self.width+self.border_width, self.height+self.border_width),
+                    self.border_width,
                     )
 
         spos = self.y + self.ypadding/2
@@ -428,12 +434,12 @@ class Tetromino(object):
         self.force_draw = True
 
         if xcenter:
-            self.x = (self.board.width//2) - (len(self.matrix[0])//2)
+            self.x = (self.board.blocks_width//2) - (len(self.matrix[0])//2)
 
         if y == None:
             self.y = -(len(self.matrix))
         if ycenter:
-            self.y = (self.board.height//2) - (len(self.matrix)//2)
+            self.y = (self.board.blocks_height//2) - (len(self.matrix)//2)
 
         self.ghostpiece = None
         if ghostpiece:
@@ -505,9 +511,9 @@ class Tetromino(object):
                 ## Some of the functions need to know which edge the collision happened on,
                 ## otherwise the result can be treated like a boolean.
                 if self.matrix[y][x]:
-                    if yp+y > self.board.height-1:
+                    if yp+y > self.board.blocks_height-1:
                         return "bottom"
-                    if xp+x > self.board.width-1:
+                    if xp+x > self.board.blocks_width-1:
                         return "right"
                     if xp+x < 0:
                         return "left"
@@ -615,16 +621,6 @@ class GhostTetromino(Tetromino):
             self.board.layers.ghost_tetromino = self.getBlocksDict()
             self.force_draw = False
 
-class InputBox(TextBox):
-    def __init__(self, prompt):
-        super(InputBox, self).__init__(
-                "{prompt}{input}",
-                variables={
-                    "input": lambda self: self.jobs.board.level,
-                    "prompt": lambda self: self.prompt,
-                    }
-                )
-
 class AutoTextBox(TextBox):
     def __init__(self, game, text, **kwargs):
         super(AutoTextBox, self).__init__(
@@ -681,8 +677,10 @@ class Board(object):
         self.anchor = (x, y)
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
+        self.blocks_width = width
+        self.blocks_height = height
+        self.width = width * blockwidth
+        self.height = height * blockwidth
         self.blocks = {}
         self.layers = Struct()
         self.layers.tetromino = {}
@@ -765,13 +763,13 @@ class Board(object):
     ##       and then "get" a row.
     def checkTetris(self, rows=None):
         if rows == None:
-            rows = xrange(self.height)
+            rows = xrange(self.blocks_height)
 
         lines = 0
 
         for row in rows:
             points = [p for p in self.blocks if p[1] == row]
-            if len(points) == self.width:
+            if len(points) == self.blocks_width:
                 lines += 1
                 for p in points:
                     self.blocks.pop(p)
@@ -838,27 +836,27 @@ class Board(object):
         Pygame.draw.rect(
                 self.screen,
                 self.outercolor,
-                (self.x, self.y, (self.width * self.blockwidth) + 1, self.height * self.blockwidth + 1,),
+                (self.x, self.y, (self.blocks_width * self.blockwidth) + 1, self.blocks_height * self.blockwidth + 1,),
                 1)
         Pygame.draw.rect(
                 self.screen,
                 self.bgcolor,
-                (self.x+1, self.y+1, self.width * self.blockwidth - 2, self.height * self.blockwidth - 1),
+                (self.x+1, self.y+1, self.blocks_width * self.blockwidth - 2, self.blocks_height * self.blockwidth - 1),
                 0)
         if self.draw_grid:
-            for x in xrange(1, self.width):
+            for x in xrange(1, self.blocks_width):
                 Pygame.draw.line(
                         self.screen,
                         self.innercolor,
                         (self.x + self.blockwidth*x, self.y + 1),
-                        (self.x + self.blockwidth*x, self.y + self.height*self.blockwidth - 2),
+                        (self.x + self.blockwidth*x, self.y + self.blocks_height*self.blockwidth - 2),
                         1)
-            for y in xrange(1, self.height):
+            for y in xrange(1, self.blocks_height):
                 Pygame.draw.line(
                         self.screen,
                         self.innercolor,
                         (self.x + 1, self.y + self.blockwidth*y),
-                        (self.x + self.width*self.blockwidth - 2, self.y + self.blockwidth*y),
+                        (self.x + self.blocks_width*self.blockwidth - 2, self.y + self.blockwidth*y),
                         1)
 
     def getBlockInPos(self, x, y):
@@ -986,7 +984,7 @@ class InputBox(TextBox):
         super(InputBox, self).__init__(
                 game, text, xcenter=True, ycenter=True, font=font,
                 textfit=True, colors=colors, background=True, border=True,
-                padding=6, variables={"input": lambda _: self.value}
+                padding=12, variables={"input": lambda _: self.value}, border_width=2,
                 )
 
     def eventHandler(self, event):
@@ -997,10 +995,11 @@ class InputBox(TextBox):
 
             if event.key == K_BACKSPACE:
                 self.value = self.value[:-1]
+                self.resize = True
                 Pygame.draw.rect(
                         self.game.screen,
                         self.game.bgcolor,
-                        (self.x-1, self.y-1, self.width+1, self.height+1)
+                        (self.x-self.border_width, self.y-self.border_width, self.width+self.border_width + 1, self.height+self.border_width + 1)
                         )
             else:
                 if event.key in self.noncharacters:
