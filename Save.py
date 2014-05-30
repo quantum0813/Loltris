@@ -42,9 +42,9 @@ def saveScore(score, state=set()):
     score["date"] = Log.getTime(spec="%Y-%m-%d %H:%M:%S")
     score["seq"] = seq
     scores.append(score)
-    with open(Path.join(HIGHSCOREDIR, "Scores.json"), "w") as wf:
+    with open(Path.join(HIGHSCOREDIR, "Scores.json"), "wb") as wf:
         Json.dump(scores, wf, indent=JSON_INDENT)
-    with open(Path.join(SNAPSHOTDIR, "{}.pyset.bz2".format(seq)), "w") as wf:
+    with open(Path.join(SNAPSHOTDIR, "{}.pyset.bz2".format(seq)), "wb") as wf:
         wf.write(Bz2.compress(Pickle.dumps(state)))
     Log.log("Saved new score to `Scores.json'")
 
@@ -60,16 +60,16 @@ def _appendTetromino(root, color, name, matrix):
     root.append(element)
 
 def saveOptions():
-    with open(Path.join(JSONDIR, "Settings.json"), "w") as wf:
+    with open(Path.join(JSONDIR, "Settings.json"), "wb") as wf:
         Json.dump(Shared.options, wf, indent=4)
 
 def saveKeymap():
-    with open(Path.join(JSONDIR, "Keymaps.json"), "w") as wf:
+    with open(Path.join(JSONDIR, "Keymaps.json"), "wb") as wf:
         Json.dump(Shared.keymap, wf)
 
 def _writeText(path, data):
     try:
-        with open(path, "w") as wf:
+        with open(path, "wb") as wf:
             wf.write(data)
     except (IOError, OSError):
         Log.panic("Unable to write data to `{}'".format(path))

@@ -17,13 +17,13 @@ def setupFiles():
 
     Log.log("Setting up files for Loltris")
 
-    with open(Path.join(Load.DATADIR, SETUP_FILE), "w") as wf:
+    with open(Path.join(Load.DATADIR, SETUP_FILE), "wb") as wf:
         wf.write("# This file just tells Loltris that everything has been set up,\n" + \
                  "# do not remove this file unless you want to set up everything\n" + \
                  "# again (deletes all user-files like scores)\n"
                  )
 
-    with open(Path.join(Load.HIGHSCOREDIR, "Scores.json"), "w") as wf:
+    with open(Path.join(Load.HIGHSCOREDIR, "Scores.json"), "wb") as wf:
         wf.write(SCORES_CONTENTS)
 
     try:

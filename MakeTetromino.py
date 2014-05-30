@@ -157,3 +157,7 @@ class MakeTetromino(Core.Game):
     def mainLoop(self):
         pass
 
+class Browse(Core.Game):
+    def __init__(self, *args, **kwargs):
+        super(Browse, self).__init__(
+                "Browse", *args, fill=True, **kwargs)

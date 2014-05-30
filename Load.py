@@ -56,7 +56,7 @@ def loadKeymaps():
 
 def _loadText(path):
     try:
-        with open(path) as rf:
+        with open(path, "rb") as rf:
             return rf.read()
     except:
         Log.panic("Error while loading plain text from file `{}'".format(path))
