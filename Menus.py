@@ -89,6 +89,15 @@ class MainMenu(Core.Menu):
         self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)
         self.loadHighscores()
 
+    def eventHandler(self, event):
+        super(MainMenu, self).eventHandler(event)
+        if event.type == KEYDOWN:
+            if event.key == K_TAB:
+                self.addJob(
+                        "input",
+                        Jobs.InputBox(self, "Input: ")
+                        )
+
 class PauseMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(PauseMenu, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, xcenter=True, **kwargs)

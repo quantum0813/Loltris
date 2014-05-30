@@ -5,6 +5,8 @@
     }, 
     "graphics": {
         "shade": true, 
-        "cross_tetromino": false
+        "cross_tetromino": false,
+        "ghostpiece": true,
+        "ghostpiece_color": [45, 45, 45]
     }
 }

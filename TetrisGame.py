@@ -62,7 +62,7 @@ class TetrisGame(Core.Game):
         super(TetrisGame, self).__init__(
                 self.id, *args, fill=True, soundtrack=os.path.join(Load.MUSICDIR, "uprising.ogg"), sound_enabled=SOUND_ENABLED, **kwargs
                 )
-        self.running = self.mainLoop
+        self.running = self.mainGame
         self.highscores = Load.loadHighscores(top=HIGHSCORES)
         self.player_name = player_name
 
@@ -122,7 +122,18 @@ class TetrisGame(Core.Game):
                         ghostpiece=False))
         self.jobs.preview_block.update_required = False
 
-    def mainLoop(self):
+    def getName(self):
+        if not self.jobs.name_inputbox.update_required:
+            Save.saveScore({"name": self.jobs.name_inputbox.value,
+                            "score": self.jobs.board.score,
+                            "level": self.jobs.board.level,
+                            "lines": self.jobs.board.lines,
+                            },
+                            state=self.jobs.board.blocks,
+                            )
+            self.quitGame()
+
+    def mainGame(self):
         if not self.getJob("board").update_required and not hasattr(self.jobs, "window-game_over"):
             ## XXX: GAME OVER
             board = self.getJob("board")
@@ -137,17 +148,11 @@ class TetrisGame(Core.Game):
             if ((len(self.highscores) < HIGHSCORES or any(board.score > score["score"] for score in self.highscores)) and 
                     not Shared.options.get("uber_tetromino") and not Shared.options.get("flip_tetromino")
                     ):
-                self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "New Highscore!"))
-                Save.saveScore({"name": self.player_name,
-                                "score": board.score,
-                                "level": board.level,
-                                "lines": board.lines,
-                                },
-                                state=self.jobs.board.blocks,
-                                )
+                self.addJob("name_inputbox", Jobs.InputBox(self, "New Highscore!\nName: "))
+                self.running = self.getName
             else:
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "Game Over"))
-            self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, seconds=2, anykey=True))
+                self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, seconds=3, anykey=True))
 
         if not self.jobs.tetromino.update_required and self.getJob("board").update_required:
             ## Create a new tetromino job from the nextTetromino Struct instance

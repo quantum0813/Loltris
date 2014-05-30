@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*--
 
 from pygame.locals import *
+import pygame as Pygame
 
 FRAMERATE = 30
 MOVING_TETROMINO_TIMEOUT = 0.05
@@ -86,10 +87,22 @@ ERRORBOX_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa),
 DISPLAY_OPTIONS = 0
 GHOST_COLOR = (0x29, 0x29, 0x29)
 
-PROJECT_SITE = "https://github.com/UndeadMastodon/Loltris"
+PROJECT_SITE = "http://undeadmastodon.github.io/Loltris/"
 
 SCORES = {
         "tetris": {1: 100, 2: 250, 3: 500, 4: 1500},
         }
 
 EOL = "\ǹ"
+
+NONCHARACTERS = (
+        Pygame.K_LSHIFT,
+        Pygame.K_RSHIFT,
+        Pygame.K_RSUPER,
+        Pygame.K_LSUPER,
+        Pygame.K_LALT,
+        Pygame.K_RALT,
+        Pygame.K_RCTRL,
+        Pygame.K_LCTRL,
+        Pygame.K_BACKSPACE,
+        )

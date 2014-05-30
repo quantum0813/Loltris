@@ -437,7 +437,8 @@ class Tetromino(object):
 
         self.ghostpiece = None
         if ghostpiece:
-            self.ghostpiece = GhostTetromino(board, matrix, _type, GHOST_COLOR, x=x, y=y, xcenter=xcenter)
+            self.ghostpiece = GhostTetromino(
+                    board, matrix, _type, Shared.options["graphics"].get("ghostpiece_color", GHOST_COLOR), x=x, y=y, xcenter=xcenter)
             self.ghostpiece.drop(self.y)
 
     def getActiveBlocks(self):
@@ -974,4 +975,43 @@ class Table(Job):
                 row = (y - self.y) / self.row_heights[0]
                 if (0 <= row <= len(self.rows)-1) and (self.x <= x <= self.x + self.width):
                     self.onmouseclick(row, self.table[row][1])
+
+class InputBox(TextBox):
+    def __init__(self, game, prompt, maxlen=10, submit_key=Pygame.K_RETURN, colors=ERRORBOX_COLORSCHEME, font=ERRORBOX_FONT, noncharacters=NONCHARACTERS):
+        text = unicode(prompt + "{input}")
+        self.maxlen = maxlen
+        self.value = u""
+        self.submit_key = submit_key
+        self.noncharacters = noncharacters + (submit_key,)
+        super(InputBox, self).__init__(
+                game, text, xcenter=True, ycenter=True, font=font,
+                textfit=True, colors=colors, background=True, border=True,
+                padding=6, variables={"input": lambda _: self.value}
+                )
+
+    def eventHandler(self, event):
+        if event.type == KEYDOWN:
+            if event.key == self.submit_key:
+                Log.debug(u"Submitting {} from `{}'".format(repr(self.value), self))
+                self.update_required = False
+
+            if event.key == K_BACKSPACE:
+                self.value = self.value[:-1]
+                Pygame.draw.rect(
+                        self.game.screen,
+                        self.game.bgcolor,
+                        (self.x-1, self.y-1, self.width+1, self.height+1)
+                        )
+            else:
+                if event.key in self.noncharacters:
+                    return
+                try:
+                    mods = Pygame.key.get_mods()
+                    if mods & KMOD_SHIFT or mods & KMOD_CAPS:
+                        self.value += unichr(event.key).upper()
+                    else:
+                        self.value += unichr(event.key)
+                except UnicodeEncodeError:
+                    return
+            self.game.lock[KEYDOWN] = self
 
