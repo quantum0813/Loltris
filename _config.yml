@@ -1,5 +1,5 @@
 title: Loltris
 author: Jonas Møller
-assets_directory: /assets/
+assets_directory: /Loltris/assets/
 license: GFDL
 exclude: ['README.md']
