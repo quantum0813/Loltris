@@ -9,4 +9,4 @@ permalink: /
     has heard of or ever will, brilliant!
 </q> -- Aristoteles 2014 b.c, pictured below
 
-![brilliance](/Loltris/assets/images/brilliant.jpg)
+![brilliance](/assets/images/brilliant.jpg)

@@ -25,4 +25,4 @@ and blackjack. But if you use my code, you have to publish the new version
 (with hookers, blackjack and whatnot) under the GNU general public
 license.
 
-![I'm gonna create my own Tetris-clone, with hookers, and blackjack.](/Loltris/assets/images/bender_hookers_and_blackjack.jpg)
+![I'm gonna create my own Tetris-clone, with hookers, and blackjack.](/assets/images/bender_hookers_and_blackjack.jpg)

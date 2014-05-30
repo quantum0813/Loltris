@@ -24,7 +24,7 @@ Loltris is a small hobby project, it's a Tetris clone with some cool features.
 
 Here you can see the Überblock in action
 
-![Überblock in action](/Loltris/assets/images/uberblock.png)
+![Überblock in action](/assets/images/uberblock.png)
 
 The following features are planned
 
