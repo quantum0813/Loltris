@@ -1,7 +1,7 @@
 ---
 layout: layout
 title: Home
-permalink: /
+permalink: /Loltris/
 ---
 
 <q>
