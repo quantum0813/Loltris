@@ -27,6 +27,15 @@ def rgbHexEncode(rgb):
         return "0" + hex(num)[2:].upper()
     return "#" + "".join([hexByte(byte) for byte in rgb])
 
+def dial(rgb, increase):
+    rgb = [x + increase for x in rgb]
+    for i in xrange(3):
+        if rgb[i] < 0:
+            rgb[i] = 0
+        if rgb[i] > 255:
+            rgb[i] = 255
+    return tuple(rgb)
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

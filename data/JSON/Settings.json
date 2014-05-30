@@ -1,4 +1,9 @@
 {
-    "uber_tetromino": false, 
-    "flip_tetromino": false
+    "gameplay": {
+        "uber_tetromino": true, 
+        "flip_tetromino": false
+    },
+    "graphics": {
+        "cross_tetromino": false
+    }
 }

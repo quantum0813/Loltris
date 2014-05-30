@@ -25,10 +25,14 @@ import Shared
 import Menus
 import Load
 import Setup
+import Log
 import profile as Profile
+import os as OS
 import pygame as Pygame
 
 if __name__ == '__main__':
+    #OS.environ["SDL_VIDEO_CENTERED"] = "1"
+
     Pygame.font.init()
 
     ## Run setup (will decide for itself whether or not it is necessary)
@@ -42,4 +46,7 @@ if __name__ == '__main__':
     ## Launch the game
     main_menu = Menus.MainMenu(caption="Loltris")
     main_menu.setup()
+    Log.log("Running MainMenu from Loltris startup script")
     main_menu.run()
+else:
+    Log.warning("Importing from Loltris launcher")

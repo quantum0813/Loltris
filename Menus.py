@@ -38,7 +38,7 @@ import functools as Func
 from pygame.locals import *
 from Globals import *
 
-## TODO: You know what would be cool? A DSL for doing this, may do that later.
+## TODO: You know what would be cool? A DSL for doing this, may do that later. Menus Could be described in XML.
 
 class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
@@ -74,13 +74,9 @@ class MainMenu(Core.Menu):
                            "".join(["{}: {}\n".format(x["name"], x["score"]) for x in self.highscores]) + ## The scores
                            ("\n" * (HIGHSCORES - len(self.highscores))) ## Empty lines
                            ),
-                         y=self.jobs.header.y+self.jobs.header.height+10,
+                         y=self.menu[0].y+1,
                          textfit=True,
-                         colors={
-                             "background":self.colorscheme["background"],
-                             "font":self.colorscheme["option"],
-                             "border": (0xaa,0xaa,0xaa),
-                             },
+                         colors=HIGHSCORELIST_COLORSCHEME,
                          font=HIGHSCORELIST_FONT,
                          border=True,
                          background=True,
@@ -138,7 +134,7 @@ class OptionsMenu(Core.Menu):
                 Factory.basicSwitches([
                     ("Uber-Tetromino", "uber_tetromino"),
                     ("Flip tetromino", "flip_tetromino"),
-                    ], self, turnOn, turnOff, Shared.options,
+                    ], self, turnOn, turnOff, Shared.options["gameplay"],
                     font=MENU_OPTION_FONT,
                     colors=SWITCH_OPTION_COLORS,
                     boxwidth=8,

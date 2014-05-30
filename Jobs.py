@@ -26,6 +26,7 @@ import Log
 import Utils
 import Shared
 import Matrix
+import RGB
 import os.path
 from pygame.locals import *
 from Globals import *
@@ -609,7 +610,7 @@ class GhostTetromino(Tetromino):
     def draw(self):
         if self.force_draw:
             for x, y in self.getActiveBlocks():
-                self.board.drawCube(x, y, self.color)
+                self.board.drawCube(x, y, self.color, shade=False)
             self.board.layers.ghost_tetromino = self.getBlocksDict()
             self.force_draw = False
 
@@ -704,20 +705,57 @@ class Board(object):
         self.force_draw = True
 
         ## XXX: Currently does not support filling, because the width and height
-        ##      are in BOARD_BLOCKWIDTH.
+        ##      are given in BOARD_BLOCKWIDTH, not pixels.
         self.fill = False
 
-    def drawCube(self, x, y, color):
+    def drawCube(self, x, y, color, shade=True):
         if y < 0:
             return
 
-        Pygame.draw.rect(
-                self.screen,
-                color,
-                (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
-                )
-
         self.drawncubes.add((x, y))
+
+        Pygame.draw.rect(
+            self.screen,
+            color,
+            (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
+        )
+
+        ## Draw shade
+        if shade:
+            x, y = self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1
+            Pygame.draw.polygon(
+                    self.screen,
+                    RGB.dial(color, 50),
+                    ((x, y+1), (x + self.blockwidth - 2, y+1),
+                     (x + 2, y + 2), (x + self.blockwidth - 3, y + 2)),
+                    0,
+                    )
+            Pygame.draw.polygon(
+                    self.screen,
+                    RGB.dial(color, -50),
+                    ((x, y+self.blockwidth - 2), (x + self.blockwidth - 2, y+self.blockwidth - 2),
+                     (x + 4, y + self.blockwidth - 3), (x + self.blockwidth - 5, y + self.blockwidth - 3)),
+                    0,
+                    )
+
+            if Shared.options["graphics"].get("cross_tetromino"):
+                ## Draw cool "cross" shade
+                Pygame.draw.polygon(
+                        self.screen,
+                        RGB.dial(color, -30),
+                        ((x, y+1), (x, y+self.blockwidth - 3),
+                         (x + 4, y + self.blockwidth - 3), (x + self.blockwidth - 5, y + self.blockwidth - 3)),
+                        0,
+                        )
+            else:
+                ## Draw other shades
+                Pygame.draw.polygon(
+                        self.screen,
+                        RGB.dial(color, -30),
+                        ((x, y+1), (x, y+self.blockwidth - 3),
+                         (x + 4, y + self.blockwidth - 3), (x + 4, y + self.blockwidth - 3)),
+                        0,
+                        )
 
     ## TODO: The unexpected-ghost-bug occurs in here
     ##       the bug occurs when you have a block higher than all the others,
@@ -773,7 +811,11 @@ class Board(object):
             active_blocks.update(getattr(self.layers, blocks))
         blocks = self.drawncubes.difference(active_blocks)
         for x, y in blocks:
-            self.drawCube(x, y, self.bgcolor)
+            Pygame.draw.rect(
+                self.screen,
+                self.bgcolor,
+                (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
+            )
             self.drawncubes.discard((x, y))
 
     ## TODO: Instead of having the Tetromino call Board.drawBlock, this could instead be handled by
@@ -868,7 +910,7 @@ class Table(Job):
     def renderFonts(self):
         font = loadFont(self.font)
 
-        ## Simplest method of padding, let the font renderer handle automatically it by adding spaces.
+        ## Simplest method of padding, let the font renderer handle it automatically by adding spaces.
         rows = [ [" {} ".format(column) for column in row]
                  for row in self.rows ]
 
