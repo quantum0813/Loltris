@@ -457,7 +457,7 @@ class Tetromino(object):
             if self.ghostpiece:
                 self.ghostpiece.draw()
             for x, y in self.getActiveBlocks():
-                self.board.drawCube(x, y, self.color)
+                self.board.drawCube(x, y, self.color, shade=Shared.options["graphics"].get("shade"))
             self.board.layers.tetromino = self.getBlocksDict()
             self.board.emptyBlocks()
             self.force_draw = False
@@ -575,7 +575,7 @@ class Tetromino(object):
                 self.rotate(1)
             elif event.key == Shared.keymap["game"]["rotate_left"]:
                 self.rotate(-1)
-            elif event.key == Shared.keymap["game"]["reverse"] and Shared.options.get("flip_tetromino"):
+            elif event.key == Shared.keymap["game"]["reverse"] and Shared.options["gameplay"].get("flip_tetromino"):
                 self.flip()
 
             elif event.key == Shared.keymap["game"]["move_right"]:
@@ -722,6 +722,7 @@ class Board(object):
 
         ## Draw shade
         if shade:
+            ## Top shade (actually light, but whatever)
             x, y = self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1
             Pygame.draw.polygon(
                     self.screen,
@@ -730,6 +731,7 @@ class Board(object):
                      (x + 2, y + 2), (x + self.blockwidth - 3, y + 2)),
                     0,
                     )
+            ## Bottom shade
             Pygame.draw.polygon(
                     self.screen,
                     RGB.dial(color, -50),

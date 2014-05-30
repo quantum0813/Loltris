@@ -1,9 +1,10 @@
 {
     "gameplay": {
-        "uber_tetromino": true, 
-        "flip_tetromino": false
-    },
+        "uber_tetromino": false, 
+        "flip_tetromino": true
+    }, 
     "graphics": {
+        "shade": true, 
         "cross_tetromino": false
     }
 }
