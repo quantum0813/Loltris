@@ -58,6 +58,15 @@ class Preview(Core.Game):
                         font=TETRIS_STATUSBOX_FONT,
                         )
                     )
+        self.addJob(
+                "exit_button",
+                Jobs.TextBox(
+                    self, "Exit", x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
+                    y=self.jobs.status.y + self.jobs.status.height + SPACER,
+                    textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                    font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
+                    )
+                )
         ## XXX: Beware that this dict is RW
         self.jobs.board.blocks = blocks
 
@@ -69,7 +78,7 @@ class Preview(Core.Game):
         pass
 
 class HighscoreList(Core.Menu):
-    def __init__(self, top=HIGHSCORES, filler_offset=30, header_font=MENU_HEADER_FONT, *args, **kwargs):
+    def __init__(self, top=HIGHSCORES, header_font=MENU_HEADER_FONT, *args, **kwargs):
         super(HighscoreList, self).__init__("HighscoreList", *args, **kwargs)
         self.running = self.mainLoop
         self.scores = Load.loadScores()
@@ -95,13 +104,29 @@ class HighscoreList(Core.Menu):
                     xcenter=True,# queue=Queue.TEXTBOX,
                     )
                 )
+
+        self.addJob(
+                "exit_button",
+                Jobs.TextBox(
+                    self, "Exit", x=SPACER,
+                    y=self.height - SPACER,
+                    textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                    font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
+                    )
+                )
+        self.jobs.exit_button.y -= self.jobs.exit_button.height
+
+        ## Keeps the exit_button from being overwritten by the table
         self.addJob(
                 "bottom_filler",
                 Jobs.Filler(
-                    self, 0, self.height-filler_offset, self.width, filler_offset,
+                    self,
+                    0, self.jobs.exit_button.y - SPACER,
+                    self.width, self.jobs.exit_button.height + (self.height - self.jobs.exit_button.y) + SPACER,
                     queue=Queue.SCROLL_FILLER,
                     )
                 )
+        ## Keeps the table from being visible above the header
         self.addJob(
                 "top_filler",
                 Jobs.Filler(

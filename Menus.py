@@ -51,7 +51,7 @@ class MainMenu(Core.Menu):
                 ("Start Game", self.launchTetrisGame),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
-                ("Highscores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
+                ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
                 ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
                 ("Exit", self.quit),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
