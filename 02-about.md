@@ -1,7 +1,7 @@
 ---
 layout: layout
 title: About
-permalink: pages/about/
+permalink: /about/
 ---
 
 Loltris is a small hobby project, it's a Tetris clone with some cool features.
@@ -24,7 +24,7 @@ Loltris is a small hobby project, it's a Tetris clone with some cool features.
 
 Here you can see the Überblock in action
 
-![Überblock in action](/assets/images/uberblock.png)
+![Überblock in action]({{ site.baseurl }}/assets/images/uberblock.png)
 
 The following features are planned
 

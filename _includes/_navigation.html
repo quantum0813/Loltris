@@ -4,7 +4,7 @@
 
 {% for p in site.pages %}
     <a
-    href="{{ p.url }}"
+        href="{{ site.baseurl }}{{ p.url }}"
     {% if p.url == page.url %}
     class="active-sidelink"
     {% else %}

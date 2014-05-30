@@ -1,7 +1,7 @@
 ---
 layout: layout
 title: Home
-permalink: /Loltris/
+permalink: /
 ---
 
 <q>
@@ -9,4 +9,4 @@ permalink: /Loltris/
     has heard of or ever will, brilliant!
 </q> -- Aristoteles 2014 b.c, pictured below
 
-![brilliance](/assets/images/brilliant.jpg)
+![brilliance]({{ site.baseurl }}/assets/images/brilliant.jpg)

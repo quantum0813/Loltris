@@ -1,7 +1,7 @@
 ---
 layout: layout
 title: Can I steal it?
-permalink: pages/copying/
+permalink: /copying/
 ---
 
 Without raising any philosophical questions regarding whether one
@@ -25,4 +25,4 @@ and blackjack. But if you use my code, you have to publish the new version
 (with hookers, blackjack and whatnot) under the GNU general public
 license.
 
-![I'm gonna create my own Tetris-clone, with hookers, and blackjack.](/assets/images/bender_hookers_and_blackjack.jpg)
+![I'm gonna create my own Tetris-clone, with hookers, and blackjack.]({{ site.baseurl }}/assets/images/bender_hookers_and_blackjack.jpg)

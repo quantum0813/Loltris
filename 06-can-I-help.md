@@ -1,7 +1,7 @@
 ---
 layout: layout
 title: Can I help?
-permalink: pages/help/
+permalink: /help/
 ---
 
 Sure you can!
@@ -16,4 +16,4 @@ page.)
 I also appreciate bug-reports sent to me. If you would like to send me a bug-report,
 please follow [these guidelines](https://developer.mozilla.org/en-US/docs/Mozilla/QA/Bug_writing_guidelines).
 
-![Good guy coder](/assets/images/good_guy_coder.png)
+![Good guy coder]({{ site.baseurl }}/assets/images/good_guy_coder.png)

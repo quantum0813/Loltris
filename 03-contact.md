@@ -1,7 +1,7 @@
 ---
 layout: layout
 title: Contact
-permalink: pages/contact/
+permalink: /contact/
 ---
 
 Do you have suggestions or bug-reports? Just send an email

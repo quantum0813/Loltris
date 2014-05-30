@@ -3,4 +3,4 @@ author: Jonas Møller
 assets_directory: /assets/
 license: GFDL
 exclude: ['README.md']
-baseurl: /Loltris/
+baseurl: /Loltris
