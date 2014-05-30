@@ -1,0 +1,16 @@
+<h4>
+    Browse
+</h4>
+
+{% for p in site.pages %}
+    <a
+    href="{{ p.url }}"
+    {% if p.url == page.url %}
+    class="active-sidelink"
+    {% else %}
+    class="inactive-sidelink"
+    {% endif %}
+    >
+        {{ p.title }}
+    </a>
+{% endfor %}
