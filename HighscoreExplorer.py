@@ -67,8 +67,8 @@ class Preview(Core.Game):
                     font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
                     )
                 )
-        ## XXX: Beware that this dict is RW
-        self.jobs.board.blocks = blocks
+        self.jobs.board.blocks = {}
+        self.jobs.board.blocks.update(blocks)
 
     def eventHandler(self, event):
         if event.type == QUIT:

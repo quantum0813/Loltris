@@ -16,7 +16,10 @@ features.
   * Interactive menus, with mouse support (wow...)
     * Mouse and arrow-keys can be used interchangeably
   * Modifiable keymap
-  * Options-menu
+  * Options-menu (wow...)
+    * Scrollable (if the menu is too large to fit on the screen)
+  * Detailed highscore list
+    * View the state of the game when you lost
 
 ## Screenshots
 
@@ -27,6 +30,5 @@ features.
 ## Issues
 
 * Planed features
-  * Detailed highscore list
   * Online/multiplayer functionality
     * server/client
