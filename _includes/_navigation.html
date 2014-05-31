@@ -2,7 +2,8 @@
     Browse
 </h4>
 
-{% for p in site.pages | sort %}
+{% assign sorted_pages = site.pages | sort:"name" %}
+{% for p in sorted_pages %}
     <a
         href="{{ site.baseurl }}{{ p.url }}"
     {% if p.url == page.url %}
