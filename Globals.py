@@ -12,6 +12,7 @@ BOARD_HEIGHT = 20
 # BOARD_WIDTH = 40
 # BOARD_HEIGHT = 30
 SPACER = 10
+MAKETETROMINO_OPTION_SPACER = 4
 LOGLEVEL = 4
 SOUND_ENABLED = False
 HIGHSCORES = 5
@@ -107,3 +108,15 @@ NONCHARACTERS = (
         Pygame.K_LCTRL,
         Pygame.K_BACKSPACE,
         )
+
+## _ and O are declared to make TITLE_BLOCKS more readable
+_ = False
+O = True
+TITLE_BLOCKS = [
+        [O,_,_,_,O,O,O,_,O,_,_,O,O,O,_,O,O,O,_,O,_,O,O,O],
+        [O,_,_,_,O,_,O,_,O,_,_,_,O,_,_,O,_,O,_,O,_,O,_,_],
+        [O,_,_,_,O,_,O,_,O,_,_,_,O,_,_,O,O,_,_,O,_,_,O,_],
+        [O,_,_,_,O,_,O,_,O,_,_,_,O,_,_,O,_,O,_,O,_,_,_,O],
+        [O,O,O,_,O,O,O,_,O,O,O,_,O,_,_,O,_,O,_,O,_,O,O,O],
+        ]
+

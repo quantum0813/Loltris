@@ -52,6 +52,12 @@ def rot90(matrix):
 
     return ret
 
+def matrixToSet(matrix):
+    for y in xrange(len(matrix)):
+        for x in xrange(len(matrix[y])):
+            if matrix[y][x]:
+                yield x, y
+
 def setToMatrix(blocks, width, height):
     return[ [(x, y) in blocks for x in xrange(height)]
             for y in xrange(height)

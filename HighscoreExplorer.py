@@ -35,15 +35,16 @@ class Preview(Core.Game):
         self.running = self.mainLoop
 
         self.addJob("board",
-                    Jobs.Board(self.screen,
-                          x=SPACER,
-                          y=SPACER,
-                          height=BOARD_HEIGHT,
-                          width=BOARD_WIDTH,
-                          blockwidth=BOARD_BLOCKWIDTH,
-                          level=kwargs.get("level", 1),
-                          bgcolor=self.bgcolor,
-                          )
+                    Jobs.Board(
+                        self,
+                        x=SPACER,
+                        y=SPACER,
+                        height=BOARD_HEIGHT,
+                        width=BOARD_WIDTH,
+                        blockwidth=BOARD_BLOCKWIDTH,
+                        level=kwargs.get("level", 1),
+                        bgcolor=self.bgcolor,
+                        )
                 )
         kwargs.pop("screen")
         self.addJob("status",

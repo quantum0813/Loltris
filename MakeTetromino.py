@@ -73,15 +73,16 @@ class MakeTetromino(Core.Game):
 
         self.addJob(
                 "board",
-                Jobs.Board(self.screen,
-                      x=SPACER,
-                      y=SPACER,
-                      height=BOARD_HEIGHT,
-                      width=BOARD_WIDTH,
-                      blockwidth=BOARD_BLOCKWIDTH,
-                      level=0,
-                      bgcolor=self.bgcolor,
-                      ),
+                Jobs.Board(
+                    self,
+                    x=SPACER,
+                    y=SPACER,
+                    height=BOARD_HEIGHT,
+                    width=BOARD_WIDTH,
+                    blockwidth=BOARD_BLOCKWIDTH,
+                    level=0,
+                    bgcolor=self.bgcolor,
+                    )
                 )
 
         ## TODO: Make it less cumbersome and repeditive to spawn a row of buttons
@@ -96,7 +97,7 @@ class MakeTetromino(Core.Game):
         self.addJob(
                 "clear_button",
                 Jobs.TextBox(self, "Clear", x=self.jobs.board.x + (self.jobs.board.blocks_width*self.jobs.board.blockwidth) + 5,
-                        y=self.jobs.board.y + self.jobs.save_button.height + SPACER,
+                        y=self.jobs.board.y + self.jobs.save_button.height + MAKETETROMINO_OPTION_SPACER,
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                         font=TETRIS_STATUSBOX_FONT, onmouseclick=self.clear,
                     )
@@ -104,14 +105,25 @@ class MakeTetromino(Core.Game):
         self.addJob(
                 "exit_button",
                 Jobs.TextBox(self, "Exit", x=self.jobs.board.x + (self.jobs.board.blocks_width*self.jobs.board.blockwidth) + 5,
-                        y=self.jobs.clear_button.y + self.jobs.clear_button.height + SPACER,
+                        y=self.jobs.clear_button.y + self.jobs.clear_button.height + MAKETETROMINO_OPTION_SPACER,
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                         font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame,
+                    )
+                )
+        self.addJob(
+                "color_button",
+                Jobs.TextBox(self, "Change color", x=self.jobs.board.x + (self.jobs.board.blocks_width*self.jobs.board.blockwidth) + 5,
+                        y=self.jobs.exit_button.y + self.jobs.exit_button.height + MAKETETROMINO_OPTION_SPACER,
+                        textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.changeColor,
                     )
                 )
 
     def clear(self):
         self.jobs.board.blocks = {}
+
+    def changeColor(self):
+        pass
 
     def eventHandler(self, event):
         if event.type == QUIT:

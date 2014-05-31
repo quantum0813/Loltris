@@ -671,10 +671,11 @@ class Notification(TextBox):
                 )
 
 class Board(object):
-    def __init__(self, screen, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f),
+    def __init__(self, game, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f), draw_border=True,
                  innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=Queue.BOARD, level=1, draw_grid=True,
                 ):
         self.anchor = (x, y)
+        self.draw_border = draw_border
         self.x = x
         self.y = y
         self.blocks_width = width
@@ -687,7 +688,7 @@ class Board(object):
         self.layers.ghost_tetromino = {}
         self.drawncubes = set()
         self.blockwidth = blockwidth
-        self.screen = screen
+        self.game = game
         self.bgcolor = bgcolor
         self.innercolor = innercolor
         self.outercolor = outercolor
@@ -714,7 +715,7 @@ class Board(object):
         self.drawncubes.add((x, y))
 
         Pygame.draw.rect(
-            self.screen,
+            self.game.screen,
             color,
             (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
         )
@@ -724,7 +725,7 @@ class Board(object):
             ## Top shade (actually light, but whatever)
             x, y = self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1
             Pygame.draw.polygon(
-                    self.screen,
+                    self.game.screen,
                     RGB.dial(color, 50),
                     ((x, y+1), (x + self.blockwidth - 2, y+1),
                      (x + 2, y + 2), (x + self.blockwidth - 3, y + 2)),
@@ -732,7 +733,7 @@ class Board(object):
                     )
             ## Bottom shade
             Pygame.draw.polygon(
-                    self.screen,
+                    self.game.screen,
                     RGB.dial(color, -50),
                     ((x, y+self.blockwidth - 2), (x + self.blockwidth - 2, y+self.blockwidth - 2),
                      (x + 4, y + self.blockwidth - 3), (x + self.blockwidth - 5, y + self.blockwidth - 3)),
@@ -742,7 +743,7 @@ class Board(object):
             if Shared.options["graphics"].get("cross_tetromino"):
                 ## Draw cool "cross" shade
                 Pygame.draw.polygon(
-                        self.screen,
+                        self.game.screen,
                         RGB.dial(color, -30),
                         ((x, y+1), (x, y+self.blockwidth - 3),
                          (x + 4, y + self.blockwidth - 3), (x + self.blockwidth - 5, y + self.blockwidth - 3)),
@@ -751,7 +752,7 @@ class Board(object):
             else:
                 ## Draw other shades
                 Pygame.draw.polygon(
-                        self.screen,
+                        self.game.screen,
                         RGB.dial(color, -30),
                         ((x, y+1), (x, y+self.blockwidth - 3),
                          (x + 4, y + self.blockwidth - 3), (x + 4, y + self.blockwidth - 3)),
@@ -813,7 +814,7 @@ class Board(object):
         blocks = self.drawncubes.difference(active_blocks)
         for x, y in blocks:
             Pygame.draw.rect(
-                self.screen,
+                self.game.screen,
                 self.bgcolor,
                 (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
             )
@@ -833,27 +834,28 @@ class Board(object):
     def drawBoard(self):
         """ Yup, just draw the board """
 
+        if self.draw_border:
+            Pygame.draw.rect(
+                    self.game.screen,
+                    self.outercolor,
+                    (self.x, self.y, (self.blocks_width * self.blockwidth) + 1, self.blocks_height * self.blockwidth + 1,),
+                    1)
         Pygame.draw.rect(
-                self.screen,
-                self.outercolor,
-                (self.x, self.y, (self.blocks_width * self.blockwidth) + 1, self.blocks_height * self.blockwidth + 1,),
-                1)
-        Pygame.draw.rect(
-                self.screen,
+                self.game.screen,
                 self.bgcolor,
                 (self.x+1, self.y+1, self.blocks_width * self.blockwidth - 2, self.blocks_height * self.blockwidth - 1),
                 0)
         if self.draw_grid:
             for x in xrange(1, self.blocks_width):
                 Pygame.draw.line(
-                        self.screen,
+                        self.game.screen,
                         self.innercolor,
                         (self.x + self.blockwidth*x, self.y + 1),
                         (self.x + self.blockwidth*x, self.y + self.blocks_height*self.blockwidth - 2),
                         1)
             for y in xrange(1, self.blocks_height):
                 Pygame.draw.line(
-                        self.screen,
+                        self.game.screen,
                         self.innercolor,
                         (self.x + 1, self.y + self.blockwidth*y),
                         (self.x + self.blocks_width*self.blockwidth - 2, self.y + self.blockwidth*y),
@@ -1014,3 +1016,6 @@ class InputBox(TextBox):
                     return
             self.game.lock[KEYDOWN] = self
 
+class ColorSelector(Job):
+    def __init__(self, game, x, y, **kwargs):
+        super(Table, self).__init__(game, x, y, **kwargs)

@@ -260,7 +260,7 @@ class Menu(Game):
         self.lookup = {}
         self.options = []
         self.selected = 0
-        self.options_pos = (10, 80)
+        self.options_pos = [10, 80]
         self.header_font = header_font
         self.option_font = option_font
         self.isroot = isroot

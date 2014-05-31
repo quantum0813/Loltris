@@ -24,6 +24,7 @@ import Core
 import Load
 import Jobs
 import TetrisGame
+import Queue
 import MakeTetromino
 import Log
 import pygame as Pygame
@@ -34,6 +35,7 @@ import webbrowser as Webbrowser
 import os.path as Path
 import Credits
 import Save
+import Matrix
 import functools as Func
 from pygame.locals import *
 from Globals import *
@@ -44,21 +46,50 @@ class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(
                 "MainMenu", onHeaderClick=lambda: Webbrowser.open(PROJECT_SITE),
-                header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True,
+                header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, xcenter=True,
                 soundtrack=Path.join(Load.MUSICDIR, "jazz_cat_infinite_loop_cut.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
-        self.header = "Loltris"
+
+        blockwidth = (self.width) // len(TITLE_BLOCKS[0])
+        Log.debug("title_board.blockwidth = {}".format(blockwidth))
+        self.addJob("title_board",
+                    Jobs.Board(
+                        self,
+                        y=SPACER,
+                        height=len(TITLE_BLOCKS),
+                        width=len(TITLE_BLOCKS[0]),
+                        blockwidth=blockwidth,
+                        bgcolor=self.bgcolor,
+                        queue=100,
+                        draw_grid=False,
+                        draw_border=False,
+                        )
+                    )
+        self.jobs.title_board.x = (self.width // 2) - (self.jobs.title_board.width // 2)
+        for x, y in Matrix.matrixToSet(TITLE_BLOCKS):
+            self.jobs.title_board.blocks[(x, y)] = (0xaa,0xaa,0xaa)
+        self.options_pos[1] = self.jobs.title_board.y + self.jobs.title_board.height + SPACER
+
         self.menu = Factory.textBoxes([
                 ("Start Game", self.launchTetrisGame),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
                 ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
+                ("Homepage", lambda: Webbrowser.open(PROJECT_SITE)),
                 ("Exit", self.quit),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 )
         self.setupObjects()
-        self.loadHighscores()
+        #self.loadHighscores()
+        self.running = self.mainLoop
+        ## XXX: Temporary bugfix, scroll_filler is drawn on every frame while the board is not.
+        del self.jobs.scroll_filler
+
+    def mainLoop(self):
+        pass
+        # Log.debug("DUMPING JOBS")
+        # Log.dump(" ".join(list(self.jobs.__dict__)) + "\n")
 
     def loadHighscores(self):
         """ Load scores from disk, then add the highscorelist job to see them """
@@ -87,7 +118,7 @@ class MainMenu(Core.Menu):
 
     def launchTetrisGame(self):
         self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)
-        self.loadHighscores()
+        # self.loadHighscores()
 
     def eventHandler(self, event):
         super(MainMenu, self).eventHandler(event)

@@ -68,22 +68,23 @@ class TetrisGame(Core.Game):
 
         ## All the jobs
         self.addJob("board",
-                    Jobs.Board(self.screen,
-                          x=SPACER,
-                          y=SPACER,
-                          height=BOARD_HEIGHT,
-                          width=BOARD_WIDTH,
-                          blockwidth=BOARD_BLOCKWIDTH,
-                          level=kwargs.get("level", 1),
-                          bgcolor=self.bgcolor,
-                          )
+                    Jobs.Board(
+                        self,
+                        x=SPACER,
+                        y=SPACER,
+                        height=BOARD_HEIGHT,
+                        width=BOARD_WIDTH,
+                        blockwidth=BOARD_BLOCKWIDTH,
+                        level=kwargs.get("level", 1),
+                        bgcolor=self.bgcolor,
+                        )
                     )
         self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
         color, _type, matrix = Random.choice(Shared.tetrominos)
         self.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
         self.addJob("preview_window",
                     Jobs.Board(
-                        self.screen,
+                        self,
                         x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                         y=SPACER,
                         height=PREVIEW_HEIGHT,
