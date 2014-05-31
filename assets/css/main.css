@@ -16,8 +16,7 @@ body {
     background: #222;
 }
 header {
-    /* border-bottom: 1px solid #cacaca; */
-    padding: 20px 20px 0;
+    padding: 20px 25px 0;
 }
 .active-toplink {
     border: 2px solid black;
@@ -43,7 +42,7 @@ article {
     border-radius: 10px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     margin 0 10px;
-    padding: 40px 40px 30px;
+    padding: 30px 30px 20px;
 }
 .grid {
     box-sizing: border-box;
@@ -67,10 +66,6 @@ nav a {
     text-decoration: none;
     display: block;
     padding: 5px 10px;
-}
-nav .active {
-    background: #111;
-    color: #fff;
 }
 
 h2 {
@@ -99,7 +94,7 @@ aside h4 {
     text-transform: uppercase;
 }
 .title {
-    border-bottom: 1px solid #cacaca;
+    border-bottom: 1px solid #555;
 }
 footer {
     color: #bbb;
@@ -155,4 +150,10 @@ a.inactive-sidelink:hover {
     background-color: #333;
     box-shadow: inset 0 0 3px 3px #404040;
     /* box-shadow: 0 3px 0 rgba(255, 255, 255, 0.5); */
+}
+.hidden {
+    display: none;
+}
+.visible {
+    display: block;
 }

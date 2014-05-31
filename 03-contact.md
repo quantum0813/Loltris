@@ -11,7 +11,7 @@ encrypt it with the PGP-key below before sending.
 <img src="{{ site.baseurl }}/assets/images/crypto_nerds_imagination.png" class="square"/>
 
 <pre>
-<div style="height:120px;border:1px solid #ccc;overflow:auto;">
+<div style="height:120px;border:1px solid #555;overflow:auto;border-radius:5px;">
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 

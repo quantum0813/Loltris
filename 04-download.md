@@ -4,7 +4,6 @@ title: Download
 permalink: /download/
 ---
 
-<!-- JS functions -->
 <script type="text/javascript">
 function getOSName() {
     if (navigator.platform.indexOf("Win")!=-1) {
@@ -55,7 +54,7 @@ if (! dl_link) {
 </script>
 
 <!-- If javascript is disabled, we just give the user all the links -->
-<noscript>
+<noscript id="download_list">
 <ul>
   <li>Windows (32-bit)
     <ul>
@@ -74,3 +73,16 @@ if (! dl_link) {
   </li>
 </ul>
 </noscript>
+
+<script text="text/javascript">
+// Write the noscript HTML to the document, but hide it
+var text = document.getElementById("download_list").innerHTML;
+document.write("<div id='hidden_download_list' class='hidden'>" + text + "</div>");
+
+function showDownloadList() {
+    // Show the list, while hiding the button
+    document.getElementById("hidden_download_list").className = "visible";
+    document.getElementById("show_downloads_button").className = "hidden";
+}
+</script>
+<input id="show_downloads_button" type="button" value="Show all downloads" onclick="showDownloadList();">
