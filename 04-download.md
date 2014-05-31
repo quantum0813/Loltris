@@ -4,12 +4,74 @@ title: Download
 permalink: /download/
 ---
 
-Download Loltris for your platform:
+<!-- JS functions -->
+<script type="text/javascript">
+function getOSName() {
+    if (navigator.platform.indexOf("Win")!=-1) {
+        return "Windows";
+    } else if (navigator.platform.indexOf("Mac")!=-1) {
+        return "MacOS";
+    } else if (navigator.platform.indexOf("Linux")!=-1) {
+        return "Linux";
+    } else if (navigator.platform.indexOf("BSD")!=-1) {
+        return "BSD";
+    }
+}
 
-* Windows (32-bit)
-  * [Download]({{ site.baseurl }}/assets/Software-Packages/Loltris_Win32.zip)
-* Linux (32-bit)
-  * [Download]({{ site.baseurl }}/assets/Software-Packages/Loltris_Linux32.tar.bz2)
-* Experimental Source+Data (multi-platform, if you know how to set it up)
-  * [Download](https://github.com/UndeadMastodon/Loltris)
+function getDLLink(os_name) {
+    switch(os_name) {
+        case "Windows":
+            return "{{ site.baseurl }}/assets/Software-Packages/Loltris_Win32.zip";
+        case "Linux":
+            return "{{ site.baseurl }}/assets/Software-Packages/Loltris_Linux32.tar.bz2";
+        default:
+            return null;
+    }
+}
 
+function imageExists(url) {
+   var img = new Image();
+   img.src = url;
+   return img.height != 0;
+}
+
+function getImageLink(os_name) {
+    var url = "{{ site.baseurl }}/assets/images/platforms/" + os_name + ".png";
+    if (imageExists(url)) {
+        return url;
+    }
+}
+</script>
+
+<script text="text/javascript">
+var os_name = getOSName();
+var dl_link = getDLLink(os_name);
+if (! dl_link) {
+    document.write("Loltris has not been packaged for your platform, if Python/Pygame runs on your platform you can download the ");
+    document.write('<a href="{{ site.github_page }}>source</a> and set it up yourself."');
+} else {
+    document.write("<a href='" + dl_link + "'>Download for " + os_name + "</a><br>");
+    document.write("<img src='" + getImageLink(os_name) + "'>");
+}
+</script>
+
+<!-- If javascript is disabled, we just give the user all the links -->
+<noscript>
+<ul>
+  <li>Windows (32-bit)
+    <ul>
+      <li><a href="/Loltris/assets/Software-Packages/Loltris_Win32.zip">Download</a></li>
+    </ul>
+  </li>
+  <li>Linux (32-bit)
+    <ul>
+      <li><a href="/Loltris/assets/Software-Packages/Loltris_Linux32.tar.bz2">Download</a></li>
+    </ul>
+  </li>
+  <li>Experimental Source+Data (multi-platform, if you know how to set it up)
+    <ul>
+      <li><a href="https://github.com/UndeadMastodon/Loltris">Download</a></li>
+    </ul>
+  </li>
+</ul>
+</noscript>
