@@ -2,6 +2,8 @@
 
 ## Miscellaneous "utilities"
 
+import pygame as Pygame
+
 def genKey(d):
     """
     >>> genKey({"name": "GenericFont", "size": 40, "bold": True})

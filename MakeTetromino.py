@@ -92,6 +92,7 @@ class MakeTetromino(Core.Game):
                         y=self.jobs.board.y, 
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                         font=TETRIS_STATUSBOX_FONT, onmouseclick=self.save,
+                        fill=MENU_BACKGROUND,
                         )
                 )
         self.addJob(
@@ -100,6 +101,7 @@ class MakeTetromino(Core.Game):
                         y=self.jobs.board.y + self.jobs.save_button.height + MAKETETROMINO_OPTION_SPACER,
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                         font=TETRIS_STATUSBOX_FONT, onmouseclick=self.clear,
+                        fill=MENU_BACKGROUND,
                     )
                 )
         self.addJob(
@@ -108,6 +110,7 @@ class MakeTetromino(Core.Game):
                         y=self.jobs.clear_button.y + self.jobs.clear_button.height + MAKETETROMINO_OPTION_SPACER,
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                         font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame,
+                        fill=MENU_BACKGROUND,
                     )
                 )
         self.addJob(
@@ -116,6 +119,7 @@ class MakeTetromino(Core.Game):
                         y=self.jobs.exit_button.y + self.jobs.exit_button.height + MAKETETROMINO_OPTION_SPACER,
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                         font=TETRIS_STATUSBOX_FONT, onmouseclick=self.changeColor,
+                        fill=MENU_BACKGROUND,
                     )
                 )
 

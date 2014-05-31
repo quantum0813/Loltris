@@ -27,6 +27,7 @@ import Utils
 import Shared
 import Matrix
 import RGB
+import Draw
 import os.path
 from pygame.locals import *
 from Globals import *
@@ -227,6 +228,7 @@ class TextBox(object):
         for f in self.rendered_fonts:
             self.game.screen.blit(f, (self.x + self.xpadding/2, spos))
             spos += self.fontheight
+
         if self.underline:
             Pygame.draw.line(
                     self.game.screen,
@@ -1027,6 +1029,27 @@ class InputBox(TextBox):
                     return
             self.game.lock[KEYDOWN] = self
 
+class Border3D(Job):
+    def __init__(self, game, x, y, width, height, colors, deepness, background=None, **kwargs):
+        super(Border3D, self).__init__(game, x, y, **kwargs)
+        self.force_draw = True
+        self.width = width
+        self.height = height
+        self.colors = colors
+        self.deepness = deepness
+        self.background = background
+
+    def draw(self):
+        if self.force_draw:
+            Draw.draw3DBorder(
+                    self.game.screen,
+                    self.colors,
+                    (self.x, self.y, self.width, self.height),
+                    self.deepness,
+                    background=self.background
+                    )
+            self.force_draw = False
+
 class ColorSelector(Job):
     def __init__(self, game, x, y, **kwargs):
-        super(Table, self).__init__(game, x, y, **kwargs)
+        super(ColorSelector, self).__init__(game, x, y, **kwargs)

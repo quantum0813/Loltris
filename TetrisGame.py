@@ -109,7 +109,8 @@ class TetrisGame(Core.Game):
                             "score": lambda self: self.getJob("board").score,
                             "lines": lambda self: self.getJob("board").lines,
                             "level up": lambda self: self.getJob("board").level_lines,
-                            }
+                            },
+                        fill=TETRIS_BACKGROUND,
                         )
                     )
         self.addJob("preview_block",

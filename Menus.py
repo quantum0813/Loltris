@@ -67,7 +67,7 @@ class MainMenu(Core.Menu):
         self.jobs.title_board.x = (self.width // 2) - (self.jobs.title_board.width // 2)
         for x, y in Matrix.matrixToSet(TITLE_BLOCKS):
             self.jobs.title_board.blocks[(x, y)] = (0xaa,0xaa,0xaa)
-        self.options_pos[1] = self.jobs.title_board.y + self.jobs.title_board.height + SPACER
+        self.options_pos[1] = self.jobs.title_board.y + self.jobs.title_board.height + SPACER*2
 
         self.menu = Factory.textBoxes([
                 ("Start Game", self.launchTetrisGame),
@@ -77,19 +77,19 @@ class MainMenu(Core.Menu):
                 ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
                 ("Homepage", lambda: Webbrowser.open(PROJECT_SITE)),
                 ("Exit", self.quit),
-                ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
-                                                        "font":self.colorscheme["option"], },
+                ],
+                self,
+                font=MENU_OPTION_FONT,
+                fill=MENU_3DBORDER_BACKGROUND,
+                colors={
+                    "background":self.colorscheme["background"],
+                    "font":self.colorscheme["option"],
+                    },
                 )
         self.setupObjects()
         #self.loadHighscores()
-        self.running = self.mainLoop
         ## XXX: Temporary bugfix, scroll_filler is drawn on every frame while the board is not.
         del self.jobs.scroll_filler
-
-    def mainLoop(self):
-        pass
-        # Log.debug("DUMPING JOBS")
-        # Log.dump(" ".join(list(self.jobs.__dict__)) + "\n")
 
     def loadHighscores(self):
         """ Load scores from disk, then add the highscorelist job to see them """
@@ -139,6 +139,7 @@ class PauseMenu(Core.Menu):
                 ("Exit Game", self.quit),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
+                fill=MENU_3DBORDER_BACKGROUND,
                 )
         self.setupObjects()
         self.running = self.mainLoop
@@ -154,6 +155,7 @@ class OptionsMenu(Core.Menu):
                 ("Keymaps", lambda: self.call(KeymapMenu, caption=self.caption)),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
+                fill=MENU_3DBORDER_BACKGROUND,
                 )
 
         ## >inb4 immature jokes
@@ -179,6 +181,7 @@ class OptionsMenu(Core.Menu):
                     colors=SWITCH_OPTION_COLORS,
                     boxwidth=8,
                     box_center=True,
+                    fill=MENU_3DBORDER_BACKGROUND,
                     )
                 )
 
@@ -209,6 +212,7 @@ class KeymapMenu(Core.Menu):
                 ("Menu", lambda: self.call(self.Menu)),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
+                fill=MENU_3DBORDER_BACKGROUND,
                 )
         self.setupObjects()
         self.getting = None
@@ -229,6 +233,7 @@ class KeymapMenu(Core.Menu):
                     ("Spawn Uber-Tetromino", lambda: modifyKeymap(self, Shared.keymap["game"], "uber_tetromino")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
+                    fill=MENU_3DBORDER_BACKGROUND,
                     )
             self.setupObjects()
 
@@ -243,6 +248,7 @@ class KeymapMenu(Core.Menu):
                     ("Go back", lambda: modifyKeymap(self, Shared.keymap["menu"], "back")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
+                    fill=MENU_3DBORDER_BACKGROUND,
                     )
             self.setupObjects()
 

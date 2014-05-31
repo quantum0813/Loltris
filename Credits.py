@@ -21,6 +21,7 @@ class Credits(Core.Game):
                         speed=-1,
                         font=CREDITS_FONT,
                         colors=CREDITS_COLORSCHEME,
+                        fill=MENU_BACKGROUND,
                         )
                     )
         self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, timed=False, anykey=True))

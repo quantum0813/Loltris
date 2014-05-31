@@ -31,14 +31,8 @@ from pygame.locals import *
 from Globals import *
 import Jobs
 import Queue
+import Draw
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
-
-def fillJob(screen, color, job):
-    Pygame.draw.rect(
-            screen,
-            color,
-            (job.x-1, job.y-1, job.width+1, job.height+1),
-            0)
 
 class Game(object):
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
@@ -67,7 +61,7 @@ class Game(object):
         removed_job = self.jobs.__dict__[removed_job_str]
         ## For now this is the solution, fill the entire screen. When the todo below is finished,
         ## I'll just fill  the job instead.
-        fillJob(self.screen, self.bgcolor, removed_job)
+        Draw.fillJob(self.screen, self.bgcolor, removed_job)
         for job in self.getJobsIn(removed_job_str):
             job.force_draw = True
         delattr(self.jobs, removed_job_str)
@@ -225,7 +219,7 @@ class Game(object):
 
                 if obj.draw_required:
                     if obj.fill:
-                        fillJob(self.screen, self.bgcolor, obj)
+                        Draw.fillJob(self.screen, obj.fill, obj)
                     obj.draw()
 
 
@@ -260,7 +254,7 @@ class Menu(Game):
         self.lookup = {}
         self.options = []
         self.selected = 0
-        self.options_pos = [10, 80]
+        self.options_pos = [10, 90]
         self.header_font = header_font
         self.option_font = option_font
         self.isroot = isroot
@@ -283,7 +277,8 @@ class Menu(Game):
                                               colors={
                                                   "background":self.colorscheme["background"],
                                                   "font":self.colorscheme["option"],
-                                                  }
+                                                  },
+                                              fill=MENU_3DBORDER_BACKGROUND,
                                               ))
 
         if self.header:
@@ -291,7 +286,7 @@ class Menu(Game):
             self.addJob("header",
                     Jobs.TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
                             colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                            onmouseclick=self.onHeaderClick, queue=Queue.HEADER
+                            onmouseclick=self.onHeaderClick, queue=Queue.HEADER, fill=self.bgcolor,
                             )
                     )
         else:
@@ -300,7 +295,7 @@ class Menu(Game):
         self.addJob(
                 "scroll_filler",
                 Jobs.Filler(
-                    self, 0, 0, self.width, self.options_pos[1],
+                    self, 0, 0, self.width, self.options_pos[1] - SPACER,
                     queue=Queue.SCROLL_FILLER,
                     )
                 )
@@ -332,8 +327,29 @@ class Menu(Game):
                 self.options_width = option.width
         Log.debug(self.options_width)
 
+        self.addJob(
+                "options_border",
+                Jobs.Border3D(
+                    self,
+                    SPACER/2,
+                    self.options_pos[1] - SPACER,
+                    self.width - SPACER,
+                    self.height - self.options_pos[1],
+                    [(30, 30, 30), (90, 90, 90), (90, 90, 90), (30, 30, 30)],
+                    SPACER/2,
+                    background=(20, 20, 20)
+                    )
+                )
+
     def mainLoop(self):
         pass
+        # Draw.draw3DBorder(
+        #         self.screen,
+        #         [(30, 30, 30), (90, 90, 90), (90, 90, 90), (30, 30, 30)],
+        #         (SPACER/2, self.options_pos[1] - SPACER, self.width - SPACER, self.height - self.options_pos[1]),
+        #         SPACER/2,
+        #         background=(20, 20, 20)
+        #         )
 
     def move(self, direction):
         item = self.getSelectedItem()
