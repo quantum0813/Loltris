@@ -5,7 +5,7 @@ permalink: /download/
 ---
 
 <!-- JS functions -->
-<script>
+<script type="text/javascript">
 function getOSName() {
     if (navigator.platform.indexOf("Win")!=-1) {
         return "Windows";
@@ -40,7 +40,7 @@ function getImageLink(os_name) {
 }
 </script>
 
-<script>
+<script text="text/javascript">
 var os_name = getOSName();
 var dl_link = getDLLink(os_name);
 if (! dl_link) {
