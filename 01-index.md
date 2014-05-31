@@ -4,9 +4,15 @@ title: Home
 permalink: /
 ---
 
-<q>
-    A static site completely dedicated to some weird Tetris-clone that nobody
-    has heard of or ever will, brilliant!
-</q> &mdash; Aristoteles 2014 b.c, pictured below
+This site is dedicated to Loltris, a Tetris-clone written in Python/Pygame by
+a person with WAY too much time on his hands.
 
-![brilliance]({{ site.baseurl }}/assets/images/brilliant.jpg)
+It is called Loltris because of it's "non-standard" features such as its
+"Überblock" and the ability to "flip" blocks the other way around. If you
+want to know more about the things Loltris can do (will let you do) then
+you should visit the "About" page.
+
+If you just want to get the game, head over to the "Download" page where you
+can find a stable (somewhat stable) binary release for your platform.
+
+![computer person]({{ site.baseurl }}/assets/images/lain_dad_on_computer.png)

@@ -8,7 +8,10 @@ Do you have suggestions or bug-reports? Just send an email
 to [shrubber@tfwno.gf](mailto:shrubber@tfwno.gf). Optionally,
 encrypt it with the PGP-key below before sending.
 
+<img src="{{ site.baseurl }}/assets/images/crypto_nerds_imagination.png" class="square"/>
+
 <pre>
+<div style="height:120px;border:1px solid #ccc;overflow:auto;">
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
@@ -61,4 +64,5 @@ sdqqPTBSOrBqC6TTq8sYQGXQVzUrqSC/uewUaDdsoqlRSx4hxVw2P1J1dMxGmovy
 DOwlYSSDYH3P5SVbCQ==
 =CuQm
 -----END PGP PUBLIC KEY BLOCK-----
+</div>
 </pre>
