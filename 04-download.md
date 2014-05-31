@@ -47,6 +47,7 @@ if (! dl_link) {
     document.write("Loltris has not been packaged for your platform, if Python/Pygame runs on your platform you can download the ");
     document.write('<a href="{{ site.github_page }}>source</a> and set it up yourself."');
 } else {
+    document.write("Download the source <a href='{{ site.github_page }}'>here</a> or")
     document.write("<a href='" + dl_link + "'>Download for " + os_name + "</a><br>");
     document.write("<img src='" + getImageLink(os_name) + "'>");
 }

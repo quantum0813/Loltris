@@ -5,3 +5,4 @@ license: GFDL
 exclude: ['README.md']
 baseurl: /Loltris
 markdown: redcarpet
+github_page: https://github.com/UndeadMastodon/Loltris
