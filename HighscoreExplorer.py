@@ -57,6 +57,7 @@ class Preview(Core.Game):
                         width=BOARD_BLOCKWIDTH * PREVIEW_WIDTH,
                         colors=TETRIS_STATUSBOX_COLORSCHEME,
                         font=TETRIS_STATUSBOX_FONT,
+                        fill=TETRIS_BACKGROUND,
                         )
                     )
         self.addJob(
@@ -66,6 +67,7 @@ class Preview(Core.Game):
                     y=self.jobs.status.y + self.jobs.status.height + SPACER,
                     textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                     font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
+                    fill=TETRIS_BACKGROUND,
                     )
                 )
         self.jobs.board.blocks = {}
@@ -94,7 +96,8 @@ class HighscoreList(Core.Menu):
                 Jobs.TextBox(
                     self, "Scores", y=20, xcenter=True, textfit=True, underline=False,
                     colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                    onmouseclick=self.onHeaderClick, queue=Queue.HEADER
+                    onmouseclick=self.onHeaderClick, queue=Queue.HEADER,
+                    fill=TETRIS_BACKGROUND,
                     )
                 )
         self.addJob(
@@ -113,6 +116,7 @@ class HighscoreList(Core.Menu):
                     y=self.height - SPACER,
                     textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
                     font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
+                    fill=TETRIS_BACKGROUND,
                     )
                 )
         self.jobs.exit_button.y -= self.jobs.exit_button.height

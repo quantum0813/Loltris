@@ -237,11 +237,6 @@ class Game(object):
 
         return self.ret
 
-## TODO: Add sliders and other fancy shit.
-## TODO: Make the menu into a job, but keep the Game-derived class. This way it would be easy
-##       to create small pop-up menus, as well as full-screen menus. The Game-derived Menu class would
-##       register a Job.Menu with the width/height of the screen and the coordinates (0, 0)
-## Menu with scrolling
 class Menu(Game):
     def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
                  isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
@@ -343,13 +338,6 @@ class Menu(Game):
 
     def mainLoop(self):
         pass
-        # Draw.draw3DBorder(
-        #         self.screen,
-        #         [(30, 30, 30), (90, 90, 90), (90, 90, 90), (30, 30, 30)],
-        #         (SPACER/2, self.options_pos[1] - SPACER, self.width - SPACER, self.height - self.options_pos[1]),
-        #         SPACER/2,
-        #         background=(20, 20, 20)
-        #         )
 
     def move(self, direction):
         item = self.getSelectedItem()
