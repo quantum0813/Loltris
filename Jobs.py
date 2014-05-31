@@ -977,12 +977,16 @@ class Table(Job):
                     self.onmouseclick(row, self.table[row][1])
 
 class InputBox(TextBox):
-    def __init__(self, game, prompt, maxlen=10, submit_key=Pygame.K_RETURN, colors=ERRORBOX_COLORSCHEME, font=ERRORBOX_FONT, noncharacters=NONCHARACTERS):
+    def __init__(self, game, prompt, maxlen=20, submit_key=Pygame.K_RETURN, colors=ERRORBOX_COLORSCHEME, font=ERRORBOX_FONT, noncharacters=NONCHARACTERS,
+                 required_length=1, require_nonwhitespace=True):
         text = unicode(prompt + "{input}")
         self.maxlen = maxlen
         self.value = u""
         self.submit_key = submit_key
         self.noncharacters = noncharacters + (submit_key,)
+        self.required_length = required_length
+        self.require_nonwhitespace = require_nonwhitespace
+        Pygame.key.set_repeat(KEYDOWN_REPEAT_DELAY, KEYDOWN_REPEAT_INTERVAL)
         super(InputBox, self).__init__(
                 game, text, xcenter=True, ycenter=True, font=font,
                 textfit=True, colors=colors, background=True, border=True,
@@ -992,8 +996,13 @@ class InputBox(TextBox):
     def eventHandler(self, event):
         if event.type == KEYDOWN:
             if event.key == self.submit_key:
+                if len(self.value) < self.required_length:
+                    return
+                if self.require_nonwhitespace and all(c.isspace() for c in self.value):
+                    return
                 Log.debug(u"Submitting {} from `{}'".format(repr(self.value), self))
                 self.update_required = False
+                Pygame.key.set_repeat()
 
             if event.key == K_BACKSPACE:
                 self.value = self.value[:-1]
@@ -1005,6 +1014,8 @@ class InputBox(TextBox):
                         )
             else:
                 if event.key in self.noncharacters:
+                    return
+                if len(self.value) >= self.maxlen:
                     return
                 try:
                     mods = Pygame.key.get_mods()

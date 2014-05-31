@@ -1,6 +1,9 @@
 #!/usr/bin/python2
 #-*- coding: utf-8 -*--
 
+## Hardcoded variables, some of these are defaults which can be overwritten
+## by options in the Settings.json file.
+
 from pygame.locals import *
 import pygame as Pygame
 
@@ -21,6 +24,8 @@ PREVIEW_HEIGHT = 6
 PREVIEW_WIDTH = 7
 SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT
 JSON_INDENT = 2
+KEYDOWN_REPEAT_INTERVAL = 20
+KEYDOWN_REPEAT_DELAY = 500
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
 ##       to input her name whenever she get's on the top scorers list. This seems most
