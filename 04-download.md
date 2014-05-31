@@ -45,11 +45,12 @@ var os_name = getOSName();
 var dl_link = getDLLink(os_name);
 if (! dl_link) {
     document.write("Loltris has not been packaged for your platform, if Python/Pygame runs on your platform you can download the ");
-    document.write('<a href="{{ site.github_page }}>source</a> and set it up yourself."');
+    document.write('<a href="{{ site.github_page }}>source</a> and set it up yourself. Be warned that this code is not stable."');
 } else {
-    document.write("Download the source <a href='{{ site.github_page }}'>here</a> or")
-    document.write("<a href='" + dl_link + "'>Download for " + os_name + "</a><br>");
+    document.write("Download binary for " + os_name + " <a href='" + dl_link + "'>here</a><br>");
     document.write("<img src='" + getImageLink(os_name) + "'>");
+    document.write("<br>If you'd rather have the lates features, download the source <a href='{{ site.github_page }}'>here</a>. But be warned ");
+    document.write("that this code is not stable. It is highly recommended that you download the binary instead.");
 }
 </script>
 
