@@ -49,8 +49,8 @@ if (! dl_link) {
 } else {
     document.write("Download binary for " + os_name + " <a href='" + dl_link + "'>here</a><br>");
     document.write("<img src='" + getImageLink(os_name) + "'>");
-    document.write("<br>If you'd rather have the lates features, download the source <a href='{{ site.github_page }}'>here</a>. But be warned ");
-    document.write("that this code is not stable. It is highly recommended that you download the binary instead.");
+    document.write("<br>If you would rather have the latest features, download the source <a href='{{ site.github_page }}'>here</a>. But be warned, ");
+    document.write("this code is not stable. Therefore it is highly recommended that you download the binary instead.");
 }
 </script>
 
