@@ -44,7 +44,7 @@ def saveScore(score, state=set()):
     scores.append(score)
     with open(Path.join(HIGHSCOREDIR, "Scores.json"), "wb") as wf:
         Json.dump(scores, wf, indent=JSON_INDENT)
-    with open(Path.join(SNAPSHOTDIR, "{}.pyset.bz2".format(seq)), "wb") as wf:
+    with open(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq)), "wb") as wf:
         wf.write(Bz2.compress(Pickle.dumps(state)))
     Log.log("Saved new score to `Scores.json'")
 
@@ -76,7 +76,7 @@ def _writeText(path, data):
 
 def saveTetromino(color, name, matrix):
     _writeText(
-            Path.join(TETROMINODIR, "{}.pydict.bz2".format(name)),
+            Path.join(TETROMINODIR, "{}.pyobj.bz2".format(name)),
             Bz2.compress(Pickle.dumps({"color": color, "matrix": matrix}))
             )
 

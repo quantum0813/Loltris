@@ -19,6 +19,8 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## =====================================================================
 
+## TODO: This file should made into a module
+
 import pygame as Pygame
 import Queue
 import Load
@@ -28,7 +30,7 @@ import Shared
 import Matrix
 import RGB
 import Draw
-import os.path
+import os.path as Path
 from pygame.locals import *
 from Globals import *
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
@@ -41,7 +43,7 @@ def loadFont(font):
         try:
             fontobj = Shared.globfonts[Utils.genKey(font)] = \
                     Pygame.font.Font(
-                            os.path.join(Load.FONTDIR, "{}.ttf".format(font["name"])),
+                            Path.join(Load.FONTDIR, "{}.ttf".format(font["name"])),
                             font.get("size", 40),
                             bold=font.get("bold"),
                             italic=font.get("italic")
@@ -165,7 +167,7 @@ class TextBox(object):
             try:
                 fontobj = Shared.globfonts[Utils.genKey(self.font)] = \
                         Pygame.font.Font(
-                                os.path.join(Load.FONTDIR, "{}.ttf".format(self.font["name"])),
+                                Path.join(Load.FONTDIR, "{}.ttf".format(self.font["name"])),
                                 self.font.get("size", 40),
                                 bold=self.font.get("bold"),
                                 italic=self.font.get("italic")
@@ -197,10 +199,6 @@ class TextBox(object):
             self.height = self.fontheight*len(self.rendered_fonts)
             self.ypadding = (self.height/self.padding) if self.padding else 0
             self.height += self.ypadding
-
-        if self.border:
-            self.height += self.border_width
-            self.width += self.border_width
 
         if self.xcenter:
             self.x = (self.game.width // 2) - (self.width // 2)
@@ -236,6 +234,13 @@ class TextBox(object):
                     (self.x, spos),
                     (self.x + self.width, spos),
                     )
+
+    def fillArea(self, color):
+        Pygame.draw.rect(
+                self.game.screen,
+                color,
+                (self.x-self.border_width, self.y-self.border_width, self.width+self.border_width + 1, self.height+self.border_width + 1),
+                0)
 
     def eventHandler(self, event):
 
@@ -985,7 +990,7 @@ class InputBox(TextBox):
         self.maxlen = maxlen
         self.value = u""
         self.submit_key = submit_key
-        self.noncharacters = noncharacters + (submit_key,)
+        self.noncharacters = tuple(noncharacters) + (submit_key,)
         self.required_length = required_length
         self.require_nonwhitespace = require_nonwhitespace
         Pygame.key.set_repeat(KEYDOWN_REPEAT_DELAY, KEYDOWN_REPEAT_INTERVAL)

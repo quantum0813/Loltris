@@ -125,7 +125,6 @@ class TetrisGame(Core.Game):
         self.jobs.preview_block.update_required = False
 
     def getName(self):
-        self.getJobsIn("name_inputbox")
         if not self.jobs.name_inputbox.update_required:
             Save.saveScore({"name": self.jobs.name_inputbox.value,
                             "score": self.jobs.board.score,

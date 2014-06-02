@@ -87,4 +87,4 @@ def _loadSnapshot(data):
     return Pickle.loads(Bz2.decompress(data))
 
 def loadSnapshot(seq):
-    return _loadSnapshot(_loadText(Path.join(SNAPSHOTDIR, "{}.pyset.bz2".format(seq))))
+    return _loadSnapshot(_loadText(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq))))

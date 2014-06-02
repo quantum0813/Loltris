@@ -57,6 +57,10 @@ class Game(object):
         self.lock = {}
         self.fill = fill
 
+        ## TODO: Explore this
+        self.interrupt_table = {}
+        self.interrupts = []
+
     def removeJob(self, removed_job_str):
         removed_job = self.jobs.__dict__[removed_job_str]
         ## For now this is the solution, fill the entire screen. When the todo below is finished,
@@ -189,8 +193,20 @@ class Game(object):
             self.clock.tick(self.ticktime)
             self.events = Pygame.event.get()
 
-            queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
+            ## The events and updates should be handled in reverse order (the things on top go first)
+            queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)
+            for objname in queue:
+                if objname not in self.jobs.__dict__:
+                    ## In case a Job modifies self.jobs, removing this job.
+                    continue
+                obj = self.getJob(objname)
+                if obj.update_required:
+                    for event in self.events:
+                        if event.type not in self.lock:
+                            obj.eventHandler(event)
+                    obj.update()
 
+            queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
             ## Handle resizing (redraw everything underneath the resized job)
             for objname in queue:
                 obj = self.getJob(objname)
@@ -199,6 +215,7 @@ class Game(object):
                         job.force_draw = True
                     obj.resize = False
 
+            ## Unlike the events and updates, drawing is handled so that the lowest go first
             for objname in queue:
 
                 if objname not in self.jobs.__dict__:
@@ -206,12 +223,6 @@ class Game(object):
                     continue
 
                 obj = self.getJob(objname)
-
-                if obj.update_required:
-                    for event in self.events:
-                        if event.type not in self.lock:
-                            obj.eventHandler(event)
-                    obj.update()
 
                 if objname not in self.jobs.__dict__:
                     ## In case a Job modifies self.jobs, removing itself during update.
@@ -330,9 +341,9 @@ class Menu(Game):
                     self.options_pos[1] - SPACER,
                     self.width - SPACER,
                     self.height - self.options_pos[1],
-                    [(30, 30, 30), (90, 90, 90), (90, 90, 90), (30, 30, 30)],
+                    [(40, 40, 40), (90, 90, 90), (90, 90, 90), (40, 40, 40)],
                     SPACER/2,
-                    background=(20, 20, 20)
+                    background=MENU_3DBORDER_BACKGROUND,
                     )
                 )
 

@@ -36,6 +36,7 @@ import os.path as Path
 import Credits
 import Save
 import Matrix
+import Utils
 import functools as Func
 from pygame.locals import *
 from Globals import *
@@ -199,7 +200,7 @@ def getKeyLoop(self, keys):
 
 ## Sets the appropriate values for setting a key in a keymap.
 def modifyKeymap(self, keys, getting):
-    self.addJob("input_box", Jobs.GetKeyBox(self, "Press key for {}".format(getting), font=MENU_OPTION_FONT, colors=SWITCH_OPTION_COLORS))
+    self.addJob("input_box", Jobs.GetKeyBox(self, "Press key for {}".format(getting), font=MENU_OPTION_FONT, colors=SWITCH_OPTION_COLORS, queue=self.menu[0].queue+1))
     self.getting = getting
     self.running = Func.partial(getKeyLoop, self, keys)
 
@@ -208,8 +209,8 @@ class KeymapMenu(Core.Menu):
         super(KeymapMenu, self).__init__("KeymapMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
         self.header = "Keymaps"
         self.menu = Factory.textBoxes([
-                ("Tetris", lambda: self.call(self.Tetris)),
-                ("Menu", lambda: self.call(self.Menu)),
+                ("Tetris", lambda: self.call(self.Tetris, caption="Loltris - Tetris keymap")),
+                ("Menu", lambda: self.call(self.Menu, caption="Loltris - Menu keymap")),
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 fill=MENU_3DBORDER_BACKGROUND,
@@ -221,16 +222,34 @@ class KeymapMenu(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Tetris-map"
-            self.menu = Factory.textBoxes([
-                    ("Rotate left", lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_left")),
-                    ("Pause", lambda: modifyKeymap(self, Shared.keymap["game"], "pause")),
-                    ("Speed up", lambda: modifyKeymap(self, Shared.keymap["game"], "speed_up")),
-                    ("Move left", lambda: modifyKeymap(self, Shared.keymap["game"], "move_left")),
-                    ("Move right", lambda: modifyKeymap(self, Shared.keymap["game"], "move_right")),
-                    ("Drop down", lambda: modifyKeymap(self, Shared.keymap["game"], "drop_down")),
-                    ("Rotate right", lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_right")),
-                    ("Reverse", lambda: modifyKeymap(self, Shared.keymap["game"], "reverse")),
-                    ("Spawn Uber-Tetromino", lambda: modifyKeymap(self, Shared.keymap["game"], "uber_tetromino")),
+            self.menu = Factory.variableTextBoxes([
+                    ("Rotate left: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("rotate_left", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_left")),
+                    ("Pause: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("pause", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "pause")),
+                    ("Speed up: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("speed_up", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "speed_up")),
+                    ("Move left: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("move_left", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "move_left")),
+                    ("Move right: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("move_right", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "move_right")),
+                    ("Drop down: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("drop_down", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "drop_down")),
+                    ("Rotate right: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("rotate_right", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_right")),
+                    ("Reverse: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("reverse", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "reverse")),
+                    ("Uber: {key}",
+                     {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("uber_tetromino", 0))},
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "uber_tetromino")),
                     ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                             "font":self.colorscheme["option"], },
                     fill=MENU_3DBORDER_BACKGROUND,
@@ -241,14 +260,28 @@ class KeymapMenu(Core.Menu):
         def __init__(self, **kwargs):
             super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Menu-map"
-            self.menu = Factory.textBoxes([
-                    ("Move down", lambda: modifyKeymap(self, Shared.keymap["menu"], "down")),
-                    ("Move up", lambda: modifyKeymap(self, Shared.keymap["menu"], "up")),
-                    ("Select", lambda: modifyKeymap(self, Shared.keymap["menu"], "select")),
-                    ("Go back", lambda: modifyKeymap(self, Shared.keymap["menu"], "back")),
-                    ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
-                                                            "font":self.colorscheme["option"], },
-                    fill=MENU_3DBORDER_BACKGROUND,
-                    )
+            self.menu = Factory.variableTextBoxes([
+                ("Move down: {key}",
+                 {"key": lambda _: Utils.keyToString(Shared.keymap["menu"].get("down"))},
+                 lambda: modifyKeymap(self, Shared.keymap["menu"], "down")),
+                ("Move up: {key}",
+                 {"key": lambda _: Utils.keyToString(Shared.keymap["menu"].get("up"))},
+                 lambda: modifyKeymap(self, Shared.keymap["menu"], "up")),
+                ("Select: {key}",
+                 {"key": lambda _: Utils.keyToString(Shared.keymap["menu"].get("select"))},
+                 lambda: modifyKeymap(self, Shared.keymap["menu"], "select")),
+                ("Go back: {key}",
+                 {"key": lambda _: Utils.keyToString(Shared.keymap["menu"].get("back"))},
+                 lambda: modifyKeymap(self, Shared.keymap["menu"], "back")),
+                ],
+                self,
+                font=MENU_OPTION_FONT,
+                colors={
+                    "background":self.colorscheme["background"],
+                    "font":self.colorscheme["option"],
+                    },
+                fill=MENU_3DBORDER_BACKGROUND,
+                )
+            print(self.menu)
             self.setupObjects()
 

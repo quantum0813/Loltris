@@ -4,13 +4,9 @@
         "flip_tetromino": false
     }, 
     "graphics": {
-        "ghostpiece": true, 
-        "ghostpiece_color": [
-            45, 
-            45, 
-            45
-        ], 
+        "cross_tetromino": false, 
+        "ghostpiece_color": [ 45, 45, 45 ], 
         "shade": true, 
-        "cross_tetromino": false
+        "ghostpiece": true
     }
 }

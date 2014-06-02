@@ -4,16 +4,16 @@ import Jobs
 import Log
 import functools as Func
 
-def textBoxes(pairs, game, **kwargs):
+def textBoxes(dubs, game, **kwargs):
     boxes = []
-    for text, func in pairs:
+    for text, func in dubs:
         Log.debug("Generating textbox: {}".format(text))
         boxes.append(Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs))
     return boxes
     ## XXX: Needed debug
-    # return [Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs) for text, func in pairs]
+    # return [Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs) for text, func in dubs]
 
-def switches(pairs, game, **kwargs):
+def switches(dubs, game, **kwargs):
     return [
             Jobs.Switch(
                 game,
@@ -22,12 +22,12 @@ def switches(pairs, game, **kwargs):
                 funcs[1],
                 **kwargs
                 )
-            for text, funcs in pairs
+            for text, funcs in dubs
             ]
 
-def basicSwitches(pairs, game, turnOn, turnOff, lookup, **kwargs):
+def basicSwitches(dubs, game, turnOn, turnOff, lookup, **kwargs):
     switches = []
-    for text, option in pairs:
+    for text, option in dubs:
         switches.append(
                 Jobs.Switch(
                     game,
@@ -40,9 +40,11 @@ def basicSwitches(pairs, game, turnOn, turnOff, lookup, **kwargs):
                 )
     return switches
 
-# def variableTextBoxes(trips, game):
-#     for text, variables, func in trips:
-#         pass
+def variableTextBoxes(trips, game, **kwargs):
+    boxes = []
+    for text, variables, func in trips:
+        boxes.append(Jobs.AutoTextBox(game, text, variables=variables, onmouseclick=func, **kwargs))
+    return boxes
 
-def sliders(pairs, game, **kwargs):
+def sliders(dubs, game, **kwargs):
     pass

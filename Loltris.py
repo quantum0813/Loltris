@@ -29,9 +29,11 @@ import Log
 import profile as Profile
 import os as OS
 import pygame as Pygame
+from Globals import *
 
 if __name__ == '__main__':
-    #OS.environ["SDL_VIDEO_CENTERED"] = "1"
+    if CENTER_WINDOW:
+        OS.environ["SDL_VIDEO_CENTERED"] = "1"
 
     Pygame.font.init()
 

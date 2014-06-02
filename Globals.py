@@ -26,6 +26,7 @@ SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT
 JSON_INDENT = 2
 KEYDOWN_REPEAT_INTERVAL = 20
 KEYDOWN_REPEAT_DELAY = 500
+CENTER_WINDOW = True
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
 ##       to input her name whenever she get's on the top scorers list. This seems most
@@ -83,7 +84,7 @@ SWITCH_OPTION_COLORS = {
         "off":MENU_COLORSCHEME["background"],
         "border":(0x66,0x66,0x66),
         }
-MENU_3DBORDER_BACKGROUND = (20, 20, 20)
+MENU_3DBORDER_BACKGROUND = (29,29,29)
 MENU_BACKGROUND = (0x22, 0x22, 0x22)
 TETRIS_BACKGROUND = (0x22, 0x22, 0x22)
 TETRIS_STATUSBOX_COLORSCHEME = {"border":(0x50,0x50,0x50), "font":(0x90,0x90,0x90), "background":(0x22,0x22,0x22)}
@@ -104,18 +105,32 @@ SCORES = {
 
 EOL = "\ǹ"
 
-## Keys that do not directly represent a single character
-NONCHARACTERS = (
-        Pygame.K_LSHIFT,
-        Pygame.K_RSHIFT,
-        Pygame.K_RSUPER,
-        Pygame.K_LSUPER,
-        Pygame.K_LALT,
-        Pygame.K_RALT,
-        Pygame.K_RCTRL,
-        Pygame.K_LCTRL,
-        Pygame.K_BACKSPACE,
-        )
+## Keys that do not directly represent a single character, here are their
+## string representations.
+NONCHARACTERS = {
+        Pygame.K_LSHIFT: "L-Shift",
+        Pygame.K_RSHIFT: "R-Shift",
+        Pygame.K_RSUPER: "R-Super",
+        Pygame.K_LSUPER: "L-Super",
+        Pygame.K_LALT: "L-Alt",
+        Pygame.K_RALT: "R-Alt",
+        Pygame.K_RCTRL: "R-Ctrl",
+        Pygame.K_LCTRL: "L-Ctrl",
+        Pygame.K_BACKSPACE: "Backspace",
+        Pygame.K_DOWN: "Down",
+        Pygame.K_UP: "Up",
+        Pygame.K_RIGHT: "Right",
+        Pygame.K_RETURN: "Return",
+        Pygame.K_LEFT: "Left",
+        Pygame.K_ESCAPE: "Escape",
+        Pygame.K_PAGEDOWN: "PgDn",
+        Pygame.K_PAGEUP: "PgUp",
+        Pygame.K_TAB: "Tab",
+        Pygame.K_END: "End",
+        Pygame.K_HOME: "Home",
+        Pygame.K_PRINT: "PrntScr",
+        Pygame.K_INSERT: "Insert",
+        }
 
 ## _ and O are declared to make TITLE_BLOCKS more readable
 _ = False

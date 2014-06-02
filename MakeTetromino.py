@@ -91,7 +91,7 @@ class MakeTetromino(Core.Game):
                 Jobs.TextBox(self, "Save", x=self.jobs.board.x + (self.jobs.board.blocks_width*self.jobs.board.blockwidth) + 5,
                         y=self.jobs.board.y, 
                         textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
-                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.save,
+                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.getName,
                         fill=MENU_BACKGROUND,
                         )
                 )
@@ -123,6 +123,26 @@ class MakeTetromino(Core.Game):
                     )
                 )
 
+    def getName(self):
+        if not self.jobs.board.blocks:
+            Log.log("No blocks present, will not save tetromino")
+            self.addJob("no_blocks_present", Jobs.Notification(self, "no_blocks_present", "Invalid: No blocks present"))
+            return
+
+        if any(islands(self.jobs.board.blocks)):
+            Log.log("Islands present, will not save tetromino")
+            self.addJob( "islands_present_window", Jobs.Notification(self, "islands_present_window", "Invalid: Islands present"))
+            return
+
+        self.running = self.getNameLoop
+        self.addJob("name_inputbox", Jobs.InputBox(self, "Name: "))
+
+    def getNameLoop(self):
+        if not self.jobs.name_inputbox.update_required:
+            self.save(self.jobs.name_inputbox.value)
+            self.removeJob("name_inputbox")
+            self.running = self.mainLoop
+
     def clear(self):
         self.jobs.board.blocks = {}
 
@@ -144,16 +164,7 @@ class MakeTetromino(Core.Game):
                     self.jobs.board.blocks.pop((x, y))
                     self.jobs.board.emptyBlocks()
 
-    def save(self):
-        if not self.jobs.board.blocks:
-            Log.log("No blocks present, will not save tetromino")
-            self.addJob("no_blocks_present", Jobs.Notification(self, "no_blocks_present", "Invalid: No blocks present"))
-            return
-
-        if any(islands(self.jobs.board.blocks)):
-            Log.log("Islands present, will not save tetromino")
-            self.addJob( "islands_present_window", Jobs.Notification(self, "islands_present_window", "Invalid: Islands present"))
-            return
+    def save(self, name):
 
         xlow = min(x for x, y in self.jobs.board.blocks)
         xhigh = max(x for x, y in self.jobs.board.blocks)
@@ -166,7 +177,7 @@ class MakeTetromino(Core.Game):
 
         Log.log("Created new tetromino, displaying below")
         Matrix.put(matrix)
-        Save.saveTetromino(self.color, "kek", matrix)
+        Save.saveTetromino(self.color, name, matrix)
         Shared.tetrominos = Load.loadTetrominos()
 
         return True
