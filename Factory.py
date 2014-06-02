@@ -7,7 +7,7 @@ import functools as Func
 def textBoxes(dubs, game, **kwargs):
     boxes = []
     for text, func in dubs:
-        Log.debug("Generating textbox: {}".format(text))
+        Log.debug("Generating textbox {}".format(repr(text)))
         boxes.append(Jobs.AutoTextBox(game, text, onmouseclick=func, **kwargs))
     return boxes
     ## XXX: Needed debug

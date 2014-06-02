@@ -30,7 +30,7 @@ from pygame.locals import *
 from Globals import *
 
 class Preview(Core.Game):
-    def __init__(self, blocks, date=None, level=None, lines=None, name=None, score=None, seq=None, *args, **kwargs):
+    def __init__(self, blocks, time=None, date=None, level=None, lines=None, name=None, score=None, seq=None, *args, **kwargs):
         super(Preview, self).__init__("Preview", *args, fill=True, **kwargs)
         self.running = self.mainLoop
 
@@ -49,14 +49,14 @@ class Preview(Core.Game):
         kwargs.pop("screen")
         self.addJob("status",
                     Jobs.TextBox(
-                        self, "Date: {}\nName: {}\nLines: {}\nLevel: {}\nScore: {}\n".format(date, name, lines, level, score),
+                        self, u"Date: {}\nTime: {}\nName: {}\nLines: {}\nLevel: {}\nScore: {}\n".format(date, time, name, lines, level, score),
                         border=True,
                         y=SPACER,
                         x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                         yfit=True,
                         width=BOARD_BLOCKWIDTH * PREVIEW_WIDTH,
-                        colors=TETRIS_STATUSBOX_COLORSCHEME,
-                        font=TETRIS_STATUSBOX_FONT,
+                        colors=HIGHSCORE_EXPLORER_STATUSBOX_COLORSCHEME,
+                        font=HIGHSCORE_EXPLORER_STATUSBOX_FONT,
                         fill=TETRIS_BACKGROUND,
                         )
                     )
@@ -103,7 +103,7 @@ class HighscoreList(Core.Menu):
         self.addJob(
                 "table",
                 Jobs.Table(
-                    self, SPACER, self.jobs.header.y+self.jobs.header.height, TETRIS_STATUSBOX_FONT, sorted_score_table,
+                    self, SPACER, self.jobs.header.y+self.jobs.header.height + 1, TETRIS_STATUSBOX_FONT, sorted_score_table,
                     colors=TETRIS_STATUSBOX_COLORSCHEME, onmouseclick=self.previewScore,
                     xcenter=True,# queue=Queue.TEXTBOX,
                     )

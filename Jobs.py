@@ -30,6 +30,7 @@ import Shared
 import Matrix
 import RGB
 import Draw
+import traceback as Traceback
 import os.path as Path
 from pygame.locals import *
 from Globals import *
@@ -477,14 +478,18 @@ class Tetromino(object):
             self.force_draw = False
 
     def insert(self):
+        self.board.layers.tetromino = {}
+        Log.debug("Inserting tetromino `{}'".format(self))
+        Traceback.print_stack()
+
         if self.y < 0:
             ## XXX: GAME OVER
             self.board.update_required = False
 
-        for x, y in self.getActiveBlocks():
-            self.board.blocks[(x, y)] = self.color
+        self.board.blocks.update(self.getBlocksDict())
         self.board.checkTetris()
         self.update_required = False
+        self.ghostpiece.update_required = False
 
     def update(self):
         self.time_until_update -= 1
@@ -505,6 +510,9 @@ class Tetromino(object):
             self.moveHorizontal(-1)
 
     def drop(self):
+        ## We now need to make sure that the update never happens by setting time_until_update to infinity,
+        ## this fixes a bug where the block will occasionally be inserted twice (boohyeah)
+        self.time_until_update = float('inf')
         while self.update_required:
             self.moveDiagonal(1)
         self.force_draw = True
@@ -529,10 +537,7 @@ class Tetromino(object):
     def moveDiagonal(self, direction):
         self.y += direction
         self.force_draw = True
-        if self.checkBlockCollision():
-            self.y -= direction
-            self.insert()
-        if self.checkWallCollision(self.x, self.y) == "bottom":
+        if self.checkBlockCollision() or self.checkWallCollision(self.x, self.y) == "bottom":
             self.y -= direction
             self.insert()
 
@@ -559,6 +564,7 @@ class Tetromino(object):
 
     def updateGhost(self, attr, *args, **kwargs):
         if self.ghostpiece:
+            self.ghostpiece.force_draw = True
             self.ghostpiece.y = self.y
             self.ghostpiece.x = self.x
             getattr(self.ghostpiece, attr)(*args, **kwargs)
@@ -612,6 +618,9 @@ class Tetromino(object):
 class GhostTetromino(Tetromino):
     def __init__(self, *args, **kwargs):
         super(GhostTetromino, self).__init__(*args, ghostpiece=False, **kwargs)
+
+    def insert(self):
+        raise TypeError("Attempted to insert Ghost")
 
     def drop(self, y_pos):
         for y in xrange(y_pos, self.board.height):
@@ -716,7 +725,8 @@ class Board(object):
         self.fill = False
 
     def drawCube(self, x, y, color, shade=True):
-        if y < 0:
+        if y < 0 or x < 0 or x >= self.blocks_width or y >= self.blocks_height:
+            ## Out of bounds
             return
 
         self.drawncubes.add((x, y))
@@ -766,14 +776,25 @@ class Board(object):
                         0,
                         )
 
-    ## TODO: The unexpected-ghost-bug occurs in here
-    ##       the bug occurs when you have a block higher than all the others,
-    ##       and then "get" a row.
+    def getRows(self):
+        rows = self.blocks_height
+        # for row in xrange(rows):
+        #     yield [(x, y) in self.blocks for x, y in self.blocks if y == row]
+        for row in xrange(rows):
+            yield [(x, row) in self.blocks for x in xrange(self.blocks_width)]
+
     def checkTetris(self, rows=None):
         if rows == None:
             rows = xrange(self.blocks_height)
 
         lines = 0
+
+        Log.log("Before line")
+        matrix = [
+                [(x, y) in self.blocks for x in xrange(self.blocks_width)]
+                for y in xrange(self.blocks_height)
+                ]
+        Matrix.put(matrix, f="_")
 
         for row in rows:
             points = [p for p in self.blocks if p[1] == row]
@@ -790,8 +811,16 @@ class Board(object):
                 self.blocks = new_blocks
 
         if lines:
-            ## XXX: Temporary bugfix for the unexpected-ghost-bug, re-draw everything when
-            ##      the player gets one or more lines.
+            ## Empty all cubes
+            for x, y in set(self.drawncubes):
+                Pygame.draw.rect(
+                    self.game.screen,
+                    self.bgcolor,
+                    (self.x + x*self.blockwidth + 1, self.y + y*self.blockwidth + 1, self.blockwidth - 1, self.blockwidth - 1)
+                )
+                self.drawncubes.discard((x, y))
+
+            ## Force a redraw
             self.force_draw = True
             self.score += SCORES["tetris"].get(lines, 9001)
 
@@ -802,6 +831,15 @@ class Board(object):
         if self.level_lines <= 0:
             self.level += 1
             self.level_lines = LEVEL_LINES + (LEVEL_LINES_INCREASE * (self.level-1)) - self.level_lines
+
+        if lines:
+            Log.log("After line")
+            matrix = [
+                    [(x, y) in self.blocks for x in xrange(self.blocks_width)]
+                    for y in xrange(self.blocks_height)
+                    ]
+            Matrix.put(matrix, f="_")
+
 
     def update(self):
         self.isupdated = True
@@ -815,7 +853,8 @@ class Board(object):
         self.force_draw = False
 
     def emptyBlocks(self):
-        active_blocks = set(self.blocks)
+        active_blocks = set()
+        active_blocks.update(self.blocks)
         for blocks in self.layers.__dict__:
             active_blocks.update(getattr(self.layers, blocks))
         blocks = self.drawncubes.difference(active_blocks)
@@ -835,8 +874,8 @@ class Board(object):
                 self.drawCube(block[0], block[1], self.blocks[block])
 
     def drawAllBlocks(self):
-        for block in self.blocks:
-            self.drawCube(block[0], block[1], self.blocks[block])
+        for x, y in self.blocks:
+            self.drawCube(x, y, self.blocks[(x, y)])
 
     def drawBoard(self):
         """ Yup, just draw the board """
@@ -921,7 +960,7 @@ class Table(Job):
         font = loadFont(self.font)
 
         ## Simplest method of padding, let the font renderer handle it automatically by adding spaces.
-        rows = [ [" {} ".format(column) for column in row]
+        rows = [ [u" {} ".format(column) for column in row]
                  for row in self.rows ]
 
         self.column_widths = [0 for _ in xrange(len(rows[0]))]

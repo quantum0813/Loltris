@@ -1,11 +1,15 @@
 {
     "gameplay": {
-        "uber_tetromino": false, 
+        "uber_tetromino": true, 
         "flip_tetromino": false
     }, 
     "graphics": {
         "cross_tetromino": false, 
-        "ghostpiece_color": [ 45, 45, 45 ], 
+        "ghostpiece_color": [
+            45, 
+            45, 
+            45
+        ], 
         "shade": true, 
         "ghostpiece": true
     }
