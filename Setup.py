@@ -17,11 +17,10 @@ def setupFiles():
 
     Log.log("Setting up files for Loltris")
 
-    with open(Path.join(Load.DATADIR, SETUP_FILE), "wb") as wf:
-        wf.write("# This file just tells Loltris that everything has been set up,\n" + \
-                 "# do not remove this file unless you want to set up everything\n" + \
-                 "# again (deletes all user-files like scores)\n"
-                 )
+    try:
+        OS.mkdir(Load.HIGHSCOREDIR)
+    except OSError:
+        Log.panic("Unable to create directory `{}'".format(Path.join(Load.HIGHSCOREDIR, "Snapshots")))
 
     with open(Path.join(Load.HIGHSCOREDIR, "Scores.json"), "wb") as wf:
         wf.write(SCORES_CONTENTS)
@@ -29,5 +28,10 @@ def setupFiles():
     try:
         OS.mkdir(Path.join(Load.HIGHSCOREDIR, "Snapshots"))
     except OSError:
-        pass
+        Log.panic("Unable to create directory `{}'".format(Path.join(Load.HIGHSCOREDIR, "Snapshots")))
 
+    with open(Path.join(Load.DATADIR, SETUP_FILE), "wb") as wf:
+        wf.write("# This file just tells Loltris that everything has been set up,\n" + \
+                 "# do not remove this file unless you want to set up everything\n" + \
+                 "# again (deletes all user-files like scores)\n"
+                 )
