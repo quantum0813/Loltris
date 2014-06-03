@@ -19,7 +19,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## =====================================================================
 
-import inspect, sys, traceback
+import inspect, sys, traceback as Traceback
 from time import time, ctime, strftime, localtime
 from sys import stdout
 from threading import currentThread
@@ -54,28 +54,46 @@ def fprint(fileobj, data):
     fileobj.write(data + EOL)
     fileobj.flush()
 
+## Safe print
+def putLn(thing):
+    try:
+        print(thing)
+    except:
+        pass
+
+def put(thing):
+    try:
+        stdout.write(str(thing))
+    except:
+        pass
+
 def genericLog(logtype, message, cr=False, **kwargs):
     if loglevel[logtype] > LOGLEVEL:
         return
 
     if cr:
         ## Carriage return
-        stdout.write("\r")
+        put("\r")
     if enable_color:
-        stdout.write(color.get(logtype, ""))
+        put(color.get(logtype, ""))
     log = "[%s] %8s: %20s: %s" % (getTime(), logtype, getCaller(), message)
-    print(log)
+    putLn(log)
     if enable_color:
-        stdout.write(color["DEFAULT"])
+        put(color["DEFAULT"])
     if kwargs.get("trace"):
         ## Print the traceback, indented with four spaces
-        stdout.write("".join(["    "+x+EOL for x in traceback.format_exc(kwargs["trace"]).splitlines()]))
+        put("".join(["    "+x+EOL for x in Traceback.format_exc(kwargs["trace"]).splitlines()]))
 
 ## Just so that everything is uniform
 def dump(message):
     if loglevel["DEBUG"] > LOGLEVEL:
         return
-    stdout.write(str(message))
+    put(str(message))
+
+def stackDump():
+    if loglevel["DEBUG"] > LOGLEVEL:
+        return
+    Traceback.print_stack()
 
 ## Called by genericLog, which is called by panic/error/log etc, which is called by [function we want]
 def getCaller():

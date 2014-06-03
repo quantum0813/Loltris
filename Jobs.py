@@ -30,7 +30,6 @@ import Shared
 import Matrix
 import RGB
 import Draw
-import traceback as Traceback
 import os.path as Path
 from pygame.locals import *
 from Globals import *
@@ -53,8 +52,10 @@ def loadFont(font):
             Log.panic("Unable to load font: `{}'".format(font["name"]))
     return fontobj
 
-## The basic structure of a Job
 class Job(object):
+    """
+    The basic structure of a job, all required attributes and methods.
+    """
     def __init__(self, game, x, y, queue=Queue.GENERIC):
         self.game = game
         self.x = x
@@ -76,6 +77,9 @@ class Job(object):
         pass
 
 class ColorPalette(Job):
+    """
+    Job for mixing together values into a color, using sliders.
+    """
     def __init__(self, game, x, y):
         super(ColorPalette, self).__init__(game, x, y)
         self.red = 0
@@ -104,9 +108,142 @@ class ColorPalette(Job):
 
 
 class TextBox(object):
+    """
+    Multi-purpose text-box, takes the following keyword arguments:
+
+    onmouseclick (func):
+        Info:
+            A function activated when the mouse is clicked while inside the TextBox object.
+            This function is not given any arguments.
+        Default:
+            None
+
+    onmouseenter (func):
+        Info
+            A function activated when the mouse is moved inside the TextBox (from outside of it.)
+            This function is given one argument, the TextBox it belongs to. Example below
+            def onmouseenter(textbox_object):
+                ...
+        Default:
+            None
+
+    onmouseleave (func):
+        Info
+            A function activated when the mouse is moved outside the TextBox (from inside of it.)
+            This function is given one argument, the TextBox it belongs to. Example below
+            def onmouseleave(textbox_object):
+                ...
+        Default:
+            None
+
+    variables (dict):
+        Info:
+            A dictionary. Will be used like this on the TextBox's text:
+            text.format(**variables)
+            this is how a TextBox can handle text that changes.
+        Default:
+            {}
+
+    xcenter (bool):
+        Info:
+            Centers the textbox along the width of the screen.
+        Default:
+            False
+
+    ycenter (bool):
+        Info:
+            Centers the textbox along the height of the screen.
+        Default:
+            False
+
+    underline (bool):
+        Info:
+            Draw a line underneath the text.
+        Default:
+            False
+
+    colors (dict):
+        Info:
+            Colors of different parts of the TextBox, given as tuples with three values
+        Default:
+            {"background": (0,0,0)}
+
+    background (bool):
+        Info:
+            Draw a background with the color colors["background"]
+        Default:
+            False
+
+    border (bool):
+        Info:
+            Draw a border with the color colors["border"] around the TextBox
+        Default:
+            False
+
+    font (dict):
+        Info:
+            Controls the font used
+        Default:
+            {"name": ""}
+
+    yfit (bool):
+        Info:
+            Fit the height according to the fonts. Constant height given as keyword "height" will be ignored.
+        Default:
+            False
+
+    xfit (bool):
+        Info:
+            Fit the width according to the fonts. Constant width given as keyword "width" will be ignored.
+        Default:
+            False
+
+    textfit (bool):
+        Info:
+            LEGACY, has been replaced by xfit and yfit
+            Same as xfit=True and yfit=True.
+        Default:
+            False
+
+    padding (int):
+        Info:
+            The TextBox will be padded with the width/height divided by padding.
+        Default:
+            12
+
+    height (int):
+        Info:
+            Set height manually with a constant int.
+        Default:
+            0
+
+    width (int):
+        Info:
+            Set width manually with a constant int.
+        Default:
+            0
+
+    x (int):
+        Info:
+            x coordinate
+        Default:
+            0
+
+    y (int):
+        Info:
+            y coordinate
+        Default:
+            0
+
+    border_width (int):
+        Info:
+            Controls width of the border in pixels. (if the border has been enabled with border=True)
+        Default:
+            1
+    """
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
-                 queue=None, variables={}, updatewhen=None, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True,
+                 queue=None, variables={}, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True,
                  border_width=1):
         if not text:
             Log.log("Error in TextBox.__init__, called by {}".format(Log.getCaller()))
@@ -383,7 +520,41 @@ class Switch(TextBox):
         self.drawBox()
 
 class TimedExecution(object):
-    def __init__(self, function, cycles=0, seconds=0, timed=True, anykey=True):
+    """
+    Execute a function after a given time. The timing is handled in terms of cycles,
+    i.e how many times update has been called. It is therefore dependant on the framerate
+    being kept at a relatively constant speed. The time can be given in seconds or in
+    cycles (seconds are recommended.)
+
+    Takes the following keyword arguments:
+    
+    cycles (int):
+        Info:
+            Give the time until execution in cycles, this option is not recommended
+            as it will change depending on framerate.
+        Default:
+            0
+
+    seconds (float):
+        Info:
+            The time until execution in seconds, this option will overwrite cycles.
+        Default:
+            0
+
+    timed (bool):
+        Info:
+            Whether or not the execution is timed (used with anykey.)
+        Default:
+            True
+
+    anykey (bool):
+        Info:
+            If enabled, the given function will be executed when a KEYDOWN event
+            is caught by eventHandler. Often used with timed=False.
+        Default:
+            True
+    """
+    def __init__(self, function, cycles=0, seconds=0.0, timed=True, anykey=True):
         self.update_required = True
         self.draw_required = False
         self.queue = 0
@@ -396,7 +567,7 @@ class TimedExecution(object):
         if cycles:
             self.cycles = cycles
         elif seconds:
-            self.cycles = seconds * FRAMERATE
+            self.cycles = int(round(seconds * FRAMERATE))
 
     def eventHandler(self, event):
         if event.type == KEYDOWN and self.anykey:
@@ -413,6 +584,25 @@ class TimedExecution(object):
         self.cycles -= 1
 
 class Tetromino(object):
+    """
+    A tetromino, heavily tied in with the Board class, requires a board to function.
+
+    Positional arguments:
+
+    board (Board instance):
+        The board that the instance belongs to 
+    matrix (2d list):
+        An image of the tetromino, given as a 2d matrix of boolean values
+        Example:
+            ## The "T" block
+            [[0, 1, 0],
+             [1, 1, 1]]
+    _type (str):
+        DEPRECATED
+        The name of the tetromino
+    color (tuple):
+        The color of the tetromino blocks given as a RGB tuple.
+    """
     def __init__(self, board, matrix, _type, color, x=0, y=None, ycenter=False,
                  xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None,
                  fill=False,
@@ -480,7 +670,7 @@ class Tetromino(object):
     def insert(self):
         self.board.layers.tetromino = {}
         Log.debug("Inserting tetromino `{}'".format(self))
-        Traceback.print_stack()
+        Log.stackDump()
 
         if self.y < 0:
             ## XXX: GAME OVER
@@ -614,8 +804,11 @@ class Tetromino(object):
                 self.updateinterval = SPED_UP_UPDATEINTERVAL
                 self.time_until_update = self.updateinterval
 
-## This object will be managed by a Tetromino(), it should not be managed as a Job
 class GhostTetromino(Tetromino):
+    """
+    "GhostPiece"
+    Should always be managed by a Tetromino, should not be registered as a Job.
+    """
     def __init__(self, *args, **kwargs):
         super(GhostTetromino, self).__init__(*args, ghostpiece=False, **kwargs)
 
@@ -678,6 +871,9 @@ class ScrollingText(AutoTextBox):
         self.y += self.speed
 
 class Notification(TextBox):
+    """
+    Notification that will destroy itself when clicked.
+    """
     def __init__(self, game, _id, text):
         super(Notification, self).__init__(
                 game, text, xcenter=True, ycenter=True, font=ERRORBOX_FONT,

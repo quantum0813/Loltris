@@ -118,7 +118,7 @@ class MainMenu(Core.Menu):
             self.jobs.highscorelist.x = SCREEN_WIDTH - self.jobs.highscorelist.width - 5
 
     def launchTetrisGame(self):
-        self.call(TetrisGame.TetrisGame, caption="Loltris", player_name=PLAYER)
+        self.call(TetrisGame.TetrisGame, caption="Loltris")
         # self.loadHighscores()
 
     def eventHandler(self, event):
@@ -223,37 +223,62 @@ class KeymapMenu(Core.Menu):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Tetris-map"
             self.menu = Factory.variableTextBoxes([
-                    ("Rotate left: {key}",
+                 # (keymap.replace("_", " ").capitalize() + ": {key}",
+                 #  {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get(keymap, 0))},
+                 #  lambda: modifyKeymap(self, Shared.keymap["game"], keymap))
+                 # for keymap in ("rotate_left", "pause", "speed_up", "move_left", "move_right", "drop_down", "rotate_right", "reverse", "uber_tetromino")
+                 # ],
+                 (
+                     "Rotate left: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("rotate_left", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_left")),
-                    ("Pause: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_left")
+                     ),
+                 (
+                     "Pause: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("pause", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "pause")),
-                    ("Speed up: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "pause")
+                     ),
+                 (
+                     "Speed up: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("speed_up", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "speed_up")),
-                    ("Move left: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "speed_up")
+                     ),
+                 (
+                     "Move left: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("move_left", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "move_left")),
-                    ("Move right: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "move_left")
+                     ),
+                 (
+                     "Move right: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("move_right", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "move_right")),
-                    ("Drop down: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "move_right")
+                     ),
+                 (
+                     "Drop down: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("drop_down", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "drop_down")),
-                    ("Rotate right: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "drop_down")
+                     ),
+                 (
+                     "Rotate right: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("rotate_right", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_right")),
-                    ("Reverse: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "rotate_right")
+                     ),
+                 (
+                     "Reverse: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("reverse", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "reverse")),
-                    ("Uber: {key}",
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "reverse")
+                     ),
+                 (
+                     "Uber: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("uber_tetromino", 0))},
-                     lambda: modifyKeymap(self, Shared.keymap["game"], "uber_tetromino")),
-                    ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
-                                                            "font":self.colorscheme["option"], },
-                    fill=MENU_3DBORDER_BACKGROUND,
-                    )
+                     lambda: modifyKeymap(self, Shared.keymap["game"], "uber_tetromino")
+                     ),
+                 ],
+                 self,
+                 font=MENU_OPTION_FONT,
+                 colors={"background":self.colorscheme["background"], "font":self.colorscheme["option"]},
+                 fill=MENU_3DBORDER_BACKGROUND,
+                 )
             self.setupObjects()
 
     class Menu(Core.Menu):

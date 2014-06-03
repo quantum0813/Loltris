@@ -35,6 +35,10 @@ import Draw
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 class Game(object):
+    """
+    Multi-purpose class for creating and managing games. Based on the handling of multiple jobs in a perticular
+    order, can be thought of as a (very) minimal operating system for video games.
+    """
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
                  width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=True, soundtrack=None,
                  fill=True):
@@ -249,6 +253,9 @@ class Game(object):
         return self.ret
 
 class Menu(Game):
+    """
+    Game-derived class for creating Menus.
+    """
     def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
                  isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
         self.id = _id
@@ -261,8 +268,10 @@ class Menu(Game):
         self.options = []
         self.selected = 0
         self.options_pos = [10, 90]
-        self.header_font = header_font
-        self.option_font = option_font
+        self.header_font = {}
+        self.header_font.update(header_font)
+        self.option_font = {}
+        self.option_font.update(option_font)
         self.isroot = isroot
         self.onHeaderClick = onHeaderClick
         self.xcenter = xcenter
