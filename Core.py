@@ -208,6 +208,9 @@ class Game(object):
                     for event in self.events:
                         if event.type not in self.lock:
                             obj.eventHandler(event)
+                ## XXX: Second check of update_required is necessarry because the eventHandler may either modify
+                ##      or call methods that modify parameters in obj.
+                if obj.update_required:
                     obj.update()
 
             queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
