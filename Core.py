@@ -203,12 +203,14 @@ class Game(object):
                 if objname not in self.jobs.__dict__:
                     ## In case a Job modifies self.jobs, removing this job.
                     continue
+
                 obj = self.getJob(objname)
                 if obj.update_required:
                     for event in self.events:
                         if event.type not in self.lock:
                             obj.eventHandler(event)
-                ## XXX: Second check of update_required is necessarry because the eventHandler may either modify
+
+                ## XXX: This second check of update_required is necessarry because the eventHandler may either modify
                 ##      or call methods that modify parameters in obj.
                 if obj.update_required:
                     obj.update()
