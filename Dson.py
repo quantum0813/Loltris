@@ -291,6 +291,6 @@ def dumps(obj, indent=0):
     serializer = Serializer(obj, indent=indent)
     return serializer.serialize()
 
-def dump(path, obj, indent=0):
+def dump(obj, path, indent=0):
     with open(path, "wb") as w:
         return w.write(dumps(obj, indent=indent))

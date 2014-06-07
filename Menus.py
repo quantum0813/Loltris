@@ -223,11 +223,6 @@ class KeymapMenu(Core.Menu):
             super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Tetris-map"
             self.menu = Factory.variableTextBoxes([
-                 # (keymap.replace("_", " ").capitalize() + ": {key}",
-                 #  {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get(keymap, 0))},
-                 #  lambda: modifyKeymap(self, Shared.keymap["game"], keymap))
-                 # for keymap in ("rotate_left", "pause", "speed_up", "move_left", "move_right", "drop_down", "rotate_right", "reverse", "uber_tetromino")
-                 # ],
                  (
                      "Rotate left: {key}",
                      {"key": lambda _: Utils.keyToString(Shared.keymap["game"].get("rotate_left", 0))},

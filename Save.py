@@ -34,8 +34,7 @@ from Globals import *
 
 def saveScore(score, state=set()):
     try:
-        with open(Path.join(HIGHSCOREDIR, "Scores.dson")) as rf:
-            scores = Dson.load(rf)
+        scores = Dson.load(Path.join(HIGHSCOREDIR, "Scores.dson"))
     except (IOError, OSError):
         ## Assume that the file has been deleted, start from scratch with an empty array.
         scores = []
@@ -44,8 +43,7 @@ def saveScore(score, state=set()):
     score["time"] = Log.getTime(spec="%H:%M:%S")
     score["seq"] = seq
     scores.append(score)
-    with open(Path.join(HIGHSCOREDIR, "Scores.dson"), "wb") as wf:
-        Dson.dump(scores, wf, indent=JSON_INDENT)
+    Dson.dump(scores, Path.join(HIGHSCOREDIR, "Scores.dson"), indent=JSON_INDENT)
     with open(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq)), "wb") as wf:
         wf.write(Bz2.compress(Pickle.dumps(state)))
     Log.log("Saved new score to `Scores.dson'")
@@ -62,12 +60,10 @@ def _appendTetromino(root, color, name, matrix):
     root.append(element)
 
 def saveOptions():
-    with open(Path.join(DSONDIR, "Settings.dson"), "wb") as wf:
-        Dson.dump(Shared.options, wf, indent=4)
+    Dson.dump(Shared.options, Path.join(DSONDIR, "Settings.dson"), indent=JSON_INDENT)
 
 def saveKeymap():
-    with open(Path.join(DSONDIR, "Keymaps.dson"), "wb") as wf:
-        Dson.dump(Shared.keymap, wf)
+    Dson.dump(Shared.keymap, Path.join(DSONDIR, "Keymaps.dson"), indent=JSON_INDENT)
 
 def _writeText(path, data):
     try:
@@ -81,4 +77,3 @@ def saveTetromino(color, name, matrix):
             Path.join(TETROMINODIR, "{}.pyobj.bz2".format(name)),
             Bz2.compress(Pickle.dumps({"color": color, "matrix": matrix}))
             )
-
