@@ -20,7 +20,7 @@
 ## =====================================================================
 
 
-from Load import IMAGEDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadText, TETROMINODIR
+from Load import IMAGEDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadText, TETROMINODIR, DSONDIR
 import os.path as Path
 import json as Json
 import Dson

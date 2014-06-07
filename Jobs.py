@@ -297,6 +297,7 @@ class TextBox(object):
             self.colors[color] = colors[color]
 
     def renderFonts(self):
+        Log.debug("Rendering {}".format(self))
 
         if not self.font.get("name"):
             self.font["name"] = Pygame.font.get_default_font()

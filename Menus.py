@@ -82,6 +82,7 @@ class MainMenu(Core.Menu):
                 self,
                 font=MENU_OPTION_FONT,
                 fill=MENU_3DBORDER_BACKGROUND,
+                xcenter=True,
                 colors={
                     "background":self.colorscheme["background"],
                     "font":self.colorscheme["option"],
@@ -141,6 +142,7 @@ class PauseMenu(Core.Menu):
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 fill=MENU_3DBORDER_BACKGROUND,
+                xcenter=True,
                 )
         self.setupObjects()
         self.running = self.mainLoop
@@ -157,6 +159,7 @@ class OptionsMenu(Core.Menu):
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 fill=MENU_3DBORDER_BACKGROUND,
+                xcenter=True,
                 )
 
         ## >inb4 immature jokes
@@ -214,6 +217,7 @@ class KeymapMenu(Core.Menu):
                 ], self, font=MENU_OPTION_FONT, colors={"background":self.colorscheme["background"],
                                                         "font":self.colorscheme["option"], },
                 fill=MENU_3DBORDER_BACKGROUND,
+                xcenter=True,
                 )
         self.setupObjects()
         self.getting = None
@@ -273,6 +277,7 @@ class KeymapMenu(Core.Menu):
                  font=MENU_OPTION_FONT,
                  colors={"background":self.colorscheme["background"], "font":self.colorscheme["option"]},
                  fill=MENU_3DBORDER_BACKGROUND,
+                xcenter=True,
                  )
             self.setupObjects()
 
@@ -301,6 +306,7 @@ class KeymapMenu(Core.Menu):
                     "font":self.colorscheme["option"],
                     },
                 fill=MENU_3DBORDER_BACKGROUND,
+                xcenter=True,
                 )
             print(self.menu)
             self.setupObjects()
