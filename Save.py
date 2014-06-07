@@ -23,6 +23,7 @@
 from Load import IMAGEDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadText, TETROMINODIR
 import os.path as Path
 import json as Json
+import Dson
 import os as OS
 import RGB
 import Log
@@ -33,8 +34,8 @@ from Globals import *
 
 def saveScore(score, state=set()):
     try:
-        with open(Path.join(HIGHSCOREDIR, "Scores.json")) as rf:
-            scores = Json.load(rf)
+        with open(Path.join(HIGHSCOREDIR, "Scores.dson")) as rf:
+            scores = Dson.load(rf)
     except (IOError, OSError):
         ## Assume that the file has been deleted, start from scratch with an empty array.
         scores = []
@@ -43,11 +44,11 @@ def saveScore(score, state=set()):
     score["time"] = Log.getTime(spec="%H:%M:%S")
     score["seq"] = seq
     scores.append(score)
-    with open(Path.join(HIGHSCOREDIR, "Scores.json"), "wb") as wf:
-        Json.dump(scores, wf, indent=JSON_INDENT)
+    with open(Path.join(HIGHSCOREDIR, "Scores.dson"), "wb") as wf:
+        Dson.dump(scores, wf, indent=JSON_INDENT)
     with open(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq)), "wb") as wf:
         wf.write(Bz2.compress(Pickle.dumps(state)))
-    Log.log("Saved new score to `Scores.json'")
+    Log.log("Saved new score to `Scores.dson'")
 
 def matrixToAscii(matrix, true="#", false="_", newline="\n"):
     ret = ""
@@ -61,12 +62,12 @@ def _appendTetromino(root, color, name, matrix):
     root.append(element)
 
 def saveOptions():
-    with open(Path.join(JSONDIR, "Settings.json"), "wb") as wf:
-        Json.dump(Shared.options, wf, indent=4)
+    with open(Path.join(DSONDIR, "Settings.dson"), "wb") as wf:
+        Dson.dump(Shared.options, wf, indent=4)
 
 def saveKeymap():
-    with open(Path.join(JSONDIR, "Keymaps.json"), "wb") as wf:
-        Json.dump(Shared.keymap, wf)
+    with open(Path.join(DSONDIR, "Keymaps.dson"), "wb") as wf:
+        Dson.dump(Shared.keymap, wf)
 
 def _writeText(path, data):
     try:

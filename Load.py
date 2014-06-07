@@ -22,7 +22,8 @@
 from RGB import rgbHexDecode
 import os.path as Path
 import Log
-import json as Json
+# import json as Json
+import Dson
 import pickle as Pickle
 import bz2 as Bz2
 import os as OS
@@ -34,25 +35,26 @@ IMAGEDIR = Path.join(DATADIR, "Images")
 MUSICDIR = Path.join(DATADIR, "Music")
 TXTDIR = Path.join(DATADIR, "TXT")
 JSONDIR = Path.join(DATADIR, "JSON")
+DSONDIR = Path.join(DATADIR, "DSON")
 TETROMINODIR = Path.join(DATADIR, "Tetrominos")
 ## Not sure where this should be really
 HIGHSCOREDIR = Path.join(DATADIR, "Highscores")
 SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
 
 def loadScores():
-    path = Path.join(HIGHSCOREDIR, "Scores.json")
+    path = Path.join(HIGHSCOREDIR, "Scores.dson")
     Log.log("Loading scores from `{}'".format(path))
-    return Json.loads(_loadText(path))
+    return Dson.loads(_loadText(path))
 
 def loadHighscores(top=10):
-    path = Path.join(HIGHSCOREDIR, "Scores.json")
+    path = Path.join(HIGHSCOREDIR, "Scores.dson")
     Log.log("Loading highscores from `{}'".format(path))
-    return sorted(Json.loads(_loadText(path)), key=lambda d: d["score"], reverse=True)[:top]
+    return sorted(Dson.loads(_loadText(path)), key=lambda d: d["score"], reverse=True)[:top]
 
 def loadKeymaps():
-    path = Path.join(JSONDIR, "Keymaps.json")
+    path = Path.join(DSONDIR, "Keymaps.dson")
     Log.log("Loading keymaps from `{}'".format(path))
-    return Json.loads(_loadText(path))
+    return Dson.loads(_loadText(path))
 
 def _loadText(path):
     try:
@@ -76,11 +78,11 @@ def loadTetrominos():
             ])
     return tetrominos
 
-def _loadOptions(json):
-    return Json.loads(json)
+def _loadOptions(dson):
+    return Dson.loads(dson)
 
 def loadOptions():
-    path = Path.join(JSONDIR, "Settings.json")
+    path = Path.join(DSONDIR, "Settings.dson")
     return _loadOptions(_loadText(path))
 
 def _loadSnapshot(data):
