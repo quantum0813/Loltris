@@ -92,7 +92,7 @@ aside h4 {
     font-weight: 700;
     margin: 0 0 10px;
     margin-left: -11px;
-    padding: 0 0 5px 30px;
+    padding: 0 0 5px 20px;
     text-transform: uppercase;
 }
 .title {
@@ -102,9 +102,10 @@ footer {
     color: #bbb;
 }
 
+/* Un-uglify links */
 a:link {color: #bbb; text-decoration: underline; }
 a:active {color: #bbb; text-decoration: underline; }
-a:visited {color: #ccc; text-decoration: underline; }
+a:visited {color: #999; text-decoration: underline; }
 
 a.active-sidelink:link {
     font-size: 12;

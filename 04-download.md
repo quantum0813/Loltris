@@ -44,20 +44,19 @@ function getImageLink(os_name) {
 <script text="text/javascript">
 var os_name = getOSName();
 var dl_link = getDLLink(os_name);
-if (! dl_link) {
-    document.write("Loltris has not been packaged for your platform, if Python/Pygame runs on your platform you can download the ");
-    document.write('<a href="{{ site.github_page }}>source</a> and set it up yourself. Be warned that this code is not stable."');
-} else {
+if (dl_link) {
     document.write("<p>Download binary for " + os_name + " <a href='" + dl_link + "'>here</a></p>");
     document.write("<img src='" + getImageLink(os_name) + "'>");
     document.write("<p>If you would rather have the latest features, download the source <a href='{{ site.github_page }}'>here</a>. But be warned, ");
     document.write("this code is not stable. Therefore it is highly recommended that you download the binary instead.</p>");
+} else {
+    document.write("Loltris has not been packaged for your platform, if Python/Pygame runs on your platform you can download the ");
+    document.write("<a href='{{ site.github_page }}'>source</a> and set it up yourself. Be warned that this code is not stable.");
 }
 </script>
 
 <!-- If javascript is disabled, we just give the user all the links -->
 <div id="download_list" class="noscript">
-    <p>
     <ul>
         <li>Windows (32-bit)
         <ul>
@@ -75,7 +74,6 @@ if (! dl_link) {
         </ul>
         </li>
     </ul>
-    </p>
 </div>
 
 <!-- Create the hidden list of downloads (can be enabled by clicking a button) -->
