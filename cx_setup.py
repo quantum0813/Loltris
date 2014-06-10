@@ -1,4 +1,4 @@
-## cx_freeze setup script for Pygame, auto-generated using cxfreeze
+## cx_freeze setup script for Loltris, auto-generated using cxfreeze
 
 from cx_Freeze import setup, Executable
 
