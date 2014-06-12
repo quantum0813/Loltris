@@ -12,10 +12,25 @@ class Credits(Core.Game):
     def __init__(self, *args, **kwargs):
         self.id = "Credits"
         super(Credits, self).__init__(self.id, soundtrack=os.path.join(Load.MUSICDIR, "elevator_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
+        # self.text = "Loltris v{}\n\n".format(VERSION)
         self.text = Load.loadCredits()
         self.running = self.mainLoop
 
         ## Jobs
+        title_font = {}
+        title_font.update(CREDITS_FONT)
+        title_font["size"] += 20
+        title_font["bold"] = True
+        self.addJob("title",
+                    Jobs.ScrollingText(
+                        self, "Loltris v{}\n".format(VERSION),
+                        speed=-1,
+                        font=title_font,
+                        colors=CREDITS_COLORSCHEME,
+                        fill=MENU_BACKGROUND,
+                        queue=1,
+                        )
+                    )
         self.addJob("text",
                     Jobs.ScrollingText(
                         self, self.text,
@@ -23,6 +38,8 @@ class Credits(Core.Game):
                         font=CREDITS_FONT,
                         colors=CREDITS_COLORSCHEME,
                         fill=MENU_BACKGROUND,
+                        y=SCREEN_HEIGHT + self.jobs.title.height,
+                        queue=0,
                         )
                     )
         ## TODO: For this to be possible, Jobs.ScrollingText needs to stop drawing itself when it reaches a certain point,

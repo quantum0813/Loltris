@@ -52,4 +52,3 @@ if __name__ == '__main__':
     main_menu.run()
 else:
     Log.warning("Importing from Loltris launcher")
-

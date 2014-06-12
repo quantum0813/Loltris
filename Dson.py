@@ -191,7 +191,7 @@ class Parser(object):
                 value += escaped
             else:
                 value += char
-        return string
+        return value
 
     def parseNumber(self, string, location):
         hasvery = string.count("very")

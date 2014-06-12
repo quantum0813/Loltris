@@ -5,7 +5,9 @@
 ## by options in the Settings.json file.
 
 from pygame.locals import *
-import pygame as Pygame
+
+## The program version (also used in the cxfreeze setup script)
+VERSION = "0.5"
 
 FRAMERATE = 30
 MOVING_TETROMINO_TIMEOUT = 0.05
@@ -16,13 +18,13 @@ BOARD_HEIGHT = 20
 # BOARD_HEIGHT = 30
 SPACER = 10
 MAKETETROMINO_OPTION_SPACER = 4
-LOGLEVEL = 4
+LOGLEVEL = 4 ## See Log.loglevel for details on this variable
 SOUND_ENABLED = False
 HIGHSCORES = 5
-UBERCOLOR = (0x70, 0x70, 0x22)
-PREVIEW_HEIGHT = 6
-PREVIEW_WIDTH = 7
-SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT
+UBERCOLOR = (0x70, 0x70, 0x22) ## Color of the über-tetromino
+PREVIEW_HEIGHT = 6 ## Preview window
+PREVIEW_WIDTH = 7 ## Preview window
+SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT ## How fast the Tetromino should move when sped up
 JSON_INDENT = 2
 KEYDOWN_REPEAT_INTERVAL = 20
 KEYDOWN_REPEAT_DELAY = 500
@@ -114,28 +116,28 @@ EOL = "\ǹ"
 ## Keys that do not directly represent a single character, here are their
 ## string representations.
 NONCHARACTERS = {
-        Pygame.K_LSHIFT: "L-Shift",
-        Pygame.K_RSHIFT: "R-Shift",
-        Pygame.K_RSUPER: "R-Super",
-        Pygame.K_LSUPER: "L-Super",
-        Pygame.K_LALT: "L-Alt",
-        Pygame.K_RALT: "R-Alt",
-        Pygame.K_RCTRL: "R-Ctrl",
-        Pygame.K_LCTRL: "L-Ctrl",
-        Pygame.K_BACKSPACE: "Backspace",
-        Pygame.K_DOWN: "Down",
-        Pygame.K_UP: "Up",
-        Pygame.K_RIGHT: "Right",
-        Pygame.K_RETURN: "Return",
-        Pygame.K_LEFT: "Left",
-        Pygame.K_ESCAPE: "Escape",
-        Pygame.K_PAGEDOWN: "PgDn",
-        Pygame.K_PAGEUP: "PgUp",
-        Pygame.K_TAB: "Tab",
-        Pygame.K_END: "End",
-        Pygame.K_HOME: "Home",
-        Pygame.K_PRINT: "PrntScr",
-        Pygame.K_INSERT: "Insert",
+        K_LSHIFT: "L-Shift",
+        K_RSHIFT: "R-Shift",
+        K_RSUPER: "R-Super",
+        K_LSUPER: "L-Super",
+        K_LALT: "L-Alt",
+        K_RALT: "R-Alt",
+        K_RCTRL: "R-Ctrl",
+        K_LCTRL: "L-Ctrl",
+        K_BACKSPACE: "Backspace",
+        K_DOWN: "Down",
+        K_UP: "Up",
+        K_RIGHT: "Right",
+        K_RETURN: "Return",
+        K_LEFT: "Left",
+        K_ESCAPE: "Escape",
+        K_PAGEDOWN: "PgDn",
+        K_PAGEUP: "PgUp",
+        K_TAB: "Tab",
+        K_END: "End",
+        K_HOME: "Home",
+        K_PRINT: "PrntScr",
+        K_INSERT: "Insert",
         }
 
 ## _ and O are declared to make TITLE_BLOCKS more readable

@@ -191,6 +191,28 @@ class OptionsMenu(Core.Menu):
 
         self.setupObjects()
 
+    class Graphics(Core.Menu):
+        def __init__(self, **kwargs):
+            super(KeymapMenu.Graphics, self).__init__("GraphicsMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
+            ## >inb4 immature jokes
+            def turnOn(option, options):
+                options[option] = True
+                Save.saveOptions()
+            def turnOff(option, options):
+                options[option] = False
+                Save.saveOptions()
+
+            self.menu = \
+                Factory.basicSwitches([
+                    ("Fullscreen", "fullscreen"),
+                    ], self, turnOn, turnOff, Shared.options["gameplay"],
+                    font=MENU_OPTION_FONT,
+                    colors=SWITCH_OPTION_COLORS,
+                    boxwidth=8,
+                    box_center=True,
+                    fill=MENU_3DBORDER_BACKGROUND,
+                    )
+
 ## Closure that generates a mainloop for getting a single character
 ## used in KeymapMenu.*
 def getKeyLoop(self, keys):

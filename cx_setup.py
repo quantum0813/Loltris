@@ -1,6 +1,7 @@
-## cx_freeze setup script for Pygame, auto-generated using cxfreeze
+## cx_freeze setup script for Loltris, auto-generated using cxfreeze
 
 from cx_Freeze import setup, Executable
+from Globals import *
 
 # Dependencies are automatically detected, but it might need
 # fine tuning.
@@ -14,7 +15,7 @@ executables = [
 ]
 
 setup(name='Loltris',
-      version = '1.0',
+      version = VERSION,
       description = 'Tetris clone',
       options = dict(build_exe = buildOptions),
       executables = executables)

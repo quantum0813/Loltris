@@ -19,7 +19,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## =====================================================================
 
-## TODO: This file should made into a module
+## TODO: This file should be modularized
 
 import pygame as Pygame
 import Queue
@@ -35,6 +35,7 @@ from pygame.locals import *
 from Globals import *
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
+## Jobs.py might not be the most logical place for this
 def loadFont(font):
     if not font.get("name"):
         font["name"] = Pygame.font.get_default_font()
@@ -66,6 +67,75 @@ class Job(object):
         self.draw_required = True
         self.fill = False
         self.resize = False
+        ## Jobs are recursive datatypes, they may have other jobs running "underneath"
+        self.jobs = Struct()
+
+    def runSubs(self):
+        self.clock.tick(self.ticktime)
+        self.events = Pygame.event.get()
+
+        ## The events and updates should be handled in reverse order (the things on top go first)
+        queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)
+        for objname in queue:
+            if objname not in self.jobs.__dict__:
+                ## In case a Job modifies self.jobs, removing this job.
+                continue
+
+            obj = self.getJob(objname)
+            if obj.update_required:
+                for event in self.events:
+                    if event.type not in self.lock:
+                        obj.eventHandler(event)
+
+            ## XXX: This second check of update_required is necessarry because eventHandler() may either modify
+            ##      or call methods that modify parameters in obj.
+            if obj.update_required:
+                obj.update()
+
+            ## XXX: This second check of update_required is necessarry because update() may either modify
+            ##      or call methods that modify parameters in obj.
+            if obj.update_required:
+                obj.runSubs()
+
+        queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
+        ## Handle resizing (redraw everything underneath the resized job)
+        for objname in queue:
+            obj = self.getJob(objname)
+            if getattr(obj, "resize"):
+                for job in self.getJobsIn(objname):
+                    job.force_draw = True
+                obj.resize = False
+
+        ## Unlike the events and updates, drawing is handled so that the lowest go first
+        for objname in queue:
+
+            if objname not in self.jobs.__dict__:
+                ## In case a Job modifies self.jobs, removing this job.
+                continue
+
+            obj = self.getJob(objname)
+
+            if objname not in self.jobs.__dict__:
+                ## In case a Job modifies self.jobs, removing itself during update.
+                continue
+
+            if obj.draw_required:
+                if obj.fill:
+                    Draw.fillJob(self.screen, obj.fill, obj)
+                obj.draw()
+
+
+        Pygame.display.flip()
+
+        for event in self.events:
+            if event.type not in self.lock:
+                self.eventHandler(event)
+
+        if self.running:
+            self.running()
+
+        ## Remove locks
+        self.lock = {}
 
     def draw(self):
         self.force_draw = False
@@ -106,7 +176,44 @@ class ColorPalette(Job):
         if event.type == MOUSEBUTTONDOWN:
             pass
 
-
+## TODO: Add markup, to allow for different fonts in different parts of the same textbox
+## XML Examples:
+"""
+<font size="40" style="bold" name="Arial">Title</font>
+<font size="20" style="cursive" name="Times New Roman">Something, something, something</font>
+"""
+## TODO: Could also just use built-in datatypes, i.e a list of dictionaries
+## Examples:
+"""
+[
+    {
+        "font": "Arial",
+        "text": "Title",
+        "bold": true,
+        "size": 40,
+    },
+    {
+        "font": "Times New Roman",
+        "text": "Something, something, something",
+        "size": 20,
+        "cursive": true,
+    },
+]
+"""
+## DSON example:
+"""
+so
+    such "font" is "Arial" wow
+    such "text" is "Title" wow
+    such "bold" is yes wow
+    such "size" is 40 wow
+and
+    such "font" is "Times New Roman" wow
+    such "text" is "Something, something, something" wow
+    such "cursive" is yes wow
+    such "size" is 20 wow
+many
+"""
 class TextBox(object):
     """
     Multi-purpose text-box, takes the following keyword arguments:
@@ -245,9 +352,9 @@ class TextBox(object):
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
                  queue=None, variables={}, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True,
                  border_width=1):
+
         if not text:
-            Log.log("Error in TextBox.__init__, called by {}".format(Log.getCaller()))
-            raise TypeError("No text given to TextBox")
+            raise TypeError("Empty string given to TextBox")
 
         self.game = game
         self.x = x
@@ -293,8 +400,7 @@ class TextBox(object):
 
         ## Copy from colors
         self.colors = {}
-        for color in colors:
-            self.colors[color] = colors[color]
+        self.colors.update(colors)
 
     def renderFonts(self):
         Log.debug("Rendering {}".format(self))
@@ -306,11 +412,11 @@ class TextBox(object):
             try:
                 fontobj = Shared.globfonts[Utils.genKey(self.font)] = \
                         Pygame.font.Font(
-                                Path.join(Load.FONTDIR, "{}.ttf".format(self.font["name"])),
-                                self.font.get("size", 40),
-                                bold=self.font.get("bold"),
-                                italic=self.font.get("italic")
-                                )
+                            Path.join(Load.FONTDIR, "{}.ttf".format(self.font["name"])),
+                            self.font.get("size", 40),
+                            bold=self.font.get("bold"),
+                            italic=self.font.get("italic")
+                        )
             except IOError:
                 Log.panic("Unable to load font: `{}' for {}".format(self.font["name"], self))
 
@@ -434,6 +540,14 @@ class Slider(TextBox):
         self.onmouseclick = lambda: self.moveBar(Pygame.mouse.get_pos()[0])
         self.from_pos = from_pos
         self.to_pos = to_pos
+
+    def drawLine(self):
+        Pygame.draw.aaline(
+                self.game.screen,
+                self.color["filled"],
+                self.from_pos,
+                self.to_pos,
+                )
 
     def getPercentage(self):
         pass
@@ -861,6 +975,10 @@ class ScrollingText(AutoTextBox):
         else:
             raise TypeError("Scrolling speed must be non-zero")
         self.speed = speed
+        if kwargs.get("x"):
+            self.x = kwargs["x"]
+        if kwargs.get("y"):
+            self.y = kwargs["y"]
 
     def update(self):
         super(ScrollingText, self).update()
@@ -1271,6 +1389,10 @@ class InputBox(TextBox):
             self.game.lock[KEYDOWN] = self
 
 class Border3D(Job):
+    """
+    3d border with background, draws four polygons (creating the 3d effect)
+    and one rectangle (filling the background)
+    """
     def __init__(self, game, x, y, width, height, colors, deepness, background=None, **kwargs):
         super(Border3D, self).__init__(game, x, y, **kwargs)
         self.force_draw = True
