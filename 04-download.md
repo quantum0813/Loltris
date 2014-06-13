@@ -23,7 +23,7 @@ function getDLLink(os_name) {
         case "Windows":
             return "{{ site.baseurl }}/assets/Software-Packages/Loltris_Win32.zip";
         case "Linux":
-            return "{{ site.baseurl }}/assets/Software-Packages/Loltris_Linux32.tar.bz2";
+            return "{{ site.baseurl }}/assets/Software-Packages/Loltris_Linux32.tgz";
         default:
             return null;
     }
