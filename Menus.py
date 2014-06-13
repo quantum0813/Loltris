@@ -23,23 +23,26 @@ import Shared
 import Core
 import Load
 import Jobs
-import TetrisGame
 import Queue
-import MakeTetromino
 import Log
-import pygame as Pygame
-import HighscoreExplorer
-import sys as Sys
 import Factory
-import webbrowser as Webbrowser
-import os.path as Path
 import Credits
 import Save
 import Matrix
 import Utils
+import pygame as Pygame
+import sys as Sys
+import webbrowser as Webbrowser
+import os.path as Path
 import functools as Func
 from pygame.locals import *
 from Globals import *
+
+## Games
+import HighscoreExplorer
+import TetrisGame
+import MakeTetromino
+import SandBox
 
 ## TODO: You know what would be cool? A DSL for doing this, may do that later. Menus Could be described in XML.
 
@@ -77,6 +80,7 @@ class MainMenu(Core.Menu):
                 ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
                 ("Credits", lambda: self.call(Credits.Credits, caption="Loltris - Credits")),
                 ("Homepage", lambda: Webbrowser.open(PROJECT_SITE)),
+                ("SandBox", lambda: self.call(SandBox.SandBox, caption="Loltris - SandBox")),
                 ("Exit", self.quit),
                 ],
                 self,

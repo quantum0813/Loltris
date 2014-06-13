@@ -35,28 +35,16 @@ from pygame.locals import *
 from Globals import *
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
-## Jobs.py might not be the most logical place for this
-def loadFont(font):
-    if not font.get("name"):
-        font["name"] = Pygame.font.get_default_font()
-    fontobj = Shared.globfonts.get(Utils.genKey(font))
-    if not fontobj:
-        try:
-            fontobj = Shared.globfonts[Utils.genKey(font)] = \
-                    Pygame.font.Font(
-                            Path.join(Load.FONTDIR, "{}.ttf".format(font["name"])),
-                            font.get("size", 40),
-                            bold=font.get("bold"),
-                            italic=font.get("italic")
-                            )
-        except IOError:
-            Log.panic("Unable to load font: `{}'".format(font["name"]))
-    return fontobj
-
 class Job(object):
     """
     The basic structure of a job, all required attributes and methods.
     """
+    def getJob(self, name):
+        return getattr(self.jobs, name)
+
+    def addJob(self, name, obj):
+        setattr(self.jobs, name, obj)
+
     def __init__(self, game, x, y, queue=Queue.GENERIC):
         self.game = game
         self.x = x
@@ -145,6 +133,24 @@ class Job(object):
 
     def update(self):
         pass
+
+## Jobs.py might not be the most logical place for this
+def loadFont(font):
+    if not font.get("name"):
+        font["name"] = Pygame.font.get_default_font()
+    fontobj = Shared.globfonts.get(Utils.genKey(font))
+    if not fontobj:
+        try:
+            fontobj = Shared.globfonts[Utils.genKey(font)] = \
+                    Pygame.font.Font(
+                            Path.join(Load.FONTDIR, "{}.ttf".format(font["name"])),
+                            font.get("size", 40),
+                            bold=font.get("bold"),
+                            italic=font.get("italic")
+                            )
+        except IOError:
+            Log.panic("Unable to load font: `{}'".format(font["name"]))
+    return fontobj
 
 class ColorPalette(Job):
     """
@@ -353,8 +359,7 @@ class TextBox(object):
                  queue=None, variables={}, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True,
                  border_width=1):
 
-        if not text:
-            raise TypeError("Empty string given to TextBox")
+        assert text, "Empty string given to TextBox"
 
         self.game = game
         self.x = x
@@ -525,42 +530,163 @@ class TextBox(object):
                 self.last_variables = variables
 
 
-class Slider(TextBox):
-    def __init__(self, game, text, from_pos, to_pos, height=5, width=0, colors=None):
+class Slider(Job):
+    """
+    A slider, made so that start position and the and position can be anywhere as long as
+    x0 < x1 and y0 < y1.
+    """
+    def __init__(self, game, text, from_pos, to_pos, width=10, colors=None):
+        assert from_pos[0] < to_pos[0]
+        assert from_pos[1] < to_pos[1]
+
+        super(Slider, self).__init__(
+                game, text, from_pos[0], from_pos[1]
+                )
+
         self.colors = colors or {
                 "background": (0,0,0),
                 "filled": (0,0,0),
-                "empty": (0,0,0),
+                "empty": (255,255,255),
                 "slider": (0,0,0),
                 }
 
-        super(Slider, self).__init__(
-                game, text, x=x, y=y, background=True, colors=colors,
-                )
         self.onmouseclick = lambda: self.moveBar(Pygame.mouse.get_pos()[0])
         self.from_pos = from_pos
         self.to_pos = to_pos
+        self.frac = 0
+        self.force_draw = True
+        self.width = width
+
+    def isIn(self, x, y):
+        """
+        Find out if the given coordinates are inside of the sliders' clickable area.
+        """
+
+        ## More readable names for the coordinates
+        x0, y0 = self.from_pos
+        x1, y1 = self.to_pos
+
+        ## Distance between the points, on the y and x axis
+        ydist = y0 - y1
+        xdist = x0 - x1
+
+        ## Equation for the line
+        slope = float(ydist) / float(xdist)
+        f = lambda x: y0 + x*slope
+
+        ## Check x and y
+        is_in_x = x0 <= x <= x1
+        is_in_y = y - self.width <= f(x) <= y + self.width
+
+        ## The coordinates are inside, if the x-coordinate is inside the x-axis,
+        ## and the y-coordinate is inside the y-axis.
+        return is_in_y and is_in_x
+
+    def getFraction(self, x, y):
+        """
+        Get the percentage, on a specific (x, y) coordinate.
+        """
+        x0 = self.from_pos[0]
+        x1 = self.to_pos[0]
+        ## Derived from getMiddle
+        percentage = abs(float(x - x0) / (x0 - x1))
+        if percentage >= 1:
+            return 1.0
+        if percentage <= 0:
+            return 0.0
+        return percentage
+
+    def getMiddle(self):
+        x0, y0 = self.from_pos
+        x1, y1 = self.to_pos
+        ydist = y0 - y1
+        xdist = x0 - x1
+        return (x0 - xdist + (xdist * self.frac), y0 - ydist + (ydist * self.frac))
 
     def drawLine(self):
-        Pygame.draw.aaline(
+        filled_to_pos = self.getMiddle()
+
+        Pygame.draw.line(
                 self.game.screen,
-                self.color["filled"],
-                self.from_pos,
+                self.colors["empty"],
+                filled_to_pos,
                 self.to_pos,
+                self.width
+                )
+        Pygame.draw.line(
+                self.game.screen,
+                self.colors["filled"],
+                self.from_pos,
+                filled_to_pos,
+                self.width
                 )
 
-    def getPercentage(self):
-        pass
+    def getValue(self):
+        ## The fraction has to be "reversed"
+        val = 1.0 - self.frac
+
+        ## We must be certain that 0.0 <= val <= 1.0
+        if val <= 0.0:
+            return 0.0
+        if val >= 1.0:
+            return 1.0
+        return val
+
+    def increase(self, amount):
+        ## This won't ever make sense, so if this happens it is most likely the result of an
+        ## error higher up on the stack.
+        assert -1.0 <= amount <= 1.0, "Increase may not exceed 1.0, or deceed -1.0"
+
+        Log.debug("Increase {}.frac by {}".format(self, amount))
+        self.force_draw = True
+        if self.frac + amount >= 1:
+            self.frac = 1.0
+        elif self.frac + amount <= 0:
+            self.frac = 0.0
+        else:
+            self.frac += amount
+        Log.debug("{}.frac = {}".format(self, self.frac))
+
+    def eventHandler(self, event):
+        if event.type == MOUSEBUTTONDOWN:
+            ## Left or right mouse button
+            x, y = Pygame.mouse.get_pos()
+            if self.isIn(x, y):
+                Log.debug("Clicked inside {}".format(self))
+                if event.button in (1, 3):
+                    frac = self.getFrac(x, y)
+                    self.frac = 1 - frac
+                    self.force_draw = True
+                if event.button == 4:
+                    self.increase(-0.1)
+                if event.button == 5:
+                    self.increase(0.1)
+
+    def draw(self):
+        if self.force_draw:
+            self.drawLine()
+            self.force_draw = False
 
 ## TODO: Create VerticalSlider and HorizontalSlider from Slider
+# class HorizontalSlider(Slider):
+#     def __init__(self, game, text, )
 
 class Flipper(TextBox):
     def __init__(self, game, title, options, x=0, y=0, height=5, width=0, colors=None):
+        def onMouseEnter(box):
+            box.colors["font"] = self.colors["option"]
+            box.renderFonts()
+        def onMouseLeave(box):
+            box.colors["font"] = self.colors["selected"]
+            box.renderFonts()
+        self.option = 0
+        self.title = title
+        self.colors = {}
+        self.colors.update(colors)
+
         super(Flipper, self).__init__(
                 game, title + options[0], x=x, y=y, background=True, colors=colors,
                 )
-        self.option = 0
-        self.title = title
 
     def nextOption(self):
         if self.option+1 == len(self.options):
@@ -723,8 +849,7 @@ class Tetromino(object):
                  fill=False,
                  ):
 
-        if not matrix:
-            raise TypeError("Will not create tetromino with empty matrix")
+        assert matrix, "Will not create tetromino with empty matrix"
 
         self.matrix = matrix
         self.type = _type
@@ -1253,8 +1378,7 @@ class Table(Job):
         super(Table, self).__init__(game, x, y, **kwargs)
 
         self.rows = [columns for columns, _ in table]
-        if any(len(self.rows[0]) != len(row) for row in self.rows[1:]):
-            raise TypeError("Rows differ in the number of columns")
+        assert any(len(self.rows[0]) == len(row) for row in self.rows[1:]), "Rows differ in the number of columns"
 
         self.colors = {}
         self.colors.update(colors)

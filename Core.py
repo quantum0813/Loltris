@@ -272,7 +272,7 @@ class Menu(Game):
         self.lookup = {}
         self.options = []
         self.selected = 0
-        self.options_pos = [10, 90]
+        self.options_pos = [10, 90] ## Need to be mutable
         self.header_font = {}
         self.header_font.update(header_font)
         self.option_font = {}
