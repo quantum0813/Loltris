@@ -34,17 +34,12 @@ import os.path as Path
 from pygame.locals import *
 from Globals import *
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
+from copy import copy
 
 class Job(object):
     """
     The basic structure of a job, all required attributes and methods.
     """
-    def getJob(self, name):
-        return getattr(self.jobs, name)
-
-    def addJob(self, name, obj):
-        setattr(self.jobs, name, obj)
-
     def __init__(self, game, x, y, queue=Queue.GENERIC):
         self.game = game
         self.x = x
@@ -58,6 +53,12 @@ class Job(object):
         ## Jobs are recursive datatypes, they may have other jobs running "underneath"
         self.jobs = Struct()
 
+    def getJob(self, name):
+        return getattr(self.jobs, name)
+
+    def addJob(self, name, obj):
+        setattr(self.jobs, name, obj)
+
     def runSubs(self):
         self.clock.tick(self.ticktime)
         self.events = Pygame.event.get()
@@ -68,7 +69,7 @@ class Job(object):
             if objname not in self.jobs.__dict__:
                 ## In case a Job modifies self.jobs, removing this job.
                 continue
-
+                
             obj = self.getJob(objname)
             if obj.update_required:
                 for event in self.events:
@@ -156,9 +157,13 @@ class ColorPalette(Job):
     """
     Job for mixing together values into a color, using sliders.
     """
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, window_width, width=10):
+        assert window_width > SPACER*2, "Window width is too small for spacers"
+
         super(ColorPalette, self).__init__(game, x, y)
+
         self.red = 0
+        # self.red_slider = Slider((x + SPACER, y), (x + window_width - SPACER, y), width=width, colors=)
         self.green = 0
         self.blue = 0
         # self.sliders = Factory.sliders
@@ -367,8 +372,7 @@ class TextBox(object):
         self.height = height
         self.width = width
         self.border = border
-        self.colors = {}
-        self.colors.update(colors)
+        self.colors = copy(colors)
         self.update_required = True
         self.draw_required = True
         self.xpadding = 0
@@ -377,8 +381,7 @@ class TextBox(object):
         self.background = background
         self.queue = queue if queue != None else Queue.TEXTBOX
         self.text = text
-        self.font = {}
-        self.font.update(font)
+        self.font = copy(font)
         self.textfit = textfit
         self.ycenter = ycenter
         self.xcenter = xcenter
@@ -403,9 +406,7 @@ class TextBox(object):
 
         self.renderFonts()
 
-        ## Copy from colors
-        self.colors = {}
-        self.colors.update(colors)
+        self.colors = copy(colors)
 
     def renderFonts(self):
         Log.debug("Rendering {}".format(self))
@@ -468,7 +469,8 @@ class TextBox(object):
             Pygame.draw.rect(
                     self.game.screen,
                     self.colors["border"],
-                    (self.x-self.border_width, self.y-self.border_width, self.width+self.border_width, self.height+self.border_width),
+                    (self.x-self.border_width, self.y-self.border_width,
+                     self.width+self.border_width, self.height+self.border_width),
                     self.border_width,
                     )
 
@@ -489,7 +491,8 @@ class TextBox(object):
         Pygame.draw.rect(
                 self.game.screen,
                 color,
-                (self.x-self.border_width, self.y-self.border_width, self.width+self.border_width + 1, self.height+self.border_width + 1),
+                (self.x-self.border_width, self.y-self.border_width,
+                 self.width+self.border_width + 1, self.height+self.border_width + 1),
                 0)
 
     def eventHandler(self, event):
@@ -529,33 +532,43 @@ class TextBox(object):
                 self.renderFonts()
                 self.last_variables = variables
 
-
 class Slider(Job):
     """
     A slider, made so that start position and the and position can be anywhere as long as
-    x0 < x1 and y0 < y1.
+    x0 <= x1 and y0 <= y1.
     """
-    def __init__(self, game, text, from_pos, to_pos, width=10, colors=None):
-        assert from_pos[0] < to_pos[0]
-        assert from_pos[1] < to_pos[1]
+    def __init__(self, game, from_pos, to_pos, width=10, colors=None, font=None, text=None):
+        assert from_pos[0] <= to_pos[0]
+        assert from_pos[1] <= to_pos[1]
 
         super(Slider, self).__init__(
-                game, text, from_pos[0], from_pos[1]
-                )
+            game, text, from_pos[0], from_pos[1]
+        )
 
-        self.colors = colors or {
+        if colors:
+            self.colors = copy(colors)
+        else:
+            self.colors = {
                 "background": (0,0,0),
                 "filled": (0,0,0),
                 "empty": (255,255,255),
                 "slider": (0,0,0),
-                }
+                "font": (255,255,255),
+            }
 
-        self.onmouseclick = lambda: self.moveBar(Pygame.mouse.get_pos()[0])
+        ## Misc. variables
         self.from_pos = from_pos
         self.to_pos = to_pos
         self.frac = 0
         self.force_draw = True
         self.width = width
+        self.text = text
+
+        ## TextBox (for displaying the explanatory text)
+        if text:
+            assert font, "Text was given, but no font was given"
+            self.textbox = AutoTextBox(self.game, text, x=from_pos[0], y=from_pos[1], font=font, colors=self.colors)
+            self.textbox.y -= self.textbox.height
 
     def isIn(self, x, y):
         """
@@ -654,7 +667,7 @@ class Slider(Job):
             if self.isIn(x, y):
                 Log.debug("Clicked inside {}".format(self))
                 if event.button in (1, 3):
-                    frac = self.getFrac(x, y)
+                    frac = self.getFraction(x, y)
                     self.frac = 1 - frac
                     self.force_draw = True
                 if event.button == 4:
@@ -662,9 +675,14 @@ class Slider(Job):
                 if event.button == 5:
                     self.increase(0.1)
 
+    def drawText(self):
+        if self.text:
+            self.textbox.draw()
+
     def draw(self):
         if self.force_draw:
             self.drawLine()
+            self.drawText()
             self.force_draw = False
 
 ## TODO: Create VerticalSlider and HorizontalSlider from Slider
@@ -681,8 +699,7 @@ class Flipper(TextBox):
             box.renderFonts()
         self.option = 0
         self.title = title
-        self.colors = {}
-        self.colors.update(colors)
+        self.colors = copy(colors)
 
         super(Flipper, self).__init__(
                 game, title + options[0], x=x, y=y, background=True, colors=colors,
@@ -882,7 +899,9 @@ class Tetromino(object):
         self.ghostpiece = None
         if ghostpiece:
             self.ghostpiece = GhostTetromino(
-                    board, matrix, _type, Shared.options["graphics"].get("ghostpiece_color", GHOST_COLOR), x=x, y=y, xcenter=xcenter)
+                board, matrix, _type,
+                Shared.options["graphics"].get("ghostpiece_color", GHOST_COLOR), x=x, y=y, xcenter=xcenter
+            )
             self.ghostpiece.drop(self.y)
 
     def getActiveBlocks(self):
@@ -1324,7 +1343,7 @@ class Board(object):
             Pygame.draw.rect(
                     self.game.screen,
                     self.outercolor,
-                    (self.x, self.y, (self.blocks_width * self.blockwidth) + 1, self.blocks_height * self.blockwidth + 1,),
+                    (self.x, self.y, (self.blocks_width * self.blockwidth) + 1, self.blocks_height * self.blockwidth + 1),
                     1)
         Pygame.draw.rect(
                 self.game.screen,
@@ -1380,8 +1399,7 @@ class Table(Job):
         self.rows = [columns for columns, _ in table]
         assert any(len(self.rows[0]) == len(row) for row in self.rows[1:]), "Rows differ in the number of columns"
 
-        self.colors = {}
-        self.colors.update(colors)
+        self.colors = copy(colors)
         self.font = font
         self.spacer = 2
         self.fill = True
@@ -1425,7 +1443,7 @@ class Table(Job):
     def draw(self):
         ## Fill the area
         if self.fill:
-            Pygame.draw.rect( self.game.screen, self.colors["background"], (self.x, self.y, self.width, self.height), 0,)
+            Pygame.draw.rect( self.game.screen, self.colors["background"], (self.x, self.y, self.width, self.height), 0)
 
         ## Draw fonts
         y = self.y
@@ -1434,20 +1452,20 @@ class Table(Job):
             x = self.x
             for column_i in xrange(len(row)):
                 column = row[column_i]
-                self.game.screen.blit( column, (x, y),)
+                self.game.screen.blit(column, (x, y))
                 x += self.column_widths[column_i]
             y += self.row_heights[row_i]
 
         ## Draw borders between rows
         y = self.y
         for row_i in xrange(len(self.rendered_rows)):
-            Pygame.draw.line( self.game.screen, self.colors["border"], (self.x, y), (self.x + self.width, y), 1,)
+            Pygame.draw.line(self.game.screen, self.colors["border"], (self.x, y), (self.x + self.width, y), 1)
             y += self.rendered_rows[row_i][0].get_height()
 
         ## Draw borders between columns
         x = self.x
         for column_i in xrange(len(self.rendered_rows[0])):
-            Pygame.draw.line( self.game.screen, self.colors["border"], (x, self.y), (x, self.y + self.height), 1,)
+            Pygame.draw.line(self.game.screen, self.colors["border"], (x, self.y), (x, self.y + self.height), 1)
             x += self.column_widths[column_i]
 
         ## Draw a box around everything
@@ -1537,6 +1555,3 @@ class Border3D(Job):
                     )
             self.force_draw = False
 
-class ColorSelector(Job):
-    def __init__(self, game, x, y, **kwargs):
-        super(ColorSelector, self).__init__(game, x, y, **kwargs)

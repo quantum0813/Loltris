@@ -21,8 +21,25 @@ class Struct(object):
         """
         return "Struct(" + "".join(["{} = {}, ".format(attr, repr(getattr(self, attr))) for attr in self.__dict__])[:-2] + ")"
 
-    def __add__(self):
-        pass
+    def __len__(self):
+        return len(self.__dict__)
+
+    def __add__(self, obj):
+        if isinstance(obj, dict):
+            obj = Struct(**obj)
+
+        if isinstance(obj, Struct):
+            data = self.__dict__.copy()
+            data.update(obj.__dict__)
+            return Struct(**data)
+        else:
+            raise TypeError("unsupported operand type(s) for +: '{}' and '{}'".format(type(self), type(obj)))
+
+    def __contains__(self, obj):
+        return obj in self.__dict__
+
+    def __iter__(self):
+        return iter(self.__dict__)
 
 if __name__ == "__main__":
     import doctest

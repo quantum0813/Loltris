@@ -62,11 +62,19 @@ class Game(object):
         self.fill = fill
 
         ## TODO: Explore this
-        self.interrupt_table = {}
+        self.interrupt_table = Struct(
+            halt = self.quit
+        )
         self.interrupts = []
 
+    def registerInterrupt(self, name, func):
+        setattr(self.interrupt_table, name, func)
+
+    def unregisterInterrupt(self, name):
+        delattr(self.interrupt_table, name)
+
     def removeJob(self, removed_job_str):
-        removed_job = self.jobs.__dict__[removed_job_str]
+        removed_job = getattr(self.jobs, removed_job_str)
         ## For now this is the solution, fill the entire screen. When the todo below is finished,
         ## I'll just fill  the job instead.
         Draw.fillJob(self.screen, self.bgcolor, removed_job)
@@ -110,7 +118,7 @@ class Game(object):
     ## that take over the screen.
     def call(self, obj, *args, **kwargs):
         game = obj(screen=self.screen, *args, **kwargs)
-
+        
         Log.debug("Calling `{}' from `{}'".format(game.id, self.id))
 
         if Pygame.mixer.music.get_busy():
@@ -137,7 +145,7 @@ class Game(object):
         self.setup()
 
         ## Force redrawing of all jobs (if they support it)
-        for job in self.jobs.__dict__:
+        for job in self.jobs:
             self.jobs.__dict__[job].force_draw = True
 
         if ret and self.id != ret:
@@ -174,7 +182,7 @@ class Game(object):
 
     def getJobsIn(self, basename):
         base = self.getJob(basename)
-        for jobname in self.jobs.__dict__:
+        for jobname in self.jobs:
             if jobname == basename:
                 ## Skip the base itself
                 continue
@@ -188,19 +196,33 @@ class Game(object):
             if job.x <= base.x <= job.width + job.x and job.y <= base.y <= job.height + job.y:
                 yield job
 
+
+    def handleInterrupts(self):
+        for interrupt in self.interrupts:
+            if not hasattr(self.interrupt_table, interrupt):
+                raise LookupError("Invalid interrupt {} not in table".format(interrupt))
+            ## Run the handler
+            getattr(self.interrupt_table, interrupt)()
+
     def run(self):
         if not hasattr(self, "running") or not hasattr(self, "eventHandler"):
             raise GameError("Game has not been properly initialized")
 
+        i = 0
         while self.running:
 
+            i += 1
             self.clock.tick(self.ticktime)
             self.events = Pygame.event.get()
+            self.interrupts = []
+            if i == FRAMERATE:
+                i = 0
+                Log.debug("Framerate: {}".format(int(round(self.clock.get_fps()))))
 
             ## The events and updates should be handled in reverse order (the things on top go first)
-            queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)
+            queue = sorted(self.jobs, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)
             for objname in queue:
-                if objname not in self.jobs.__dict__:
+                if objname not in self.jobs:
                     ## In case a Job modifies self.jobs, removing this job.
                     continue
 
@@ -215,7 +237,7 @@ class Game(object):
                 if obj.update_required:
                     obj.update()
 
-            queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
+            queue = sorted(self.jobs, key=lambda obj: getattr(self.jobs, obj).queue)
             ## Handle resizing (redraw everything underneath the resized job)
             for objname in queue:
                 obj = self.getJob(objname)
@@ -227,13 +249,13 @@ class Game(object):
             ## Unlike the events and updates, drawing is handled so that the lowest go first
             for objname in queue:
 
-                if objname not in self.jobs.__dict__:
+                if objname not in self.jobs:
                     ## In case a Job modifies self.jobs, removing this job.
                     continue
 
                 obj = self.getJob(objname)
 
-                if objname not in self.jobs.__dict__:
+                if objname not in self.jobs:
                     ## In case a Job modifies self.jobs, removing itself during update.
                     continue
 
@@ -254,6 +276,8 @@ class Game(object):
 
             ## Remove locks
             self.lock = {}
+
+            self.handleInterrupts()
 
         return self.ret
 

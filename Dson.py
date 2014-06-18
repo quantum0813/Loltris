@@ -1,6 +1,26 @@
 #!/usr/bin/python2
+#-*- coding: utf-8 -*-
+
+## =====================================================================
+## DSON parser/serializer for Python2
+## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## =====================================================================
 
 from pprint import pprint
+from copy import copy
 
 constants = {
         "yes": True,
@@ -12,11 +32,13 @@ constants_reverse = {
         False: "no",
         None: "empty",
         }
+## For the function take() inside Parser.parse()
 OPEN = {"such", "so"}
 CLOSE = {"wow", "many"}
+
 WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890."
 DIGITS = set("1234567")
-NOPRINT = set("\n\v\t\r")
+NOPRINT = set(chr(c) for c in range(0x20))
 
 def typeOf(obj):
     return type(obj).__name__
@@ -31,10 +53,10 @@ def severalThings(iterable):
 class Parser(object):
     def __init__(self, text, separators={" ", "\n", "\r", "\v", "\t"}, wordchars=WORDCHARS, list_separators={"and", "also"}, declarators={"is", ",", ".", "!", "?"}):
         self.text = text
-        self.separators = set(separators)
+        self.separators = set(copy(separators))
         self.wordchars = set(wordchars).union(declarators)
-        self.list_separators = set(list_separators)
-        self.declarators = set(declarators)
+        self.list_separators = set(copy(list_separators))
+        self.declarators = set(copy(declarators))
 
     def tokenize(self):
         tokens = []
@@ -278,6 +300,8 @@ class Serializer(object):
         rec(self.obj, 0, True)
         return self.text
 
+## XXX: Unlike json.dump and json.load, Dson.load and Dson.dump take a path as their first
+##      argument
 def loads(string):
     parser = Parser(string)
     tokens = parser.tokenize()

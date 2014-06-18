@@ -9,7 +9,7 @@ from pygame.locals import *
 ## The program version (also used in the cxfreeze setup script)
 VERSION = "0.5"
 
-FRAMERATE = 30
+FRAMERATE = 25
 MOVING_TETROMINO_TIMEOUT = 0.05
 MOVE_TETROMINO_TIMEOUT = 0.2
 BOARD_WIDTH = 10

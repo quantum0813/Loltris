@@ -1,14 +1,14 @@
 such 'gameplay' is
   such 'uber_tetromino' is
-    no
+    yes
   wow
   such 'flip_tetromino' is
-    no
+    yes
   wow
 wow
 such 'graphics' is
-  such 'ghostpiece' is
-    yes
+  such 'cross_tetromino' is
+    no
   wow
   such 'ghostpiece_color' is
     so
@@ -18,7 +18,7 @@ such 'graphics' is
   such 'shade' is
     yes
   wow
-  such 'cross_tetromino' is
-    no
+  such 'ghostpiece' is
+    yes
   wow
 wow

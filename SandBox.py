@@ -12,18 +12,19 @@ from Globals import *
 class SandBox(Core.Game):
     def __init__(self, **kwargs):
         super(SandBox, self).__init__(
-                "SandBox", **kwargs
-                )
+            "SandBox", **kwargs
+        )
 
         self.addJob(
-                "slider",
-                Jobs.Slider(
-                    self,
-                    "nop",
-                    (30, 30),
-                    (SCREEN_WIDTH-30, 30),
-                    )
-                )
+            "slider",
+            Jobs.Slider(
+                self,
+                (30, 30),
+                (SCREEN_WIDTH-30, 30),
+                text="nop",
+                font=TETRIS_STATUSBOX_FONT,
+            )
+        )
 
         self.running = self.mainLoop
 
