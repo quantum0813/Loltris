@@ -260,7 +260,7 @@ class Serializer(object):
             elif obj in tuple(constants_reverse):
                 if newline:
                     self.text += (self.indent * level) * " "
-                self.text += constants_reverse[obj]
+                self.text += constants_reverse[obj] + " "
             elif type(obj).__name__ == "list":
                 if newline:
                     self.text += (self.indent * level) * " "
@@ -311,7 +311,7 @@ def load(path):
     with open(path, "rb") as r:
         return loads(r.read())
 
-def dumps(obj, indent=0):
+def dumps(obj, indent=2):
     serializer = Serializer(obj, indent=indent)
     return serializer.serialize()
 

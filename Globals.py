@@ -143,5 +143,5 @@ NONCHARACTERS = {
         K_DELETE: "Delete",
         }
 
-TITLE_BLOCKS = BlockText.render("PYTHON", BlockText.STANDARD_FONT, padding=False)
+TITLE_BLOCKS = BlockText.render("LOLTRIS", BlockText.STANDARD_FONT, padding=False)
 
