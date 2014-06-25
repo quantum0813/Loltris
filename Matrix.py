@@ -62,3 +62,10 @@ def setToMatrix(blocks, width, height):
     return[ [(x, y) in blocks for x in xrange(height)]
             for y in xrange(height)
             ]
+
+def append(m0, m1):
+    if len(m0) != len(m1):
+        raise TypeError("Matrices must be of the same height")
+    for row in range(len(m0)):
+        m0[row].extend(m1[row])
+

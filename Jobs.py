@@ -211,20 +211,6 @@ class ColorPalette(Job):
     },
 ]
 """
-## DSON example:
-"""
-so
-    such "font" is "Arial" wow
-    such "text" is "Title" wow
-    such "bold" is yes wow
-    such "size" is 40 wow
-and
-    such "font" is "Times New Roman" wow
-    such "text" is "Something, something, something" wow
-    such "cursive" is yes wow
-    such "size" is 20 wow
-many
-"""
 class TextBox(object):
     """
     Multi-purpose text-box, takes the following keyword arguments:
@@ -856,7 +842,7 @@ class Tetromino(object):
             [[0, 1, 0],
              [1, 1, 1]]
     _type (str):
-        DEPRECATED
+        **DEPRECATED**
         The name of the tetromino
     color (tuple):
         The color of the tetromino blocks given as a RGB tuple.
@@ -928,8 +914,6 @@ class Tetromino(object):
 
     def insert(self):
         self.board.layers.tetromino = {}
-        Log.debug("Inserting tetromino `{}'".format(self))
-        Log.stackDump()
 
         if self.y < 0:
             ## XXX: GAME OVER
@@ -1251,13 +1235,6 @@ class Board(object):
 
         lines = 0
 
-        Log.log("Before line")
-        matrix = [
-                [(x, y) in self.blocks for x in xrange(self.blocks_width)]
-                for y in xrange(self.blocks_height)
-                ]
-        Matrix.put(matrix, f="_")
-
         for row in rows:
             points = [p for p in self.blocks if p[1] == row]
             if len(points) == self.blocks_width:
@@ -1293,15 +1270,6 @@ class Board(object):
         if self.level_lines <= 0:
             self.level += 1
             self.level_lines = LEVEL_LINES + (LEVEL_LINES_INCREASE * (self.level-1)) - self.level_lines
-
-        if lines:
-            Log.log("After line")
-            matrix = [
-                    [(x, y) in self.blocks for x in xrange(self.blocks_width)]
-                    for y in xrange(self.blocks_height)
-                    ]
-            Matrix.put(matrix, f="_")
-
 
     def update(self):
         self.isupdated = True

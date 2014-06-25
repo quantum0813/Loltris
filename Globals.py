@@ -5,6 +5,7 @@
 ## by options in the Settings.json file.
 
 from pygame.locals import *
+import BlockText
 
 ## The program version (also used in the cxfreeze setup script)
 VERSION = "0.5"
@@ -48,7 +49,7 @@ SCREEN_WIDTH = SPACER + (BOARD_WIDTH * BOARD_BLOCKWIDTH) + SPACER + (PREVIEW_WID
 
 ## TODO: Put font and colorscheme information in JSON files.
 
-GLOBAL_FONT_NAME = "orbitron"
+FALLBACK_FONT_NAME = "orbitron"
 MENU_HEADER_FONT = {
         "name":"orbitron-bold",
         "size":50,
@@ -75,7 +76,7 @@ HIGHSCORELIST_FONT = {
         "bold":False,
         }
 CREDITS_FONT = {
-        "name":"orbitron",
+        "name":"freemono",
         "size":15,
         "bold":False,
         }
@@ -92,7 +93,7 @@ MENU_BACKGROUND = (0x22, 0x22, 0x22)
 TETRIS_BACKGROUND = (0x22, 0x22, 0x22)
 TETRIS_STATUSBOX_COLORSCHEME = {"border":(0x50,0x50,0x50), "font":(0x90,0x90,0x90), "background":(0x22,0x22,0x22)}
 HIGHSCORELIST_COLORSCHEME = {"border":(0x50,0x50,0x50), "font":(0xaa,0xaa,0xaa), "background":(0x22,0x22,0x22)}
-CREDITS_COLORSCHEME = { "background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
+CREDITS_COLORSCHEME = {"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa), "border":(0xaa,0xaa,0xaa), }
 HIGHSCORE_EXPLORER_STATUSBOX_COLORSCHEME = TETRIS_STATUSBOX_COLORSCHEME
 HIGHSCORE_EXPLORER_STATUSBOX_FONT = {
         "name":"orbitron",
@@ -142,14 +143,5 @@ NONCHARACTERS = {
         K_DELETE: "Delete",
         }
 
-## _ and O are declared to make TITLE_BLOCKS more readable
-_ = False
-O = True
-TITLE_BLOCKS = [
-        [O,_,_,_,O,O,O,_,O,_,_,O,O,O,_,O,O,O,_,O,_,O,O,O],
-        [O,_,_,_,O,_,O,_,O,_,_,_,O,_,_,O,_,O,_,O,_,O,_,_],
-        [O,_,_,_,O,_,O,_,O,_,_,_,O,_,_,O,O,_,_,O,_,_,O,_],
-        [O,_,_,_,O,_,O,_,O,_,_,_,O,_,_,O,_,O,_,O,_,_,_,O],
-        [O,O,O,_,O,O,O,_,O,O,O,_,O,_,_,O,_,O,_,O,_,O,O,O],
-        ]
+TITLE_BLOCKS = BlockText.render("PYTHON", BlockText.STANDARD_FONT, padding=False)
 
