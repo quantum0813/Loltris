@@ -25,14 +25,17 @@ header {
 .inactive-toplink {
     border-radius: 5px;
 }
+.border-img {
+    border-radius: 10px;
+    border: 2px solid #555;
+}
 img {
     border-radius: 5px;
 }
-img.square {
-    border-radius: 1px;
-}
 img.border {
-    border: 2px solid black;
+    padding: -5px;
+    border-radius: 10px;
+    border: 2px solid #555;
 }
 section {
     padding: 20px;

@@ -21,11 +21,18 @@ Loltris is a small hobby project, it's a Tetris clone with some cool features.
 * Detailed highscore list
   * View "snapshots" of the game
 
-Here you can see the Überblock in action
-
-![Überblock in action]({{ site.baseurl }}/assets/images/uberblock.png)
-
 The following features are planned
 
 * Online/multiplayer functionality
   * server/client
+
+<h3>
+Überblock in action
+</h3>
+<img src="{{ site.baseurl }}/assets/images/uberblock.png" alt="Überblock in action" class="border">
+
+<h3>
+Main menu
+</h3>
+<img src="{{ site.baseurl }}/assets/images/loltris_mainmenu.png" alt="Main-Menu screenshot" class="border">
+
