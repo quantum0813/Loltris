@@ -28,6 +28,7 @@ SPED_UP_UPDATEINTERVAL = FRAMERATE * MOVING_TETROMINO_TIMEOUT ## How fast the Te
 JSON_INDENT = 2
 KEYDOWN_REPEAT_INTERVAL = 20
 KEYDOWN_REPEAT_DELAY = 500
+DISPLAY_FRAMERATE_INTERVAL = 5
 CENTER_WINDOW = True
 
 ## TODO: Need a way to set this, could be done in options, or the player could be asked
@@ -138,6 +139,7 @@ NONCHARACTERS = {
         K_HOME: "Home",
         K_PRINT: "PrntScr",
         K_INSERT: "Insert",
+        K_DELETE: "Delete",
         }
 
 ## _ and O are declared to make TITLE_BLOCKS more readable

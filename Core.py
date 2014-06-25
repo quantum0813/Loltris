@@ -215,7 +215,7 @@ class Game(object):
             self.clock.tick(self.ticktime)
             self.events = Pygame.event.get()
             self.interrupts = []
-            if i == FRAMERATE:
+            if i == FRAMERATE * DISPLAY_FRAMERATE_INTERVAL:
                 i = 0
                 Log.debug("Framerate: {}".format(int(round(self.clock.get_fps()))))
 
@@ -307,7 +307,6 @@ class Menu(Game):
 
     def setupObjects(self):
         def mouseLeave(box):
-            Log.debug(box)
             box.colors["font"] = self.colorscheme["option"]
             box.renderFonts()
         def mouseEnter(box):

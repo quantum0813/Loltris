@@ -145,6 +145,7 @@ class MakeTetromino(Core.Game):
 
     def clear(self):
         self.jobs.board.blocks = {}
+        self.jobs.board.emptyBlocks()
 
     def changeColor(self):
         pass

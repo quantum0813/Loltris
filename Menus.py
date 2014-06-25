@@ -221,6 +221,7 @@ class OptionsMenu(Core.Menu):
 ## used in KeymapMenu.*
 def getKeyLoop(self, keys):
     if not self.jobs.input_box.update_required:
+        Log.debug("Setting key {} to activate {}".format(Utils.keyToString(self.jobs.input_box.value), self.getting))
         keys[self.getting] = self.jobs.input_box.value
         self.removeJob("input_box")
         Save.saveKeymap()

@@ -1,9 +1,9 @@
 such 'gameplay' is
   such 'uber_tetromino' is
-    yes
+    no
   wow
   such 'flip_tetromino' is
-    yes
+    no
   wow
 wow
 such 'graphics' is

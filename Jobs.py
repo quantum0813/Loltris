@@ -409,7 +409,7 @@ class TextBox(object):
         self.colors = copy(colors)
 
     def renderFonts(self):
-        Log.debug("Rendering {}".format(self))
+        # Log.debug("Rendering {}".format(self))
 
         if not self.font.get("name"):
             self.font["name"] = Pygame.font.get_default_font()
@@ -921,7 +921,7 @@ class Tetromino(object):
             if self.ghostpiece:
                 self.ghostpiece.draw()
             for x, y in self.getActiveBlocks():
-                self.board.drawCube(x, y, self.color, shade=Shared.options["graphics"].get("shade"))
+                self.board.drawCube(x, y, self.color)
             self.board.layers.tetromino = self.getBlocksDict()
             self.board.emptyBlocks()
             self.force_draw = False
@@ -1183,7 +1183,10 @@ class Board(object):
         ##      are given in BOARD_BLOCKWIDTH, not pixels.
         self.fill = False
 
-    def drawCube(self, x, y, color, shade=True):
+    def drawCube(self, x, y, color, shade=None):
+        if shade == None:
+            shade = Shared.options["graphics"].get("shade")
+
         if y < 0 or x < 0 or x >= self.blocks_width or y >= self.blocks_height:
             ## Out of bounds
             return
