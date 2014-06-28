@@ -121,9 +121,12 @@ class Parser(object):
                 if level == 0:
                     break
 
-        ## First token
-        token, tokentype, location = tokens_list[0]
-        tokens = iter(tokens_list)
+        try:
+            ## First token
+            token, tokentype, location = tokens_list[0]
+            tokens = iter(tokens_list)
+        except IndexError:
+            raise SyntaxError("No object could be decoded")
 
         ## Check for comment
         if token == "silent":
@@ -139,7 +142,10 @@ class Parser(object):
                 ## Empty list
                 return []
             else:
-                return self.parseNumber(token, location)
+                try:
+                    return self.parseNumber(token, location)
+                except SyntaxError:
+                    pass
 
         value = None
         for token, tokentype, location in tokens:
