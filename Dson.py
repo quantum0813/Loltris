@@ -153,8 +153,11 @@ class Parser(object):
                 if value == None:
                     value = {}
                 ## Expecting string value here
-                token, tokentype, location = next(tokens)
-                if tokentype != "str":
+                try:
+                    token, tokentype, location = next(tokens)
+                    if tokentype != "str":
+                        raise SyntaxError("On {} / {} expected string value here".format(location[0], location[1]))
+                except StopIteration:
                     raise SyntaxError("On {} / {} expected string value here".format(location[0], location[1]))
                 try:
                     if next(tokens)[0] not in self.declarators:

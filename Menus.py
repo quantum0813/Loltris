@@ -20,6 +20,7 @@
 ## =====================================================================
 
 import Shared
+import BlockText
 import Core
 import Load
 import Jobs
@@ -53,14 +54,15 @@ class MainMenu(Core.Menu):
                 header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, xcenter=True,
                 soundtrack=Path.join(Load.MUSICDIR, "jazz_cat_infinite_loop_cut.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
 
-        blockwidth = (self.width) // len(TITLE_BLOCKS[0])
+        self.title_blocks = BlockText.render(TITLE_TEXT, font=BlockText.STANDARD_FONT)
+        blockwidth = (self.width) // len(self.title_blocks[0])
         Log.debug("title_board.blockwidth = {}".format(blockwidth))
         self.addJob("title_board",
                     Jobs.Board(
                         self,
                         y=SPACER,
-                        height=len(TITLE_BLOCKS),
-                        width=len(TITLE_BLOCKS[0]),
+                        height=len(self.title_blocks),
+                        width=len(self.title_blocks[0]),
                         blockwidth=blockwidth,
                         bgcolor=self.bgcolor,
                         queue=100,
@@ -69,7 +71,7 @@ class MainMenu(Core.Menu):
                         )
                     )
         self.jobs.title_board.x = (self.width // 2) - (self.jobs.title_board.width // 2)
-        for x, y in Matrix.matrixToSet(TITLE_BLOCKS):
+        for x, y in Matrix.matrixToSet(self.title_blocks):
             self.jobs.title_board.blocks[(x, y)] = (0xaa,0xaa,0xaa)
         self.options_pos[1] = self.jobs.title_board.y + self.jobs.title_board.height + SPACER*2
 

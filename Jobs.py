@@ -144,7 +144,7 @@ def loadFont(font):
         try:
             fontobj = Shared.globfonts[Utils.genKey(font)] = \
                     Pygame.font.Font(
-                            Path.join(Load.FONTDIR, "{}.ttf".format(font["name"])),
+                            Path.join(Load.TTF_FONTDIR, "{}.ttf".format(font["name"])),
                             font.get("size", 40),
                             bold=font.get("bold"),
                             italic=font.get("italic")
@@ -404,7 +404,7 @@ class TextBox(object):
             try:
                 fontobj = Shared.globfonts[Utils.genKey(self.font)] = \
                         Pygame.font.Font(
-                            Path.join(Load.FONTDIR, "{}.ttf".format(self.font["name"])),
+                            Path.join(Load.TTF_FONTDIR, "{}.ttf".format(self.font["name"])),
                             self.font.get("size", 40),
                             bold=self.font.get("bold"),
                             italic=self.font.get("italic")

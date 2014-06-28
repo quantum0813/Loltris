@@ -392,6 +392,7 @@ def getChar(char, font):
 
 def render(text, font, spaces=1, padding=False):
     """
+    >>> Log.LOGLEVEL = 0
     >>> Matrix.put(render("TEST", STANDARD_FONT))
      _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
     |#|#|#|_|#|#|#|_|#|#|#|_|#|#|#|
@@ -400,7 +401,7 @@ def render(text, font, spaces=1, padding=False):
     |_|#|_|_|#|_|_|_|_|_|#|_|_|#|_|
     |_|#|_|_|#|#|#|_|#|#|#|_|_|#|_|
     """
-    Log.debug("Rendering blocktext: {}".format(repr(text)))
+    Log.debug("Rendering blocktext {}".format(repr(text)))
     rows = len(getChar("invalid", font))
     matrix = [[] for _ in xrange(rows)]
     if spaces:
@@ -415,60 +416,6 @@ def render(text, font, spaces=1, padding=False):
         if spaces and (i != last or padding):
             Matrix.append(matrix, spacer)
     return matrix
-
-"""
-Filename: standard.sbf
-<<<
-[rows (4)]
-
-[character-name-length (1)][character-name (...)]
-[bytes per row (4)]
-[row (row-length)]...
->>>
-"""
-
-## Note that these masks will be reversed
-def listToMasks(xs):
-    assert xs, "List must contain at least one item"
-
-    masks = [0 for _ in xrange(int(ceil(len(xs) / 32.0)))]
-    i = 0
-    pos = 0
-    for x in xs:
-        if x:
-            masks[pos] = masks[pos] | (1 << i)
-        i += 1
-        if i == 32:
-            i = 0
-            pos += 1
-    return masks
-
-def dumpFont(font):
-    buf = ""
-    buf += struct.pack("<I", len(getChar("invalid", font)))
-
-    for charname in font:
-        assert len(charname) < 255, "Character name must be under 255 characters long"
-
-        buf += struct.pack("B", len(charname)) + charname ## Charname-length + charname
-        buf += struct.pack("<I", len(font[charname][0])) ## Length of a single row in blocks, in bits
-        for row in font[charname]:
-            for mask in listToMasks(row):
-                buf += struct.pack("<I", mask)
-
-    return buf
-
-def loadFontStream(handle):
-    rows = struct.unpack("<I", handle.read(4))
-    
-    while True:
-        charname_length = struct.unpack("B", handle.read(1))
-        charname = handle.read(charname_length)
-        row_length = struct.unpack("<I", handle.read(4))
-        row_byte_length = ceil(row_length / 32.0)
-        row_bytes = []
-        for i in xrange(row_length):
-            row_bytes.append(handle.read(row_byte_length))
 
 if __name__ == '__main__':
     import doctest

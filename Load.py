@@ -30,7 +30,8 @@ import os as OS
 from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
 
 DATADIR = "data"
-FONTDIR = Path.join(DATADIR, "Fonts")
+TTF_FONTDIR = Path.join(DATADIR, "Fonts", "TTF")
+BLOCKTEXT_FONTDIR = Path.join(DATADIR, "Fonts", "BlockText")
 IMAGEDIR = Path.join(DATADIR, "Images")
 MUSICDIR = Path.join(DATADIR, "Music")
 TXTDIR = Path.join(DATADIR, "TXT")

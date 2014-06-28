@@ -5,7 +5,6 @@
 ## by options in the Settings.json file.
 
 from pygame.locals import *
-import BlockText
 
 ## The program version (also used in the cxfreeze setup script)
 VERSION = "0.5.3"
@@ -30,7 +29,7 @@ TETRIS_BACKGROUND = (0x22, 0x22, 0x22)
 GHOST_COLOR = (0x29, 0x29, 0x29)
 # DISPLAY_OPTIONS = FULLSCREEN | DOUBLEBUF | HWSURFACE
 DISPLAY_OPTIONS = 0
-TITLE_BLOCKS = BlockText.render("LOLTRIS", BlockText.STANDARD_FONT, padding=False)
+TITLE_TEXT = "LOLTRIS"
 ## }}}
 
 ## Tetris Gameplay {{{
