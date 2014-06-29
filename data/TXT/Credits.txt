@@ -1,5 +1,5 @@
 Programming & Design:
-  Jonas Moller
+  Jonas Møller
 
 Code suggestions/review:
   Thomas Ballinger

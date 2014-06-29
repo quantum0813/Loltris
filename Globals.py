@@ -8,6 +8,8 @@ from pygame.locals import *
 
 ## The program version (also used in the cxfreeze setup script)
 VERSION = "0.5.3"
+## See Log.loglevel for details on this variable
+LOGLEVEL = 0
 
 ## Graphics {{{
 CENTER_WINDOW = True
@@ -23,6 +25,7 @@ BOARD_BLOCKWIDTH = 20
 SCREEN_HEIGHT = SPACER + (BOARD_BLOCKWIDTH * BOARD_HEIGHT) + SPACER
 SCREEN_WIDTH = SPACER + (BOARD_WIDTH * BOARD_BLOCKWIDTH) + SPACER + (PREVIEW_WIDTH * BOARD_BLOCKWIDTH) + SPACER
 FALLBACK_COLOR = (0xff,0xff,0xff)
+TETRIS_3DBORDER_BACKGROUND = (29,29,29)
 MENU_3DBORDER_BACKGROUND = (29,29,29)
 MENU_BACKGROUND = (0x22, 0x22, 0x22)
 TETRIS_BACKGROUND = (0x22, 0x22, 0x22)
@@ -58,7 +61,6 @@ HIGHSCORES = 5
 ## }}}
 
 ## Misc internals {{{
-LOGLEVEL = 4 ## See Log.loglevel for details on this variable
 DISPLAY_FRAMERATE_INTERVAL = 5
 JSON_INDENT = 2
 EOL = "\ǹ"

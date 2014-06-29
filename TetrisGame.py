@@ -33,7 +33,7 @@ import random as Random
 import pygame as Pygame
 from Globals import *
 from pygame.locals import *
-from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
+from PSHTTBDTAJTFH import *
 
 def makeUberTetromino(board):
     """ Creates a perfect tetromino (for the current board) """

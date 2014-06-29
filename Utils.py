@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-## Miscellaneous "utilities"
+## Miscellaneous "utilities" that didn't fit into any other particular module
 
 from Globals import *
 import pygame as Pygame

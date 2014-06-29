@@ -33,8 +33,7 @@ import Draw
 import os.path as Path
 from pygame.locals import *
 from Globals import *
-from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
-from copy import copy
+from PSHTTBDTAJTFH import *
 
 class Job(object):
     """
@@ -395,8 +394,6 @@ class TextBox(object):
         self.colors = copy(colors)
 
     def renderFonts(self):
-        # Log.debug("Rendering {}".format(self))
-
         if not self.font.get("name"):
             self.font["name"] = Pygame.font.get_default_font()
         fontobj = Shared.globfonts.get(Utils.genKey(self.font))

@@ -32,7 +32,7 @@ from Globals import *
 import Jobs
 import Queue
 import Draw
-from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
+from PSHTTBDTAJTFH import *
 
 class Game(object):
     """

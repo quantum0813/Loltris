@@ -45,8 +45,6 @@ import TetrisGame
 import MakeTetromino
 import SandBox
 
-## TODO: You know what would be cool? A DSL for doing this, may do that later. Menus Could be described in XML.
-
 class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(

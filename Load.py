@@ -27,7 +27,7 @@ import Dson
 import pickle as Pickle
 import bz2 as Bz2
 import os as OS
-from PythonShouldHaveTheseThingsByDefaultTheyAreJustTooFuckingHelpful import *
+from PSHTTBDTAJTFH import *
 
 DATADIR = "data"
 TTF_FONTDIR = Path.join(DATADIR, "Fonts", "TTF")
@@ -45,33 +45,40 @@ SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
 def loadScores():
     path = Path.join(HIGHSCOREDIR, "Scores.dson")
     Log.log("Loading scores from `{}'".format(path))
-    return Dson.loads(_loadText(path))
+    return Dson.loads(_loadData(path))
 
 def loadHighscores(top=10):
     path = Path.join(HIGHSCOREDIR, "Scores.dson")
     Log.log("Loading highscores from `{}'".format(path))
-    return sorted(Dson.loads(_loadText(path)), key=lambda d: d["score"], reverse=True)[:top]
+    return sorted(Dson.loads(_loadData(path)), key=lambda d: d["score"], reverse=True)[:top]
 
 def loadKeymaps():
     path = Path.join(DSONDIR, "Keymaps.dson")
     Log.log("Loading keymaps from `{}'".format(path))
-    return Dson.loads(_loadText(path))
+    return Dson.loads(_loadData(path))
 
-def _loadText(path):
+def _loadData(path):
     try:
         with open(path, "rb") as rf:
             return rf.read()
     except:
         Log.panic("Error while loading plain text from file `{}'".format(path))
 
+def _loadPlainText(path):
+    try:
+        with open(path, "r") as fd:
+            return fd.read().decode("utf-8")
+    except:
+        Log.panic("Error while loading plain text from file `{}'".format(path))
+
 def loadCredits():
-    return _loadText(Path.join(TXTDIR, "Credits.txt"))
+    return _loadPlainText(Path.join(TXTDIR, "Credits.txt"))
 
 def loadTetrominos():
     tetrominos = []
     for filename in OS.listdir(TETROMINODIR):
         path = Path.join(TETROMINODIR, filename)
-        tetromino = Pickle.loads(Bz2.decompress(_loadText(path)))
+        tetromino = Pickle.loads(Bz2.decompress(_loadData(path)))
         tetrominos.append([
             tetromino["color"],
             filename.partition(".")[0],
@@ -84,10 +91,10 @@ def _loadOptions(dson):
 
 def loadOptions():
     path = Path.join(DSONDIR, "Settings.dson")
-    return _loadOptions(_loadText(path))
+    return _loadOptions(_loadData(path))
 
 def _loadSnapshot(data):
     return Pickle.loads(Bz2.decompress(data))
 
 def loadSnapshot(seq):
-    return _loadSnapshot(_loadText(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq))))
+    return _loadSnapshot(_loadData(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq))))
