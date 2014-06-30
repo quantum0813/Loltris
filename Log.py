@@ -33,6 +33,7 @@ color = {
         "FAIL": "\x1b[1;31m",
         "NOTICE": "",
         "DEBUG": "",
+        "TMPDEBUG": "",
         "ERROR": "\x1b[1;33m",
         "WARNING": "\x1b[1;31m",
         }
@@ -44,6 +45,7 @@ loglevel = {
         "WARNING": 2,
         "NOTICE": 3,
         "DEBUG": 4,
+        "TMPDEBUG": 5,
         }
 
 def out(msg, end="\r\n", c="\x1b[0;33m"):
@@ -125,3 +127,6 @@ def log(comment, **kwargs):
 
 def warning(comment, **kwargs):
     genericLog("WARNING", comment, **kwargs)
+
+def tempDebug(comment, **kwargs):
+    genericLog("TMPDEBUG", comment, **kwargs)

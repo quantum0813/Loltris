@@ -15,8 +15,8 @@ SETUP_FILE_CONTENTS = """
 # again (deletes all user-files)
 """
 
-## Initial contents of Scores.json, an empty array
-SCORES_CONTENTS = """[]"""
+## Initial contents of Scores.dson, an empty array
+SCORES_CONTENTS = """so many"""
 
 def remove(path, follow_links=False):
     """
@@ -80,12 +80,12 @@ def setupFiles():
     if Path.exists(Path.join(Load.DATADIR, SETUP_FILE)):
         return
 
-    Log.log("Setting up files for Loltris")
+    Log.log("Running first-time setup")
 
     mkdir(Load.HIGHSCOREDIR, overwrite=True)
     mkdir(Path.join(Load.HIGHSCOREDIR, "Snapshots"), overwrite=True)
 
-    mkfile(Path.join(Load.HIGHSCOREDIR, "Scores.json"), initial=SCORES_CONTENTS, overwrite=True)
+    mkfile(Path.join(Load.HIGHSCOREDIR, "Scores.dson"), initial=SCORES_CONTENTS, overwrite=True)
     ## Finally- if everything was set up successfully- create the SETUP_FILE so Loltris
     ## know that the necessary files/directories have been set up.
     mkfile(Path.join(Load.DATADIR, SETUP_FILE), SETUP_FILE_CONTENTS, overwrite=True)

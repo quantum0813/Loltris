@@ -51,7 +51,7 @@ def makeUberTetromino(board):
         tetromino.append([clearUpwards(x, y) for x in xrange(0, board.blocks_width)])
     return Jobs.Tetromino(board, tetromino, "UBER", UBERCOLOR, xcenter=True)
 
-def randomTetromino(board, updateinterval=FRAMERATE/2):
+def randomTetromino(board, updateinterval=TETRIS_FRAMERATE/2):
     """ Creates a random tetromino for a board, created for increased readability """
     color, type, matrix = Random.choice(Shared.tetrominos)
     return Jobs.Tetromino(board, matrix, type, color, xcenter=True, updateinterval=updateinterval)
@@ -78,7 +78,7 @@ class TetrisGame(Core.Game):
                         bgcolor=self.bgcolor,
                         )
                     )
-        self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
+        self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=TETRIS_FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
         color, _type, matrix = Random.choice(Shared.tetrominos)
         self.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
         self.addJob("preview_window",
@@ -161,7 +161,7 @@ class TetrisGame(Core.Game):
                         Jobs.Tetromino(
                             self.jobs.board,
                             self.nextTetromino.matrix, self.nextTetromino.type, self.nextTetromino.color,
-                            xcenter=True, updateinterval=FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
+                            xcenter=True, updateinterval=TETRIS_FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
 
             ## Get the next tetromino information, create a Struct instance that stores this information,
             ## then create another preview block.

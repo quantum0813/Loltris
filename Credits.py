@@ -11,7 +11,10 @@ from pygame.locals import *
 class Credits(Core.Game):
     def __init__(self, *args, **kwargs):
         self.id = "Credits"
-        super(Credits, self).__init__(self.id, soundtrack=os.path.join(Load.MUSICDIR, "elevator_cat.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
+        super(Credits, self).__init__(
+                self.id, soundtrack=os.path.join(Load.MUSICDIR, "elevator_cat.ogg"), sound_enabled=SOUND_ENABLED,
+                ticktime=CREDITS_FRAMERATE, **kwargs
+                )
         # self.text = "Loltris v{}\n\n".format(VERSION)
         self.text = Load.loadCredits()
         self.running = self.mainLoop

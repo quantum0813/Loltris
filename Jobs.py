@@ -808,7 +808,7 @@ class TimedExecution(object):
         if cycles:
             self.cycles = cycles
         elif seconds:
-            self.cycles = int(round(seconds * FRAMERATE))
+            self.cycles = int(round(seconds * TETRIS_FRAMERATE))
 
     def eventHandler(self, event):
         if event.type == KEYDOWN and self.anykey:
@@ -845,7 +845,7 @@ class Tetromino(object):
         The color of the tetromino blocks given as a RGB tuple.
     """
     def __init__(self, board, matrix, _type, color, x=0, y=None, ycenter=False,
-                 xcenter=False, ghostpiece=True, updateinterval=FRAMERATE, queue=None,
+                 xcenter=False, ghostpiece=True, updateinterval=TETRIS_FRAMERATE, queue=None,
                  fill=False,
                  ):
 
@@ -933,10 +933,10 @@ class Tetromino(object):
             self.move_left_timeout -= 1
 
         if self.move_right_timeout != None and self.move_right_timeout <= 0:
-            self.move_right_timeout = Shared.options.get("moving_tetromino_timeout", MOVING_TETROMINO_TIMEOUT) * FRAMERATE
+            self.move_right_timeout = Shared.options.get("moving_tetromino_timeout", MOVING_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
             self.moveHorizontal(1)
         if self.move_left_timeout != None and self.move_left_timeout <= 0:
-            self.move_left_timeout = Shared.options.get("moving_tetromino_timeout", MOVING_TETROMINO_TIMEOUT) * FRAMERATE
+            self.move_left_timeout = Shared.options.get("moving_tetromino_timeout", MOVING_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
             self.moveHorizontal(-1)
 
     def drop(self):
@@ -1030,10 +1030,10 @@ class Tetromino(object):
 
             elif event.key == Shared.keymap["game"]["move_right"]:
                 self.moveHorizontal(1)
-                self.move_right_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * FRAMERATE
+                self.move_right_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
             elif event.key == Shared.keymap["game"]["move_left"]:
                 self.moveHorizontal(-1)
-                self.move_left_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * FRAMERATE
+                self.move_left_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
 
             elif event.key == Shared.keymap["game"]["drop_down"]:
                 self.drop()

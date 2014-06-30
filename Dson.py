@@ -21,6 +21,7 @@
 
 from pprint import pprint
 from copy import copy
+import Log
 
 constants = {
         "yes": True,
@@ -110,6 +111,7 @@ class Parser(object):
         return tokens
 
     def parse(self, tokens_list):
+
         def take(tokens, close_words=CLOSE, open_words=OPEN):
             level = 1
             for token in tokens:
@@ -133,7 +135,7 @@ class Parser(object):
             take(tokens, close_words=["loud"], open_words=[])
 
         ## Possibly single atom value
-        if (len(tokens_list) == 1) or (len(tokens_list) == 2 and tokens_list[-1][0] in CLOSE):
+        if len(tokens_list) == 1 or (len(tokens_list) == 2 and tokens_list[-1][0] in CLOSE):
             if tokentype == "str":
                 return self.parseString(token, location)
             elif tokentype == "constant" and token in constants:
@@ -179,7 +181,7 @@ class Parser(object):
                         value.append(self.parse([(token, tokentype, location)] + ts))
                         continue
                     elif token == "such":
-                        ts = list(take(tokens, open_words=[], close_words=["also", "and"]))
+                        ts = list(take(tokens))
                         value.append(self.parse([(token, tokentype, location)] + ts))
                         continue
                     else:

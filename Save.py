@@ -42,6 +42,7 @@ def saveScore(score, state=set()):
     score["date"] = Log.getTime(spec="%Y-%m-%d")
     score["time"] = Log.getTime(spec="%H:%M:%S")
     score["seq"] = seq
+    score["board_dimensions"] = "{}x{}".format(BOARD_WIDTH, BOARD_HEIGHT)
     scores.append(score)
     Dson.dump(scores, Path.join(HIGHSCOREDIR, "Scores.dson"), indent=JSON_INDENT)
     with open(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq)), "wb") as wf:

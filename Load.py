@@ -22,9 +22,8 @@
 from RGB import rgbHexDecode
 import os.path as Path
 import Log
-# import json as Json
+import cPickle as CPickle
 import Dson
-import pickle as Pickle
 import bz2 as Bz2
 import os as OS
 from PSHTTBDTAJTFH import *
@@ -72,13 +71,15 @@ def _loadPlainText(path):
         Log.panic("Error while loading plain text from file `{}'".format(path))
 
 def loadCredits():
+    Log.notice("Loading credits from {}".format(repr(Path.join(TXTDIR, "Credits.txt"))))
     return _loadPlainText(Path.join(TXTDIR, "Credits.txt"))
 
 def loadTetrominos():
     tetrominos = []
     for filename in OS.listdir(TETROMINODIR):
         path = Path.join(TETROMINODIR, filename)
-        tetromino = Pickle.loads(Bz2.decompress(_loadData(path)))
+        Log.notice("Loading tetromino from {}".format(repr(path)))
+        tetromino = CPickle.loads(Bz2.decompress(_loadData(path)))
         tetrominos.append([
             tetromino["color"],
             filename.partition(".")[0],
@@ -91,10 +92,16 @@ def _loadOptions(dson):
 
 def loadOptions():
     path = Path.join(DSONDIR, "Settings.dson")
+    Log.notice("Loading options from {}".format(repr(path)))
     return _loadOptions(_loadData(path))
 
 def _loadSnapshot(data):
-    return Pickle.loads(Bz2.decompress(data))
+    return CPickle.loads(Bz2.decompress(data))
 
 def loadSnapshot(seq):
+    Log.notice("Loading tetris snapshot from {}".format(repr(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq)))))
     return _loadSnapshot(_loadData(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq))))
+
+def loadBlockFont(name):
+    Log.notice("Loading BlockText font from {}".format(repr(Path.join(BLOCKTEXT_FONTDIR, "{}.pyobj.bz2".format(name)))))
+    return CPickle.loads(Bz2.decompress(_loadData(Path.join(BLOCKTEXT_FONTDIR, "{}.pyobj.bz2".format(name)))))

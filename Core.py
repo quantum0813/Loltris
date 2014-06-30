@@ -39,7 +39,7 @@ class Game(object):
     Multi-purpose class for creating and managing games. Based on the handling of multiple jobs in a perticular
     order, can be thought of as a (very) minimal operating system for video games.
     """
-    def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=FRAMERATE,
+    def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=TETRIS_FRAMERATE,
                  width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=True, soundtrack=None,
                  fill=True):
         Log.debug("Initializing Game object `{}'".format(_id))
@@ -215,7 +215,7 @@ class Game(object):
             self.clock.tick(self.ticktime)
             self.events = Pygame.event.get()
             self.interrupts = []
-            if i == FRAMERATE * DISPLAY_FRAMERATE_INTERVAL:
+            if i == TETRIS_FRAMERATE * DISPLAY_TETRIS_FRAMERATE_INTERVAL:
                 i = 0
                 Log.debug("Framerate: {}".format(int(round(self.clock.get_fps()))))
 
@@ -288,7 +288,7 @@ class Menu(Game):
     def __init__(self, _id, header_font={"size":60, "bold":False}, option_font={"size":60, "bold":False}, decorate_options=False,
                  isroot=False, onHeaderClick=None, xcenter=False, **kwargs):
         self.id = _id
-        super(Menu, self).__init__(self.id, **kwargs)
+        super(Menu, self).__init__(self.id, ticktime=MENU_FRAMERATE, **kwargs)
         self.running = self.mainLoop
         self.colorscheme = MENU_COLORSCHEME
         self.header = ""
