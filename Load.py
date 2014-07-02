@@ -35,8 +35,8 @@ IMAGEDIR = Path.join(DATADIR, "Images")
 MUSICDIR = Path.join(DATADIR, "Music")
 TXTDIR = Path.join(DATADIR, "TXT")
 JSONDIR = Path.join(DATADIR, "JSON")
-DSONDIR = Path.join(DATADIR, "DSON")
 TETROMINODIR = Path.join(DATADIR, "Tetrominos")
+SETTINGSDIR = Path.join(DATADIR, "Settings")
 ## Not sure where this should be really
 HIGHSCOREDIR = Path.join(DATADIR, "Highscores")
 SNAPSHOTDIR = Path.join(HIGHSCOREDIR, "Snapshots")
@@ -52,7 +52,7 @@ def loadHighscores(top=10):
     return sorted(Dson.loads(_loadData(path)), key=lambda d: d["score"], reverse=True)[:top]
 
 def loadKeymaps():
-    path = Path.join(DSONDIR, "Keymaps.dson")
+    path = Path.join(SETTINGSDIR, "Keymaps.dson")
     Log.log("Loading keymaps from `{}'".format(path))
     return Dson.loads(_loadData(path))
 
@@ -91,7 +91,7 @@ def _loadOptions(dson):
     return Dson.loads(dson)
 
 def loadOptions():
-    path = Path.join(DSONDIR, "Settings.dson")
+    path = Path.join(SETTINGSDIR, "Settings.dson")
     Log.notice("Loading options from {}".format(repr(path)))
     return _loadOptions(_loadData(path))
 

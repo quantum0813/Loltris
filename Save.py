@@ -20,7 +20,16 @@
 ## =====================================================================
 
 
-from Load import IMAGEDIR, MUSICDIR, DATADIR, JSONDIR, SNAPSHOTDIR, HIGHSCOREDIR, _loadData, TETROMINODIR, DSONDIR
+from Load import (
+        IMAGEDIR,
+        MUSICDIR,
+        DATADIR,
+        JSONDIR,
+        SNAPSHOTDIR,
+        HIGHSCOREDIR,
+        TETROMINODIR,
+        SETTINGSDIR,
+        )
 import os.path as Path
 import json as Json
 import Dson
@@ -42,7 +51,7 @@ def saveScore(score, state=set()):
     score["date"] = Log.getTime(spec="%Y-%m-%d")
     score["time"] = Log.getTime(spec="%H:%M:%S")
     score["seq"] = seq
-    score["board_dimensions"] = "{}x{}".format(BOARD_WIDTH, BOARD_HEIGHT)
+    score["board_dimensions"] = [BOARD_WIDTH, BOARD_HEIGHT]
     scores.append(score)
     Dson.dump(scores, Path.join(HIGHSCOREDIR, "Scores.dson"), indent=JSON_INDENT)
     with open(Path.join(SNAPSHOTDIR, "{}.pyobj.bz2".format(seq)), "wb") as wf:
@@ -61,10 +70,10 @@ def _appendTetromino(root, color, name, matrix):
     root.append(element)
 
 def saveOptions():
-    Dson.dump(Shared.options, Path.join(DSONDIR, "Settings.dson"), indent=JSON_INDENT)
+    Dson.dump(Shared.options, Path.join(SETTINGSDIR, "Settings.dson"), indent=JSON_INDENT)
 
 def saveKeymap():
-    Dson.dump(Shared.keymap, Path.join(DSONDIR, "Keymaps.dson"), indent=JSON_INDENT)
+    Dson.dump(Shared.keymap, Path.join(SETTINGSDIR, "Keymaps.dson"), indent=JSON_INDENT)
 
 def _writeText(path, data):
     try:
