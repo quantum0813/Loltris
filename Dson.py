@@ -23,6 +23,15 @@ from pprint import pprint
 from copy import copy
 import Log
 
+## Definitions:
+## 
+##     Word: Arbitrary combination of WORDCHARS.
+##     Str: Arbitrary combination of unicode characters not in NOPRINT that can be written in the following forms
+##         - "Str"
+##         - 'Str'
+##     Punctuation: Characters that can be considered single tokens by themselves.
+##     Constant: Word with specific value.
+
 constants = {
         "yes": True,
         "no": False,
@@ -37,7 +46,8 @@ constants_reverse = {
 OPEN = {"such", "so"}
 CLOSE = {"wow", "many"}
 
-WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890."
+WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+PUNCTUATION = ",.?"
 DIGITS = set("1234567")
 NOPRINT = set(chr(c) for c in range(0x20))
 
@@ -52,10 +62,12 @@ def severalThings(iterable):
     return text + "or " + repr(items[-1])
 
 class Parser(object):
-    def __init__(self, text, separators={" ", "\n", "\r", "\v", "\t"}, wordchars=WORDCHARS, list_separators={"and", "also"}, declarators={"is", ",", ".", "!", "?"}):
+    def __init__(self, text, separators={" ", "\n", "\r", "\v", "\t"}, wordchars=WORDCHARS, list_separators={"and", "also"}, declarators={"is", ",", ".", "!", "?"},
+                 punctuation=PUNCTUATION):
         self.text = text
         self.separators = set(copy(separators))
-        self.wordchars = set(wordchars).union(declarators)
+        self.wordchars = set(wordchars)
+        self.punctuation = set(punctuation)
         self.list_separators = set(copy(list_separators))
         self.declarators = set(copy(declarators))
 
@@ -64,49 +76,47 @@ class Parser(object):
         chars = iter(self.text)
         line = 1
         column = 1
-        for char in chars:
-            ## String
+
+        def checkCharacter(tokens, char, line, column):
             if char == "\n":
-                line += 1
                 column = 0
+                line += 1
+
             column += 1
 
-            if char in ("\"", "'"):
+            if char in ('"', "'"):
                 terminator = char
-                strval = ""
+                val = ""
                 for char in chars:
                     if char in NOPRINT:
-                        raise SyntaxError("On {} / {}, illegal character in string".format(line, column))
-                    if char == "\\":
-                        strval += char + next(chars)
+                        raise SyntaxError("On {} / {}, illegal character in string, use escape sequence".format(line, column))
                     elif char == terminator:
                         break
                     else:
-                        strval += char
+                        val += char
                     column += 1
-                tokens.append((strval, "str", (line, column - len(strval))))
+                tokens.append((val, "str", (line, column)))
 
-            ## Start of word
-            elif char not in self.separators and char in self.wordchars:
-                wordval = char
+            elif char in self.punctuation:
+                tokens.append((char, "punctuation", (line, column)))
+
+            elif char in self.wordchars:
+                val = char
                 for char in chars:
-                    if char == "\n":
-                        line += 1
-                        column = 0
-                    if char in self.separators or char not in self.wordchars:
+                    if char not in self.wordchars:
+                        tokens.append((val, "word", (line, column)))
+                        return checkCharacter(tokens, char, line, column+1)
                         break
                     column += 1
-                    wordval += char
-                if wordval in constants:
-                    tokens.append((wordval, "constant", (line, column - len(wordval))))
-                else:
-                    tokens.append((wordval, "word", (line, column - len(wordval))))
-
-            elif char in self.separators:
-                pass
+                    val += char
 
             else:
-                raise SyntaxError("On {} / {}".format(line, column))
+                column += 1
+
+            return line, column
+
+        for char in chars:
+            line, column = checkCharacter(tokens, char, line, column)
 
         return tokens
 
