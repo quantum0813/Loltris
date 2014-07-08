@@ -20,7 +20,7 @@
 ## =====================================================================
 
 from pprint import pprint
-from copy import copy
+from PSHTTBDTAJTFH import *
 import Log
 
 ## Definitions:
@@ -50,9 +50,6 @@ WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 PUNCTUATION = ",.?"
 DIGITS = set("1234567")
 NOPRINT = set(chr(c) for c in range(0x20))
-
-def typeOf(obj):
-    return type(obj).__name__
 
 def severalThings(iterable):
     items = list(iterable)
@@ -133,6 +130,12 @@ class Parser(object):
                 if level == 0:
                     break
 
+        def takeObj(tokens, close_words=CLOSE, open_words=OPEN):
+            token, tokentype, location = next(tokens)
+            if token in open_words:
+                return [(token, tokentype, location)] + list(take(tokens, open_words=open_words, close_words=close_words))
+            return [(token, tokentype, location)]
+
         try:
             ## First token
             token, tokentype, location = tokens_list[0]
@@ -164,19 +167,37 @@ class Parser(object):
             if token == "such":
                 if value == None:
                     value = {}
-                ## Expecting string value here
-                try:
-                    token, tokentype, location = next(tokens)
-                    if tokentype != "str":
-                        raise SyntaxError("On {} / {} expected string value here".format(location[0], location[1]))
-                except StopIteration:
-                    raise SyntaxError("On {} / {} expected string value here".format(location[0], location[1]))
-                try:
-                    if next(tokens)[0] not in self.declarators:
-                        raise SyntaxError("On {} / {} expected {}".format(location[0], location[1], severalThings(self.declarators)))
-                except StopIteration:
-                    raise SyntaxError("On {} / {} expected {} got EOF".format(location[0], location[1], severalThings(self.declarators)))
-                value[token] = self.parse(list(take(tokens)))
+
+                for token, tokentype, location in tokens:
+                    try:
+                        if tokentype == "word" and all(not c.isspace() for c in token):
+                            ## Allow for declarations like "such this is 'that'" notice the missing quotes on "this"
+                            tokentype = "str"
+                        if tokentype != "str":
+                            raise SyntaxError("On {0[0]} / {0[1]} expected string value or word here, got {1}".format(location, token))
+                    except StopIteration:
+                        raise SyntaxError("On {} / {} expected string value here".format(*location))
+
+                    try:
+                        declarator_token, declarator_tokentype, declarator_location = next(tokens)
+                        pprint(declarator_location)
+                        if declarator_token not in self.declarators:
+                            raise SyntaxError(
+                                    "On {0[0]} / {0[1]} expected {1} got {2}".format(
+                                        declarator_location, severalThings(self.declarators), declarator_token
+                                        )
+                                    )
+                    except StopIteration:
+                        raise SyntaxError("On {0[0]} / {0[1]} expected {} got EOF".format(location, severalThings(self.declarators)))
+
+                    # value[token] = self.parse(list(take(tokens)))
+                    topkek = list(takeObj(tokens))
+                    pprint(topkek)
+                    value[token] = self.parse(topkek)
+
+                    punctuation_token, punctuation_tokentype, punctuation_location = next(tokens)
+                    if not (punctuation_tokentype == "punctuation" and punctuation_token in self.punctuation):
+                        break
 
             if token == "so":
                 if value == None:
@@ -255,7 +276,6 @@ class Parser(object):
         try:
             return int(string)
         except:
-            print(string)
             raise SyntaxError("On {} / {} Invalid number".format(location[0], location[1]))
 
 class Serializer(object):
@@ -282,7 +302,7 @@ class Serializer(object):
                 if newline:
                     self.text += (self.indent * level) * " "
                 self.text += constants_reverse[obj] + " "
-            elif type(obj).__name__ == "list":
+            elif isinstance(obj, list):
                 if newline:
                     self.text += (self.indent * level) * " "
                 self.text += "so" + self.eol
@@ -290,20 +310,20 @@ class Serializer(object):
                     self.text += (self.indent * (level+1))*" "
                     for i in range(len(obj)):
                         sub = obj[i]
-                        if typeOf(sub) == "dict":
+                        if isinstance(sub, dict):
                             self.text += self.eol
                             rec(sub, level + 1, True)
                         else:
                             rec(sub, level + 1, False)
                         if i+1 < len(obj):
                             self.text += "and "
-                    if typeOf(obj[-1]) in ["list", "dict"]:
+                    if any(isinstance(obj, t) for t in [list, dict]):
                         self.text += "many" + self.eol
                     else:
                         self.text += self.eol + (self.indent * level)*" " + "many" + self.eol
                 else:
                     self.text += "many"
-            elif typeOf(obj) == "dict":
+            elif isinstance(obj, dict):
                 for key in obj:
                     if newline:
                         self.text += (self.indent * level) * " "
@@ -326,6 +346,7 @@ class Serializer(object):
 def loads(string):
     parser = Parser(string)
     tokens = parser.tokenize()
+    pprint(tokens)
     return parser.parse(tokens)
 
 def load(path):
