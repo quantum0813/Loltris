@@ -106,6 +106,8 @@ class Parser(object):
                         break
                     column += 1
                     val += char
+                else:
+                    tokens.append((val, "word", (line, column)))
 
             else:
                 column += 1
@@ -169,6 +171,9 @@ class Parser(object):
                     value = {}
 
                 for token, tokentype, location in tokens:
+                    if token == "wow":
+                        break
+
                     try:
                         if tokentype == "word" and all(not c.isspace() for c in token):
                             ## Allow for declarations like "such this is 'that'" notice the missing quotes on "this"
@@ -180,7 +185,6 @@ class Parser(object):
 
                     try:
                         declarator_token, declarator_tokentype, declarator_location = next(tokens)
-                        pprint(declarator_location)
                         if declarator_token not in self.declarators:
                             raise SyntaxError(
                                     "On {0[0]} / {0[1]} expected {1} got {2}".format(
@@ -191,9 +195,7 @@ class Parser(object):
                         raise SyntaxError("On {0[0]} / {0[1]} expected {} got EOF".format(location, severalThings(self.declarators)))
 
                     # value[token] = self.parse(list(take(tokens)))
-                    topkek = list(takeObj(tokens))
-                    pprint(topkek)
-                    value[token] = self.parse(topkek)
+                    value[token] = self.parse(list(takeObj(tokens)))
 
                     punctuation_token, punctuation_tokentype, punctuation_location = next(tokens)
                     if not (punctuation_tokentype == "punctuation" and punctuation_token in self.punctuation):
@@ -318,24 +320,30 @@ class Serializer(object):
                         if i+1 < len(obj):
                             self.text += "and "
                     if any(isinstance(obj, t) for t in [list, dict]):
-                        self.text += "many" + self.eol
+                        self.text += "many"
                     else:
                         self.text += self.eol + (self.indent * level)*" " + "many" + self.eol
                 else:
                     self.text += "many"
             elif isinstance(obj, dict):
-                for key in obj:
-                    if newline:
-                        self.text += (self.indent * level) * " "
-                    self.text += "such {} is{}".format(repr(str(key)), self.eol)
-                    rec(obj[key], level + 1, True)
+                if newline:
+                    self.text += (self.indent * level) * " "
+                self.text += "such\n"
+                for i, key in enumerate(obj):
+                    self.text += (self.indent * (level+1)) * " "
+                    self.text += "{} is ".format(repr(str(key)))
+                    rec(obj[key], level + 1, False)
+                    if i != len(obj)-1:
+                        self.text += ","
+                    self.text += self.eol
+                self.text += ((self.indent * level) * " ") + "wow"
 
-                    if type(obj[key]).__name__ == "dict":
-                        self.text += "wow" + self.eol
-                    elif type(obj[key]).__name__ == "list":
-                        self.text += (self.indent * level) * " " + "wow" + self.eol
-                    else:
-                        self.text += self.eol + (self.indent * level) * " " + "wow" + self.eol
+                    # if type(obj[key]).__name__ == "dict":
+                    #     self.text += "wow" + self.eol
+                    # elif type(obj[key]).__name__ == "list":
+                    #     self.text += (self.indent * level) * " " + "wow" + self.eol
+                    # else:
+                    #     self.text += self.eol + (self.indent * level) * " " + "wow" + self.eol
             else:
                 raise TypeError("Cannot serialize {}".format(type(obj).__name__))
         rec(self.obj, 0, True)
@@ -346,7 +354,6 @@ class Serializer(object):
 def loads(string):
     parser = Parser(string)
     tokens = parser.tokenize()
-    pprint(tokens)
     return parser.parse(tokens)
 
 def load(path):
