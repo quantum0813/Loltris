@@ -30,7 +30,7 @@ from pygame.locals import *
 from Globals import *
 
 class Preview(Core.Game):
-    def __init__(self, blocks, time=None, date=None, level=None, lines=None, name=None, score=None, seq=None, *args, **kwargs):
+    def __init__(self, blocks, time=None, date=None, level=None, lines=None, name=None, score=None, seq=None, board_dimensions=None, *args, **kwargs):
         super(Preview, self).__init__("Preview", *args, fill=True, **kwargs)
         self.running = self.mainLoop
 

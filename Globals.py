@@ -7,7 +7,7 @@
 from pygame.locals import *
 
 ## The program version (also used in the cxfreeze setup script)
-VERSION = "0.5.7"
+VERSION = "0.5.9"
 ## See Log.loglevel for details on this variable
 LOGLEVEL = 5
 

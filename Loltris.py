@@ -45,7 +45,6 @@ if __name__ == '__main__':
     Shared.tetrominos = Load.loadTetrominos()
     Shared.keymap = Load.loadKeymaps()
     Shared.options = Load.loadOptions()
-    pprint(Shared.options)
 
     ## Launch the game
     main_menu = Menus.MainMenu(caption="Loltris")

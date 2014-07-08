@@ -1,13 +1,13 @@
 such
-  'gameplay' is such
-    'uber_tetromino' is no ,
-    'flip_tetromino' is empty 
-  wow,
-  'graphics' is such
-    'cross_tetromino' is empty ,
-    'ghostpiece_color' is so
-      45 and 45 and 45 many,
-    'shade' is yes ,
-    'ghostpiece' is yes 
-  wow
-wow
+  gameplay is such
+    uber_tetromino is no 
+    flip_tetromino is yes 
+  wow 
+  graphics is such
+    cross_tetromino is empty 
+    ghostpiece_color is so
+      45 45 45 many
+    shade is yes 
+    ghostpiece is yes 
+  wow 
+wow 

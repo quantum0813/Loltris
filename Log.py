@@ -23,6 +23,7 @@ import inspect, sys, traceback as Traceback
 from time import time, ctime, strftime, localtime
 from sys import stdout
 from threading import currentThread
+from pprint import pprint
 
 from Globals import *
 
@@ -87,10 +88,11 @@ def genericLog(logtype, message, cr=False, **kwargs):
         put("".join(["    "+x+EOL for x in Traceback.format_exc(kwargs["trace"]).splitlines()]))
 
 ## Just so that everything is uniform
-def dump(message):
+def dump(obj):
     if loglevel["DEBUG"] > LOGLEVEL:
+        ## All dumping is considered to be debugging
         return
-    put(str(message))
+    put(str(obj))
 
 def stackDump():
     if loglevel["DEBUG"] > LOGLEVEL:

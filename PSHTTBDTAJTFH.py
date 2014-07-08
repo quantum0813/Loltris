@@ -1,7 +1,11 @@
 #!/usr/bin/python -OO
+#-*- coding: utf-8 -*-
 
 ## PSHTTBDTAJTFH
 ## Python-Should-Have-These-Things-By-Default-They-Are-Just-Too-Fucking-Helpful
+
+## Written by Jonas Møller
+## Public domain
 
 ## XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
 ## XXX THIS MODULE IS NOT ALLOWED TO IMPORT FROM OTHER MODULES IN LOLTRIS, XXX

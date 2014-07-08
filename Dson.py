@@ -19,7 +19,6 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## =====================================================================
 
-from pprint import pprint
 from PSHTTBDTAJTFH import *
 import Log
 
@@ -46,7 +45,7 @@ constants_reverse = {
 OPEN = {"such", "so"}
 CLOSE = {"wow", "many"}
 
-WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
 PUNCTUATION = ",.?"
 DIGITS = set("1234567")
 NOPRINT = set(chr(c) for c in range(0x20))
@@ -197,9 +196,9 @@ class Parser(object):
                     # value[token] = self.parse(list(take(tokens)))
                     value[token] = self.parse(list(takeObj(tokens)))
 
-                    punctuation_token, punctuation_tokentype, punctuation_location = next(tokens)
-                    if not (punctuation_tokentype == "punctuation" and punctuation_token in self.punctuation):
-                        break
+                    # punctuation_token, punctuation_tokentype, punctuation_location = next(tokens)
+                    # if not (punctuation_tokentype == "punctuation" and punctuation_token in self.punctuation):
+                    #     break
 
             if token == "so":
                 if value == None:
@@ -215,6 +214,7 @@ class Parser(object):
                         continue
                     elif token == "such":
                         ts = list(take(tokens))
+                        pprint(ts)
                         value.append(self.parse([(token, tokentype, location)] + ts))
                         continue
                     else:
@@ -222,11 +222,11 @@ class Parser(object):
                         value.append(self.parse([(token, tokentype, location)]))
 
                     ## Separator between values in list
-                    separator, _, location = next(tokens)
-                    if separator == "many":
-                        break
-                    if separator not in self.list_separators:
-                        raise SyntaxError("On {} / {} expected {} got {}".format(location[0], location[1], severalThings(self.list_separators), repr(separator)))
+                    # separator, _, location = next(tokens)
+                    # if separator == "many":
+                    #     break
+                    # if separator not in self.list_separators:
+                    #     raise SyntaxError("On {} / {} expected {} got {}".format(location[0], location[1], severalThings(self.list_separators), repr(separator)))
 
         return value
 
@@ -281,10 +281,11 @@ class Parser(object):
             raise SyntaxError("On {} / {} Invalid number".format(location[0], location[1]))
 
 class Serializer(object):
-    def __init__(self, obj, indent=2, eol="\n"):
+    def __init__(self, obj, indent=2, eol="\n", wordchars=WORDCHARS):
         self.obj = obj
         self.eol = eol
         self.indent = indent
+        self.wordchars = set(wordchars)
 
     def serialize(self):
         self.text = ""
@@ -317,8 +318,8 @@ class Serializer(object):
                             rec(sub, level + 1, True)
                         else:
                             rec(sub, level + 1, False)
-                        if i+1 < len(obj):
-                            self.text += "and "
+                        # if i+1 < len(obj):
+                        #     self.text += "and "
                     if any(isinstance(obj, t) for t in [list, dict]):
                         self.text += "many"
                     else:
@@ -331,19 +332,14 @@ class Serializer(object):
                 self.text += "such\n"
                 for i, key in enumerate(obj):
                     self.text += (self.indent * (level+1)) * " "
-                    self.text += "{} is ".format(repr(str(key)))
+                    if isinstance(key, str) and any(c not in self.wordchars for c in key):
+                        self.text += "{} is ".format(repr(str(key)))
+                    else:
+                        self.text += "{} is ".format(key)
                     rec(obj[key], level + 1, False)
-                    if i != len(obj)-1:
-                        self.text += ","
                     self.text += self.eol
-                self.text += ((self.indent * level) * " ") + "wow"
+                self.text += ((self.indent * level) * " ") + "wow "
 
-                    # if type(obj[key]).__name__ == "dict":
-                    #     self.text += "wow" + self.eol
-                    # elif type(obj[key]).__name__ == "list":
-                    #     self.text += (self.indent * level) * " " + "wow" + self.eol
-                    # else:
-                    #     self.text += self.eol + (self.indent * level) * " " + "wow" + self.eol
             else:
                 raise TypeError("Cannot serialize {}".format(type(obj).__name__))
         rec(self.obj, 0, True)
