@@ -1,43 +1,19 @@
-such 'menu' is
-  such 'down' is
-    274 
-  wow
-  such 'back' is
-    8 
-  wow
-  such 'select' is
-    13 
-  wow
-  such 'up' is
-    273 
-  wow
-wow
-such 'game' is
-  such 'rotate_left' is
-    279 
-  wow
-  such 'uber_tetromino' is
-    9 
-  wow
-  such 'speed_up' is
-    274 
-  wow
-  such 'reverse' is
-    281 
-  wow
-  such 'move_left' is
-    276 
-  wow
-  such 'move_right' is
-    275 
-  wow
-  such 'pause' is
-    27 
-  wow
-  such 'drop_down' is
-    32 
-  wow
-  such 'rotate_right' is
-    273 
+such
+  'menu' is such
+    'down' is 274 ,
+    'back' is 8 ,
+    'select' is 13 ,
+    'up' is 273 
+  wow,
+  'game' is such
+    'rotate_left' is 279 ,
+    'uber_tetromino' is 9 ,
+    'speed_up' is 274 ,
+    'reverse' is 281 ,
+    'move_left' is 276 ,
+    'move_right' is 275 ,
+    'pause' is 27 ,
+    'drop_down' is 32 ,
+    'rotate_right' is 273 
   wow
 wow

@@ -30,6 +30,7 @@ import profile as Profile
 import os as OS
 import pygame as Pygame
 from Globals import *
+from PSHTTBDTAJTFH import *
 
 if __name__ == '__main__':
     if CENTER_WINDOW:
@@ -44,6 +45,7 @@ if __name__ == '__main__':
     Shared.tetrominos = Load.loadTetrominos()
     Shared.keymap = Load.loadKeymaps()
     Shared.options = Load.loadOptions()
+    pprint(Shared.options)
 
     ## Launch the game
     main_menu = Menus.MainMenu(caption="Loltris")

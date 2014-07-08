@@ -153,7 +153,7 @@ class Parser(object):
         if len(tokens_list) == 1 or (len(tokens_list) == 2 and tokens_list[-1][0] in CLOSE):
             if tokentype == "str":
                 return self.parseString(token, location)
-            elif tokentype == "constant" and token in constants:
+            elif tokentype == "word" and token in constants:
                 return constants[token]
             elif tokentype == "word" and token == "many":
                 ## Empty list

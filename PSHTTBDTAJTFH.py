@@ -12,6 +12,8 @@
 ## Copy should be a built-in
 from copy import copy
 
+from pprint import pprint
+
 class Struct(object):
     """ For those times when you really just need a symbolic namespace 
 
