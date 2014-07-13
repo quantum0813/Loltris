@@ -997,16 +997,15 @@ class Tetromino(object):
         def digOutward(condition, xs):
             pass
 
-        def atomGoodPos(x, y):
-            is_good = not (self.checkWallCollision(x, y) or self.checkBlockCollision(x=x, y=y))
-            if is_good:
-                return x, y
-            return None
-
         def macroGoodPos(xss):
             def microGoodPos(xs):
+                def atomGoodPos(x, y):
+                    is_good = not (self.checkWallCollision(x, y) or self.checkBlockCollision(x=x, y=y))
+                    if is_good:
+                        return x, y
+                    return None
                 jump = 0
-                middle = int(round(len(xs) / 2.0))
+                middle = int(round(len(xs) / 2.0)) - 1
                 while True:
                     ## TODO: Make this procedure into a function
                     position = contain(lambda: atomGoodPos(*xs[ middle + jump ]), (IndexError,)) or contain(lambda: atomGoodPos(*xs[ middle - jump ]), (IndexError,))
@@ -1016,7 +1015,7 @@ class Tetromino(object):
                     if middle - jump < 0 and middle + jump >= len(xs):
                         return None
             jump = 0
-            middle = int(round(len(xss) / 2.0))
+            middle = int(round(len(xss) / 2.0)) - 1
             while True:
                 ## TODO: Make this procedure into a function
                 position = ( contain(lambda: microGoodPos(xss[ middle - jump ]), (IndexError,)) or
@@ -1027,12 +1026,7 @@ class Tetromino(object):
                 if middle - jump < 0 and middle + jump >= len(xss):
                     return None
 
-        if atomGoodPos(self.x, self.y):
-            ## Workaround to keep the tetromino from unnecessarrily moving when flipping
-            position = self.x, self.y
-        else:
-            position = macroGoodPos(positions)
-
+        position = macroGoodPos(positions)
         if position:
             self.x, self.y = position
             self.updateGhost("rotate", direction)
