@@ -85,9 +85,9 @@ class HighscoreList(Core.Menu):
         super(HighscoreList, self).__init__("HighscoreList", *args, **kwargs)
         self.running = self.mainLoop
         self.scores = Load.loadScores()
-        sorted_score_table = [(("Name", "Score"), None)]
+        sorted_score_table = [(("Name", "Score", "Lines"), None)]
         sorted_score_table.extend([
-                ((score["name"], score["score"]), score)
+                ((score["name"], score["score"], score["lines"]), score)
                 for score in sorted(self.scores, key=lambda d: d["score"], reverse=True)
                 ])
         self.header_font = {}

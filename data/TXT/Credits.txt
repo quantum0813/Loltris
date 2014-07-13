@@ -21,3 +21,16 @@ Fonts:
     GNU
   Orbitron:
     Matt McInerney
+
+Software & Libraries used:
+  Python2:
+    Programming language
+  PyGame:
+    SDL bindings for drawing
+    graphics
+  gVim:
+    Text-editor for editing
+    the Loltris code
+  Audacity:
+    Audio-editing tool for clipping
+    music used in the game

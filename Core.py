@@ -208,16 +208,22 @@ class Game(object):
         if not hasattr(self, "running") or not hasattr(self, "eventHandler"):
             raise GameError("Game has not been properly initialized")
 
-        i = 0
+        timers = Struct(
+                print_framerate = 0,
+                )
+
         while self.running:
 
-            i += 1
+            for timer in timers:
+                timers[timer] += 1
+
             self.clock.tick(self.ticktime)
             self.events = Pygame.event.get()
             self.interrupts = []
-            if i == TETRIS_FRAMERATE * DISPLAY_TETRIS_FRAMERATE_INTERVAL:
-                i = 0
-                Log.debug("Framerate: {}".format(int(round(self.clock.get_fps()))))
+
+            if timers.print_framerate == TETRIS_FRAMERATE * DISPLAY_TETRIS_FRAMERATE_INTERVAL:
+                timers.print_framerate = 0
+                Log.notice("Framerate: {}".format(int(round(self.clock.get_fps()))))
 
             ## The events and updates should be handled in reverse order (the things on top go first)
             queue = sorted(self.jobs, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)

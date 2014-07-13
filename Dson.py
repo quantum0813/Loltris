@@ -214,7 +214,6 @@ class Parser(object):
                         continue
                     elif token == "such":
                         ts = list(take(tokens))
-                        pprint(ts)
                         value.append(self.parse([(token, tokentype, location)] + ts))
                         continue
                     else:
@@ -318,8 +317,6 @@ class Serializer(object):
                             rec(sub, level + 1, True)
                         else:
                             rec(sub, level + 1, False)
-                        # if i+1 < len(obj):
-                        #     self.text += "and "
                     if any(isinstance(obj, t) for t in [list, dict]):
                         self.text += "many"
                     else:

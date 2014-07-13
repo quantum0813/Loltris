@@ -840,7 +840,8 @@ class Tetromino(object):
              [1, 1, 1]]
     _type (str):
         **DEPRECATED**
-        The name of the tetromino
+        The name of the tetromino, not actually used for anything but it was put in here in case
+        it would be useful at some point.
     color (tuple):
         The color of the tetromino blocks given as a RGB tuple.
     """
@@ -887,11 +888,11 @@ class Tetromino(object):
             )
             self.ghostpiece.drop(self.y)
 
-    def getActiveBlocks(self):
-        for y in xrange(len(self.matrix)):
-            for x in xrange(len(self.matrix[y])):
-                if self.matrix[y][x]:
-                    yield self.x + x, self.y + y
+    def getActiveBlocks(self, x=None, y=None):
+        for by in xrange(len(self.matrix)):
+            for bx in xrange(len(self.matrix[by])):
+                if self.matrix[by][bx]:
+                    yield (x or self.x) + bx, (y or self.y) + by
 
     def getBlocksDict(self):
         blocks = {}
@@ -947,8 +948,8 @@ class Tetromino(object):
             self.moveDiagonal(1)
         self.force_draw = True
 
-    def checkBlockCollision(self):
-        return any(self.board.blocks.get((x, y)) for x, y in self.getActiveBlocks())
+    def checkBlockCollision(self, x=None, y=None):
+        return any(self.board.blocks.get((x_, y_)) for x_, y_ in self.getActiveBlocks(x=x, y=y))
 
     def checkWallCollision(self, xp, yp):
         for y in xrange(len(self.matrix)):
@@ -986,11 +987,57 @@ class Tetromino(object):
         last_matrix = self.matrix
         self.matrix = Matrix.rot90(self.matrix)
         self.force_draw = True
-        if self.checkWallCollision(self.x, self.y) or self.checkBlockCollision():
-            self.matrix = last_matrix
-            return
+
+        positions = []
+        for y in xrange(-MAX_VERTICAL_AUTO_MOVE, MAX_VERTICAL_AUTO_MOVE+1):
+            positions.append(
+                    [(self.x + x, self.y + y) for x in xrange(-MAX_HORIZONTAL_AUTO_MOVE, MAX_HORIZONTAL_AUTO_MOVE+1)]
+                    )
+
+        def digOutward(condition, xs):
+            pass
+
+        def atomGoodPos(x, y):
+            is_good = not (self.checkWallCollision(x, y) or self.checkBlockCollision(x=x, y=y))
+            if is_good:
+                return x, y
+            return None
+
+        def macroGoodPos(xss):
+            def microGoodPos(xs):
+                jump = 0
+                middle = int(round(len(xs) / 2.0))
+                while True:
+                    ## TODO: Make this procedure into a function
+                    position = contain(lambda: atomGoodPos(*xs[ middle + jump ]), (IndexError,)) or contain(lambda: atomGoodPos(*xs[ middle - jump ]), (IndexError,))
+                    if position:
+                        return position
+                    jump += 1
+                    if middle - jump < 0 and middle + jump >= len(xs):
+                        return None
+            jump = 0
+            middle = int(round(len(xss) / 2.0))
+            while True:
+                ## TODO: Make this procedure into a function
+                position = ( contain(lambda: microGoodPos(xss[ middle - jump ]), (IndexError,)) or
+                             contain(lambda: microGoodPos(xss[ middle + jump ]), (IndexError,)) )
+                if position:
+                    return position
+                jump += 1
+                if middle - jump < 0 and middle + jump >= len(xss):
+                    return None
+
+        if atomGoodPos(self.x, self.y):
+            ## Workaround to keep the tetromino from unnecessarrily moving when flipping
+            position = self.x, self.y
         else:
+            position = macroGoodPos(positions)
+
+        if position:
+            self.x, self.y = position
             self.updateGhost("rotate", direction)
+        else:
+            self.matrix = last_matrix
 
     def updateGhost(self, attr, *args, **kwargs):
         if self.ghostpiece:

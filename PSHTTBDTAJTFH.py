@@ -19,12 +19,11 @@ from copy import copy
 from pprint import pprint
 
 class Struct(object):
-    """ For those times when you really just need a symbolic namespace 
+    """ Basically a hash table, but a struct allows for accessing attributes like this:
+        struct.attribute
 
-        >inb4 using classes as hash tables is always bad
-
-        As syntax goes:
-            namespace.value > hashtable["value"]
+        Attributes can still be accessed as such:
+        struct["attribute"]
     """
     def __init__(self, **kwargs):
         for arg in kwargs:
@@ -34,6 +33,7 @@ class Struct(object):
         """
         >>> c = Struct(arg0=0, arg1=1)
         >>> c.arg2 = "value"
+        >>> topkek
         >>> str(c)
         "Struct(arg0 = 0, arg1 = 1, arg2 = 'value')"
         """
@@ -59,6 +59,21 @@ class Struct(object):
 
     def __iter__(self):
         return iter(self.__dict__)
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+    def __delitem__(self, key):
+        delattr(self, key)
+
+def contain(computation, exceptions):
+    try:
+        return computation()
+    except exceptions:
+        return None
 
 if __name__ == "__main__":
     import doctest
