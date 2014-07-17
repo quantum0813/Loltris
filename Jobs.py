@@ -131,15 +131,15 @@ class Job(object):
         self.force_draw = False
 
     def eventHandler(self, event):
-        if event.type == KEYDOWN self.keydownhandlers.get(event.key):
+        if event.type == KEYDOWN and self.keydownhandlers.get(event.key):
             self.keydownhandlers[event.key](event)
-        elif event.type == KEYUP self.keyuphandlers.get(event.key):
+        elif event.type == KEYUP and self.keyuphandlers.get(event.key):
             self.keyuphandlers[event.key](event)
         elif event.type == MOUSEMOTION and hasattr(self, "mouseMotionHandler"):
             self.mouseMotionHandler(event)
-        elif event.type == MOUSEBUTTONDOWN hasattr(self, "mouseButtonDownHandler"):
+        elif event.type == MOUSEBUTTONDOWN and hasattr(self, "mouseButtonDownHandler"):
             self.mouseButtonDownHandler(event)
-        elif event.type == MOUSEBUTTONUP hasattr(self, "mouseButtonUpHandler"):
+        elif event.type == MOUSEBUTTONUP and hasattr(self, "mouseButtonUpHandler"):
             self.mouseButtonUpHandler(event)
 
     def update(self):
