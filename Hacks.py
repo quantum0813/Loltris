@@ -6,11 +6,5 @@ def contain(computation, exceptions):
     except exceptions:
         return None
 
-def chain():
-    def chain(function, *args, **kwargs):
-        """
-        >>> import sys
-        >>> f = lambda: chain()
-        """
-        function(*args, **kwargs)
-        return True
+def chain(f, *fs):
+    return (lambda: (lambda: f() or True)() and chain(*fs)()) if fs else f
