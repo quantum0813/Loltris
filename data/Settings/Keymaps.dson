@@ -6,28 +6,17 @@ such
     up is 273 
   wow 
   game is such
-    rotate_left is 279 
-    uber_tetromino is 9 
-    speed_up is 274 
-    reverse is 281 
-    move_left is 276 
-    move_right is 275 
-    pause is 27 
-    drop_down is 32 
-    rotate_right is 279 
-  wow 
-  game2 is such
     player2 is such
-      rotate_left is 279 
-      uber_tetromino is 9 
-      speed_up is 274 
-      reverse is 281 
-      move_left is 276 
-      move_right is 275 
-      pause is 27 
-      drop_down is 32 
-      rotate_right is 273 
+      rotate_left is 113 
+      uber_tetromino is 306 
+      speed_up is 115 
+      reverse is 308 
+      move_left is 97 
+      move_right is 100 
+      drop_down is 304 
+      rotate_right is 101 
     wow 
+    pause is 27 
     player1 is such
       rotate_left is 279 
       uber_tetromino is 9 
@@ -35,9 +24,8 @@ such
       reverse is 281 
       move_left is 276 
       move_right is 275 
-      pause is 27 
       drop_down is 32 
-      rotate_right is 273 
+      rotate_right is 279 
     wow 
   wow 
 wow 

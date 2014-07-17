@@ -254,23 +254,81 @@ class KeymapMenu(Core.Menu):
 
     class Tetris(Core.Menu):
         def __init__(self, **kwargs):
-            super(KeymapMenu.Tetris, self).__init__("PauseMenu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
+            super(KeymapMenu.Tetris, self).__init__("KeymapMenu.Tetris", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
             self.header = "Tetris-map"
-            self.menu = Factory.variableTextBoxes(
-                    [( action.replace("_", " ").capitalize() + ": {key}",
-                       ## Nested lambdas are used here to cirumvent an issue with python closures. (http://code.activestate.com/recipes/502271/)
-                       ## Basically if you don't nest the lambdas, you will end up with every single functions having the last action in
-                       ## the list of dictionary keys.
-                       {"key": (lambda action_: lambda _: Utils.keyToString(Shared.keymap["game"][action_]))(action) },
-                       lambda: modifyKeymap(self, Shared.keymap["game"], action))
-                       for action in Shared.keymap["game"] ],
+            self.menu = Factory.textBoxes(
+                    [("Player 1", lambda: self.call(self.Player1, caption="Loltris - Tetris player 1 keymap")),
+                     ("Player 2", lambda: self.call(self.Player2, caption="Loltris - Tetris player 2 keymap")),
+                    ],
                     self,
                     font=MENU_OPTION_FONT,
                     colors={"background":self.colorscheme["background"], "font":self.colorscheme["option"]},
                     fill=MENU_3DBORDER_BACKGROUND,
                     xcenter=True,
                     )
+            self.menu.extend(Factory.variableTextBoxes(
+                    [( action.replace("_", " ").capitalize() + ": {key}",
+                       ## Nested lambdas are used here to cirumvent an issue with python closures. (http://code.activestate.com/recipes/502271/)
+                       ## Basically if you don't nest the lambdas, you will end up with every single functions having the last action in
+                       ## the list of dictionary keys.
+                       {"key": (lambda action_: lambda _: Utils.keyToString(Shared.keymap["game"][action_]))(action) },
+                       lambda: modifyKeymap(self, Shared.keymap["game"], action))
+                       for action in Shared.keymap["game"]
+                       if isinstance(Shared.keymap["game"][action], int) ## Skip the player1 and player2 sub-dictionaries
+                       ],
+                    self,
+                    font=MENU_OPTION_FONT,
+                    colors={"background":self.colorscheme["background"], "font":self.colorscheme["option"]},
+                    fill=MENU_3DBORDER_BACKGROUND,
+                    xcenter=True,
+                    ))
             self.setupObjects()
+
+        class Player1(Core.Menu):
+            def __init__(self, **kwargs):
+                super(KeymapMenu.Tetris.Player1, self).__init__(
+                        "KeymapMenu.Tetris.Player1", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
+                self.header = "Player1 Keymaps"
+                self.menu.extend(Factory.variableTextBoxes(
+                        [( action.replace("_", " ").capitalize() + ": {key}",
+                           ## Nested lambdas are used here to cirumvent an issue with python closures. (http://code.activestate.com/recipes/502271/)
+                           ## Basically if you don't nest the lambdas, you will end up with every single functions having the last action in
+                           ## the list of dictionary keys.
+                           {"key": (lambda action_: lambda _: Utils.keyToString(Shared.keymap["game"]["player1"][action_]))(action) },
+                           (lambda action_: lambda: modifyKeymap(self, Shared.keymap["game"]["player1"], action_))(action),
+                           )
+                           for action in Shared.keymap["game"]["player1"]
+                           ],
+                        self,
+                        font=MENU_OPTION_FONT,
+                        colors={"background":self.colorscheme["background"], "font":self.colorscheme["option"]},
+                        fill=MENU_3DBORDER_BACKGROUND,
+                        xcenter=True,
+                        ))
+                self.setupObjects()
+
+        class Player2(Core.Menu):
+            def __init__(self, **kwargs):
+                super(KeymapMenu.Tetris.Player2, self).__init__(
+                        "KeymapMenu.Tetris.Player2", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
+                self.header = "Player2 Keymaps"
+                self.menu.extend(Factory.variableTextBoxes(
+                        [( action.replace("_", " ").capitalize() + ": {key}",
+                           ## Nested lambdas are used here to cirumvent an issue with python closures. (http://code.activestate.com/recipes/502271/)
+                           ## Basically if you don't nest the lambdas, you will end up with every single functions having the last action in
+                           ## the list of dictionary keys.
+                           {"key": (lambda action_: lambda _: Utils.keyToString(Shared.keymap["game"]["player2"][action_]))(action) },
+                           (lambda action_: lambda: modifyKeymap(self, Shared.keymap["game"]["player2"], action_))(action),
+                           )
+                           for action in Shared.keymap["game"]["player2"]
+                           ],
+                        self,
+                        font=MENU_OPTION_FONT,
+                        colors={"background":self.colorscheme["background"], "font":self.colorscheme["option"]},
+                        fill=MENU_3DBORDER_BACKGROUND,
+                        xcenter=True,
+                        ))
+                self.setupObjects()
 
     class Menu(Core.Menu):
         def __init__(self, **kwargs):

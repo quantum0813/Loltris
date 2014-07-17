@@ -3,6 +3,7 @@
 ## Miscellaneous "utilities" that didn't fit into any other particular module
 
 from Globals import *
+import Log
 import pygame as Pygame
 
 ## Generate a key for a dictionary, used for storing fonts but can be used
@@ -36,6 +37,12 @@ def keyToString(key):
         return NONCHARACTERS.get(key, unichr(key))
     except UnicodeEncodeError:
         return "(invalid)"
+    except TypeError as e:
+        Log.debug("Got {}".format(key))
+        raise e
+
+def chain(f, *fs):
+    return (lambda: (lambda: f() or True)() and chain(*fs)()) if fs else f
 
 if __name__ == '__main__':
     import doctest
