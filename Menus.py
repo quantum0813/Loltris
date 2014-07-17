@@ -44,6 +44,7 @@ import HighscoreExplorer
 import TetrisGame
 import MakeTetromino
 import SandBox
+import TwoPlayerTetrisGame
 
 class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
@@ -74,7 +75,8 @@ class MainMenu(Core.Menu):
         self.options_pos[1] = self.jobs.title_board.y + self.jobs.title_board.height + SPACER*2
 
         self.menu = Factory.textBoxes([
-                ("Start Game", self.launchTetrisGame),
+                ("Single Player", self.launchTetrisGame),
+                # ("Two Player", lambda: self.call(TwoPlayerTetris.TwoPlayerTetris, caption "Loltris - Two Player")),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),

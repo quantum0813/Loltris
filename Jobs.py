@@ -49,6 +49,8 @@ class Job(object):
         self.draw_required = True
         self.fill = False
         self.resize = False
+        self.keydownhandlers = {}
+        self.keyuphandlers = {}
         ## Jobs are recursive datatypes, they may have other jobs running "underneath"
         self.jobs = Struct()
 
@@ -129,12 +131,22 @@ class Job(object):
         self.force_draw = False
 
     def eventHandler(self, event):
-        pass
+        if event.type == KEYDOWN self.keydownhandlers.get(event.key):
+            self.keydownhandlers[event.key](event)
+        elif event.type == KEYUP self.keyuphandlers.get(event.key):
+            self.keyuphandlers[event.key](event)
+        elif event.type == MOUSEMOTION and hasattr(self, "mouseMotionHandler"):
+            self.mouseMotionHandler(event)
+        elif event.type == MOUSEBUTTONDOWN hasattr(self, "mouseButtonDownHandler"):
+            self.mouseButtonDownHandler(event)
+        elif event.type == MOUSEBUTTONUP hasattr(self, "mouseButtonUpHandler"):
+            self.mouseButtonUpHandler(event)
 
     def update(self):
         pass
 
-## Jobs.py might not be the most logical place for this
+## TODO: Jobs.py might not be the most logical place for this, move this to
+##       a more suitable module.
 def loadFont(font):
     if not font.get("name"):
         font["name"] = Pygame.font.get_default_font()
@@ -824,7 +836,7 @@ class TimedExecution(object):
             self.function()
         self.cycles -= 1
 
-class Tetromino(object):
+class Tetromino(Job):
     """
     A tetromino, heavily tied in with the Board class, requires a board to function.
 
@@ -887,6 +899,41 @@ class Tetromino(object):
                 Shared.options["graphics"].get("ghostpiece_color", GHOST_COLOR), x=x, y=y, xcenter=xcenter
             )
             self.ghostpiece.drop(self.y)
+
+        def speedUpKeyUpHandler():
+            self.sped_up = False
+            self.updateinterval = self.normal_speed
+            self.time_until_update = self.updateinterval
+
+        self.keyuphandlers = {
+                Shared.keymap["game"]["speed_up"]   : lambda _: self.sped_up and speedUpKeyUpHandler(),
+                Shared.keymap["game"]["move_right"] : lambda _: setattr(self, "move_right_timeout", None),
+                Shared.keymap["game"]["move_left"]  : lambda _: setattr(self, "move_left_timeout", None),
+                }
+
+        def moveRightKeyDownHandler():
+            self.moveHorizontal(1)
+            self.move_right_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
+
+        def moveLeftKeyUpHandler():
+            self.moveHorizontal(-1)
+            self.move_left_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
+
+        def speedUpKeyDownHandler():
+            self.sped_up = True
+            self.normal_speed = self.updateinterval
+            self.updateinterval = SPED_UP_UPDATEINTERVAL
+            self.time_until_update = self.updateinterval
+
+        self.keydownhandlers = {
+                Shared.keymap["game"]["rotate_right"] : lambda _: self.rotate(1),
+                Shared.keymap["game"]["rotate_left"]  : lambda _: self.rotate(-1),
+                Shared.keymap["game"]["reverse"]      : lambda _: Shared.options["gameplay"].get("flip_tetromino") and self.flip(),
+                Shared.keymap["game"]["move_right"]   : lambda _: moveRightKeyDownHandler(),
+                Shared.keymap["game"]["move_left"]    : lambda _: moveLeftKeyUpHandler(),
+                Shared.keymap["game"]["drop_down"]    : lambda _: self.drop(),
+                Shared.keymap["game"]["speed_up"]     : lambda _: speedUpKeyDownHandler(),
+                }
 
     def getActiveBlocks(self, x=None, y=None):
         for by in xrange(len(self.matrix)):
@@ -1047,43 +1094,6 @@ class Tetromino(object):
         if not (self.checkWallCollision(self.x, self.y) or self.checkBlockCollision()):
             Matrix.flip(self.matrix)
             self.updateGhost("flip")
-
-    def eventHandler(self, event):
-        if event.type == KEYUP:
-            if event.key == Shared.keymap["game"]["speed_up"] and self.sped_up:
-                self.sped_up = False
-                self.updateinterval = self.normal_speed
-                self.time_until_update = self.updateinterval
-
-            elif event.key == Shared.keymap["game"]["move_right"] and self.move_right_timeout != None:
-                self.move_right_timeout = None
-
-            elif event.key == Shared.keymap["game"]["move_left"] and self.move_left_timeout != None:
-                self.move_left_timeout = None
-
-        if event.type == KEYDOWN:
-            if event.key == Shared.keymap["game"]["rotate_right"]:
-                self.rotate(1)
-            elif event.key == Shared.keymap["game"]["rotate_left"]:
-                self.rotate(-1)
-            elif event.key == Shared.keymap["game"]["reverse"] and Shared.options["gameplay"].get("flip_tetromino"):
-                self.flip()
-
-            elif event.key == Shared.keymap["game"]["move_right"]:
-                self.moveHorizontal(1)
-                self.move_right_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
-            elif event.key == Shared.keymap["game"]["move_left"]:
-                self.moveHorizontal(-1)
-                self.move_left_timeout = Shared.options.get("move_tetromino_timeout", MOVE_TETROMINO_TIMEOUT) * TETRIS_FRAMERATE
-
-            elif event.key == Shared.keymap["game"]["drop_down"]:
-                self.drop()
-
-            elif event.key == Shared.keymap["game"]["speed_up"]:
-                self.sped_up = True
-                self.normal_speed = self.updateinterval
-                self.updateinterval = SPED_UP_UPDATEINTERVAL
-                self.time_until_update = self.updateinterval
 
 class GhostTetromino(Tetromino):
     """
@@ -1299,7 +1309,7 @@ class Board(object):
 
             ## Force a redraw
             self.force_draw = True
-            self.score += SCORES["tetris"].get(lines, 9001)
+            self.score += TETRIS_SCORES.get(lines, TETRIS_SCORES_OTHER)
 
         self.lines += lines
 

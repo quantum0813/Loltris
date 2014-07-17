@@ -7,7 +7,7 @@
 from pygame.locals import *
 
 ## The program version (also used in the cxfreeze setup script)
-VERSION = "0.5.9"
+VERSION = "0.6.0"
 ## See Log.loglevel for details on this variable
 LOGLEVEL = 5
 
@@ -50,9 +50,12 @@ MAX_VERTICAL_AUTO_MOVE = 3
 LEVEL_LINES = 20
 LEVEL_LINES_INCREASE = 5
 UPDATEINTERVAL_DECREASE = TETRIS_FRAMERATE / 10
-SCORES = {
-        "tetris": {1: 100, 2: 250, 3: 500, 4: 1500},
-        }
+TETRIS_SCORES = { 1: 100,
+                  2: 250,
+                  3: 500,
+                  4: 1500,
+                }
+TETRIS_SCORES_OTHER = 9001
 ## }}}
 
 ## Sound {{{
