@@ -69,12 +69,6 @@ class Struct(object):
     def __delitem__(self, key):
         delattr(self, key)
 
-def contain(computation, exceptions):
-    try:
-        return computation()
-    except exceptions:
-        return None
-
 if __name__ == "__main__":
     import doctest
     doctest.testmod()

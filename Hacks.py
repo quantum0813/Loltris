@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+## Some hacks
+
 def contain(computation, exceptions):
     try:
         return computation()
