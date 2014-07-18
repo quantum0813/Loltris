@@ -179,7 +179,7 @@ class TetrisGame(Core.Game):
             self.quit()
 
         elif event.type == KEYDOWN:
-            if event.key == Shared.keymap["game"]["player1"]["pause"]:
+            if event.key == Shared.keymap["game"]["pause"]:
                 self.call(Menus.PauseMenu, sound_enabled=False, caption="Tetris - Paused")
 
             if event.key == Shared.keymap["game"]["player1"]["uber_tetromino"] and Shared.options["gameplay"].get("uber_tetromino"):

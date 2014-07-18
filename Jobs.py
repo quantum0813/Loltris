@@ -34,6 +34,7 @@ import os.path as Path
 from pygame.locals import *
 from Globals import *
 from PSHTTBDTAJTFH import *
+from Hacks import *
 
 class Job(object):
     """
@@ -407,7 +408,7 @@ class TextBox(object):
 
     def renderFonts(self):
         if not self.font.get("name"):
-            self.font["name"] = Pygame.font.get_default_font()
+            self.font["name"] = FALLBACK_FONT_NAME
         fontobj = Shared.globfonts.get(Utils.genKey(self.font))
         if not fontobj:
             try:

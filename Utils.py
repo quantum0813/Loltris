@@ -37,9 +37,6 @@ def keyToString(key):
         return NONCHARACTERS.get(key, unichr(key))
     except UnicodeEncodeError:
         return "(invalid)"
-    except TypeError as e:
-        Log.debug("Got {}".format(key))
-        raise e
 
 def chain(f, *fs):
     return (lambda: (lambda: f() or True)() and chain(*fs)()) if fs else f
