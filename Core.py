@@ -26,6 +26,7 @@
 import pygame as Pygame
 import sys as Sys
 import Log
+import Load
 import Shared
 from pygame.locals import *
 from Globals import *
@@ -41,7 +42,7 @@ class Game(object):
     """
     def __init__(self, _id, caption="", mouse_visible=True, bgcolor=(0x22,0x22,0x22), screen=None, ticktime=TETRIS_FRAMERATE,
                  width=SCREEN_WIDTH, height=SCREEN_HEIGHT, x=SCREEN_WIDTH, y=SCREEN_HEIGHT, sound_enabled=True, soundtrack=None,
-                 fill=True):
+                 fill=True, icon=WM_ICON):
         Log.debug("Initializing Game object `{}'".format(_id))
         self.jobs = Struct()
         self.caption = caption
@@ -51,8 +52,8 @@ class Game(object):
         self.ticktime = ticktime
         self.ret = 0
         self.windows = {}
-        self.height = y
-        self.width = x
+        self.height = height
+        self.width = width
         self.events = None
         self.id = _id
         self.soundtrack = soundtrack
@@ -158,24 +159,29 @@ class Game(object):
         Log.debug("Returning from Game `{}'".format(self))
 
     def setup(self):
+        Log.debug("Running setup for {}".format(self.id))
+
         Pygame.init()
         Pygame.mouse.set_visible(int(self.mouse_visible))
+        Pygame.display.set_icon(Load.loadImage(WM_ICON))
+
         if not Pygame.mixer.get_init() and self.sound_enabled:
             Log.log("Initializing mixer")
             Pygame.mixer.init()
+
         if self.soundtrack and self.sound_enabled and not self.playing:
             Log.debug("Playing music: {}".format((self.soundtrack, self.sound_enabled, self.playing)))
             self.playMusic(self.soundtrack, loops=-1)
-        else:
-            Log.debug("Not playing music: {}".format((self.soundtrack, self.sound_enabled, self.playing)))
-        if not self.screen:
+
+        if not self.screen or self.screen.get_width() != self.width or self.screen.get_height() != self.height:
+            Log.notice("Setting display mode {}".format((self.width, self.height)))
             self.screen = Pygame.display.set_mode((self.width, self.height), DISPLAY_OPTIONS)
-        if self.width != self.screen.get_width() or self.height != self.screen.get_height():
-            self.screen.set_mode((self.width, self.height), DISPLAY_OPTIONS)
+
+
         self.screen.fill(self.bgcolor)
         Pygame.display.flip()
         self.clock = Pygame.time.Clock()
-        Pygame.display.set_caption("{}".format(self.caption))
+        Pygame.display.set_caption(self.caption)
 
     def eventHandler(self, event):
         pass

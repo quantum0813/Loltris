@@ -40,7 +40,7 @@ class Job(object):
     """
     The basic structure of a job, all required attributes and methods.
     """
-    def __init__(self, game, x, y, queue=Queue.GENERIC):
+    def __init__(self, game, x, y, queue=Queue.GENERIC, bgcolor=(0x22,0x22,0x22)):
         self.game = game
         self.x = x
         self.y = y
@@ -52,8 +52,10 @@ class Job(object):
         self.resize = False
         self.keydownhandlers = {}
         self.keyuphandlers = {}
+        self.bgcolor = bgcolor
         ## Jobs are recursive datatypes, they may have other jobs running "underneath"
         self.jobs = Struct()
+        self.screen = self.game.screen
 
     def getJob(self, name):
         return getattr(self.jobs, name)
@@ -62,37 +64,24 @@ class Job(object):
         setattr(self.jobs, name, obj)
 
     def runSubs(self):
-        self.clock.tick(self.ticktime)
-        self.events = Pygame.event.get()
-
         ## The events and updates should be handled in reverse order (the things on top go first)
         queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)
         for objname in queue:
             if objname not in self.jobs.__dict__:
                 ## In case a Job modifies self.jobs, removing this job.
                 continue
-                
-            obj = self.getJob(objname)
-            if obj.update_required:
-                for event in self.events:
-                    if event.type not in self.lock:
-                        obj.eventHandler(event)
 
+            obj = self.getJob(objname)
             ## XXX: This second check of update_required is necessarry because eventHandler() may either modify
             ##      or call methods that modify parameters in obj.
             if obj.update_required:
                 obj.update()
 
-            ## XXX: This second check of update_required is necessarry because update() may either modify
-            ##      or call methods that modify parameters in obj.
-            if obj.update_required:
-                obj.runSubs()
-
         queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue)
         ## Handle resizing (redraw everything underneath the resized job)
         for objname in queue:
             obj = self.getJob(objname)
-            if getattr(obj, "resize"):
+            if obj.__dict__.get("resize"):
                 for job in self.getJobsIn(objname):
                     job.force_draw = True
                 obj.resize = False
@@ -115,21 +104,16 @@ class Job(object):
                     Draw.fillJob(self.screen, obj.fill, obj)
                 obj.draw()
 
-
-        Pygame.display.flip()
-
-        for event in self.events:
-            if event.type not in self.lock:
-                self.eventHandler(event)
-
-        if self.running:
-            self.running()
-
         ## Remove locks
         self.lock = {}
 
     def draw(self):
         self.force_draw = False
+
+    def runSubEventHandlers(self, event):
+        for job in self.jobs:
+            if self.jobs[job].update_required:
+                self.jobs[job].eventHandler(event)
 
     def eventHandler(self, event):
         if event.type == KEYDOWN and self.keydownhandlers.get(event.key):
@@ -142,19 +126,22 @@ class Job(object):
             self.mouseButtonDownHandler(event)
         elif event.type == MOUSEBUTTONUP and hasattr(self, "mouseButtonUpHandler"):
             self.mouseButtonUpHandler(event)
+        if self.jobs:
+            self.runSubEventHandlers(event)
 
     def update(self):
-        pass
+        if self.jobs:
+            self.runSubs()
 
 ## TODO: Jobs.py might not be the most logical place for this, move this to
 ##       a more suitable module.
 def loadFont(font):
     if not font.get("name"):
         font["name"] = Pygame.font.get_default_font()
-    fontobj = Shared.globfonts.get(Utils.genKey(font))
+    fontobj = Shared.fonts.get(Utils.genKey(font))
     if not fontobj:
         try:
-            fontobj = Shared.globfonts[Utils.genKey(font)] = \
+            fontobj = Shared.fonts[Utils.genKey(font)] = \
                     Pygame.font.Font(
                             Path.join(Load.TTF_FONTDIR, "{}.ttf".format(font["name"])),
                             font.get("size", 40),
@@ -223,7 +210,7 @@ class ColorPalette(Job):
     },
 ]
 """
-class TextBox(object):
+class TextBox(Job):
     """
     Multi-purpose text-box, takes the following keyword arguments:
 
@@ -409,10 +396,10 @@ class TextBox(object):
     def renderFonts(self):
         if not self.font.get("name"):
             self.font["name"] = FALLBACK_FONT_NAME
-        fontobj = Shared.globfonts.get(Utils.genKey(self.font))
+        fontobj = Shared.fonts.get(Utils.genKey(self.font))
         if not fontobj:
             try:
-                fontobj = Shared.globfonts[Utils.genKey(self.font)] = \
+                fontobj = Shared.fonts[Utils.genKey(self.font)] = \
                         Pygame.font.Font(
                             Path.join(Load.TTF_FONTDIR, "{}.ttf".format(self.font["name"])),
                             self.font.get("size", 40),
@@ -773,7 +760,7 @@ class Switch(TextBox):
         super(Switch, self).draw()
         self.drawBox()
 
-class TimedExecution(object):
+class TimedExecution(Job):
     """
     Execute a function after a given time. The timing is handled in terms of cycles,
     i.e how many times update has been called. It is therefore dependant on the framerate
@@ -864,6 +851,8 @@ class Tetromino(Job):
                  ):
 
         assert matrix, "Will not create tetromino with empty matrix"
+
+        super(Tetromino, self).__init__(board.game, x, y)
 
         self.matrix = matrix
         self.type = _type
@@ -1056,7 +1045,7 @@ class Tetromino(Job):
                 middle = int(round(len(xs) / 2.0)) - 1
                 while True:
                     ## TODO: Make this procedure into a function
-                    position = contain(lambda: atomGoodPos(*xs[ middle + jump ]), (IndexError,)) or contain(lambda: atomGoodPos(*xs[ middle - jump ]), (IndexError,))
+                    position = atomGoodPos(*xs[ middle + jump ]) or atomGoodPos(*xs[ middle - jump ])
                     if position:
                         return position
                     jump += 1
@@ -1178,7 +1167,7 @@ class Notification(TextBox):
                 padding=6,
                 )
 
-class Board(object):
+class Board(Job):
     def __init__(self, game, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f), draw_border=True,
                  innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=Queue.BOARD, level=1, draw_grid=True,
                 ):

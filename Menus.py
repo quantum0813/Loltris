@@ -77,7 +77,7 @@ class MainMenu(Core.Menu):
 
         self.menu = Factory.textBoxes([
                 ("Single Player", self.launchTetrisGame),
-                # ("Two Player", lambda: self.call(TwoPlayerTetris.TwoPlayerTetris, caption "Loltris - Two Player")),
+                ("Two Player", lambda: self.call(TwoPlayerTetrisGame.TwoPlayerTetris, caption="Loltris - Two Player")),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
@@ -351,6 +351,5 @@ class KeymapMenu(Core.Menu):
                 fill=MENU_3DBORDER_BACKGROUND,
                 xcenter=True,
                 )
-            print(self.menu)
             self.setupObjects()
 

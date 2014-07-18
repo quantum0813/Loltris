@@ -21,12 +21,15 @@
 
 from RGB import rgbHexDecode
 import os.path as Path
+import Shared
 import Log
 import cPickle as CPickle
 import Dson
 import bz2 as Bz2
 import os as OS
+import pygame as Pygame
 from PSHTTBDTAJTFH import *
+from Globals import *
 
 DATADIR = "data"
 TTF_FONTDIR = Path.join(DATADIR, "Fonts", "TTF")
@@ -107,3 +110,11 @@ def loadSnapshot(seq):
 def loadBlockFont(name):
     Log.notice("Loading BlockText font from {}".format(repr(Path.join(BLOCKTEXT_FONTDIR, "{}.pyobj.bz2".format(name)))))
     return CPickle.loads(Bz2.decompress(_loadData(Path.join(BLOCKTEXT_FONTDIR, "{}.pyobj.bz2".format(name)))))
+
+def loadImage(filename):
+    Log.notice("Loading image {!r}".format(filename))
+    if Shared.images.get(filename):
+        return Shared.images[filename]
+    Shared.images[filename] = Pygame.image.load(OS.path.join(IMAGEDIR, filename))
+    return Shared.images[filename]
+

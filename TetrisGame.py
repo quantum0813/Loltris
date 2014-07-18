@@ -56,14 +56,11 @@ def randomTetromino(board, updateinterval=TETRIS_FRAMERATE/2):
     color, type, matrix = Random.choice(Shared.tetrominos)
     return Jobs.Tetromino(board, matrix, type, color, xcenter=True, updateinterval=updateinterval)
 
-class TetrisGame(Core.Game):
+class TetrisInterface(Jobs.Job):
     def __init__(self, *args, **kwargs):
-        self.id = "TetrisGame"
-        super(TetrisGame, self).__init__(
-                self.id, *args, fill=True, soundtrack=os.path.join(Load.MUSICDIR, "uprising.ogg"), sound_enabled=SOUND_ENABLED, **kwargs
+        super(TetrisInterface, self).__init__(
+                *args, **kwargs
                 )
-        self.running = self.mainGame
-        self.highscores = Load.loadHighscores(top=HIGHSCORES)
 
         ## All the jobs
         self.addJob("board",
@@ -123,21 +120,32 @@ class TetrisGame(Core.Game):
                         ghostpiece=False))
         self.jobs.preview_block.update_required = False
 
+class TetrisGame(Core.Game):
+    def __init__(self, *args, **kwargs):
+        self.id = "TetrisGame"
+        super(TetrisGame, self).__init__(
+                self.id, *args, fill=True, soundtrack=os.path.join(Load.MUSICDIR, "uprising.ogg"), sound_enabled=SOUND_ENABLED, **kwargs
+                )
+        self.running = self.mainGame
+        self.highscores = Load.loadHighscores(top=HIGHSCORES)
+
+        self.addJob("interface", TetrisInterface(self, SPACER, SPACER))
+
     def getName(self):
         if not self.jobs.name_inputbox.update_required:
             Save.saveScore({"name": self.jobs.name_inputbox.value,
-                            "score": self.jobs.board.score,
-                            "level": self.jobs.board.level,
-                            "lines": self.jobs.board.lines,
+                            "score": self.jobs.interface.jobs.board.score,
+                            "level": self.jobs.interface.jobs.board.level,
+                            "lines": self.jobs.interface.jobs.board.lines,
                             },
-                            state=self.jobs.board.blocks,
+                            state=self.jobs.interface.jobs.board.blocks,
                             )
             self.quitGame()
 
     def mainGame(self):
-        if not self.getJob("board").update_required and not hasattr(self.jobs, "window-game_over"):
+        if not self.jobs.interface.jobs.board.update_required and not hasattr(self.jobs, "window-game_over"):
             ## XXX: GAME OVER
-            board = self.getJob("board")
+            board = self.jobs.interface.jobs.board
 
             Log.log("Game over, displaying game state")
             matrix = [
@@ -155,24 +163,24 @@ class TetrisGame(Core.Game):
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "Game Over"))
                 self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, seconds=3, anykey=True))
 
-        if not self.jobs.tetromino.update_required and self.getJob("board").update_required:
+        if not self.jobs.interface.jobs.tetromino.update_required and self.jobs.interface.jobs.board.update_required:
             ## Create a new tetromino job from the nextTetromino Struct instance
-            self.addJob("tetromino",
+            self.jobs.interface.addJob("tetromino",
                         Jobs.Tetromino(
-                            self.jobs.board,
-                            self.nextTetromino.matrix, self.nextTetromino.type, self.nextTetromino.color,
-                            xcenter=True, updateinterval=TETRIS_FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
+                            self.jobs.interface.jobs.board,
+                            self.jobs.interface.nextTetromino.matrix, self.jobs.interface.nextTetromino.type, self.jobs.interface.nextTetromino.color,
+                            xcenter=True, updateinterval=TETRIS_FRAMERATE - (self.jobs.interface.jobs.board.level-1)*UPDATEINTERVAL_DECREASE))
 
             ## Get the next tetromino information, create a Struct instance that stores this information,
             ## then create another preview block.
             color, _type, matrix = Random.choice(Shared.tetrominos)
-            self.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
-            self.addJob("preview_block",
+            self.jobs.interface.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
+            self.jobs.interface.addJob("preview_block",
                         Jobs.Tetromino(
-                            self.jobs.preview_window,
-                            self.nextTetromino.matrix, self.nextTetromino.type, self.nextTetromino.color,
+                            self.jobs.interface.jobs.preview_window,
+                            self.jobs.interface.nextTetromino.matrix, self.jobs.interface.nextTetromino.type, self.jobs.interface.nextTetromino.color,
                             xcenter=True, ycenter=True, ghostpiece=False))
-            self.jobs.preview_block.update_required = False
+            self.jobs.interface.jobs.preview_block.update_required = False
 
     def eventHandler(self, event):
         if event.type == QUIT:
@@ -183,5 +191,5 @@ class TetrisGame(Core.Game):
                 self.call(Menus.PauseMenu, sound_enabled=False, caption="Tetris - Paused")
 
             if event.key == Shared.keymap["game"]["player1"]["uber_tetromino"] and Shared.options["gameplay"].get("uber_tetromino"):
-                self.addJob("tetromino", makeUberTetromino(self.getJob("board")))
+                self.addJob("tetromino", makeUberTetromino(self.jobs.interface.jobs.board))
 

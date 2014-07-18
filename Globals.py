@@ -5,6 +5,7 @@
 ## by options in the Settings.json file.
 
 from pygame.locals import *
+import os as OS
 
 ## The program version (also used in the cxfreeze setup script)
 VERSION = "0.6.0"
@@ -18,7 +19,7 @@ MENU_FRAMERATE = 24
 ## }}}
 
 ## Graphics {{{
-CENTER_WINDOW = True
+CENTER_WINDOW = False
 BOARD_WIDTH = 12
 BOARD_HEIGHT = 24
 SPACER = 10
@@ -38,6 +39,7 @@ GHOST_COLOR = (0x29, 0x29, 0x29)
 # DISPLAY_OPTIONS = FULLSCREEN | DOUBLEBUF | HWSURFACE ## High-performence display options
 DISPLAY_OPTIONS = 0
 TITLE_TEXT = "LOLTRIS" ## Used in main menu
+WM_ICON = "favicon.png"
 ## }}}
 
 ## Tetris Gameplay {{{

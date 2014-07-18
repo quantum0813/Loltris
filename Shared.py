@@ -4,4 +4,5 @@ tetrominos = []
 keymap = {}
 scores = []
 options = {}
-globfonts = {}
+fonts = {}
+images = {}

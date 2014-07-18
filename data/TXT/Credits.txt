@@ -24,7 +24,11 @@ Fonts:
 
 Software & Libraries used:
   Python2:
-    Programming language
+    Interpreter for the python2 programming
+    language
+  CxFreeze:
+    Tool/Library for creating executables
+    out of python programs
   PyGame:
     SDL bindings for drawing
     graphics
