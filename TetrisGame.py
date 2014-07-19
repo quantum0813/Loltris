@@ -57,17 +57,17 @@ def randomTetromino(board, updateinterval=TETRIS_FRAMERATE/2):
     return Jobs.Tetromino(board, matrix, type, color, xcenter=True, updateinterval=updateinterval)
 
 class TetrisInterface(Jobs.Job):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, game, x, y, keymap=None, **kwargs):
         super(TetrisInterface, self).__init__(
-                *args, **kwargs
+                game, x, y, **kwargs
                 )
 
         ## All the jobs
         self.addJob("board",
                     Jobs.Board(
                         self,
-                        x=SPACER,
-                        y=SPACER,
+                        x=self.x,
+                        y=self.y,
                         height=BOARD_HEIGHT,
                         width=BOARD_WIDTH,
                         blockwidth=BOARD_BLOCKWIDTH,
@@ -75,14 +75,22 @@ class TetrisInterface(Jobs.Job):
                         bgcolor=self.bgcolor,
                         )
                     )
-        self.addJob("tetromino", randomTetromino(self.jobs.board, updateinterval=TETRIS_FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE))
+
+        color, type, matrix = Random.choice(Shared.tetrominos)
+        self.addJob("tetromino",
+                Jobs.Tetromino(
+                    self.jobs.board, matrix, type, color, xcenter=True, updateinterval=TETRIS_FRAMERATE - (self.getJob("board").level-1)*UPDATEINTERVAL_DECREASE,
+                    keymap=keymap or Shared.keymap["game"]["player1"]
+                    )
+                )
+
         color, _type, matrix = Random.choice(Shared.tetrominos)
         self.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
         self.addJob("preview_window",
                     Jobs.Board(
                         self,
-                        x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
-                        y=SPACER,
+                        x=self.x+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
+                        y=self.y,
                         height=PREVIEW_HEIGHT,
                         width=PREVIEW_WIDTH,
                         blockwidth=BOARD_BLOCKWIDTH,
@@ -95,7 +103,7 @@ class TetrisInterface(Jobs.Job):
                         self, "Level: {level}\nScore: {score}\nLines: {lines}\nLines left: {level up}",
                         border=True,
                         y=self.jobs.preview_window.y + (PREVIEW_HEIGHT * BOARD_BLOCKWIDTH) + SPACER,
-                        x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
+                        x=self.x+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                         yfit=True,
                         width=self.jobs.preview_window.width,
                         colors=TETRIS_STATUSBOX_COLORSCHEME,

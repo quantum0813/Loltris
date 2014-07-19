@@ -847,7 +847,7 @@ class Tetromino(Job):
     """
     def __init__(self, board, matrix, _type, color, x=0, y=None, ycenter=False,
                  xcenter=False, ghostpiece=True, updateinterval=TETRIS_FRAMERATE, queue=None,
-                 fill=False,
+                 fill=False, keymap=None
                  ):
 
         assert matrix, "Will not create tetromino with empty matrix"
@@ -873,6 +873,7 @@ class Tetromino(Job):
         self.move_right_timeout = None
         self.move_left_timeout = None
         self.force_draw = True
+        self.keymap = keymap or Shared.keymap["game"]["player1"]
 
         if xcenter:
             self.x = (self.board.blocks_width//2) - (len(self.matrix[0])//2)
@@ -896,9 +897,9 @@ class Tetromino(Job):
             self.time_until_update = self.updateinterval
 
         self.keyuphandlers = {
-                Shared.keymap["game"]["player1"]["speed_up"]   : lambda _: self.sped_up and speedUpKeyUpHandler(),
-                Shared.keymap["game"]["player1"]["move_right"] : lambda _: setattr(self, "move_right_timeout", None),
-                Shared.keymap["game"]["player1"]["move_left"]  : lambda _: setattr(self, "move_left_timeout", None),
+                self.keymap["speed_up"]   : lambda _: self.sped_up and speedUpKeyUpHandler(),
+                self.keymap["move_right"] : lambda _: setattr(self, "move_right_timeout", None),
+                self.keymap["move_left"]  : lambda _: setattr(self, "move_left_timeout", None),
                 }
 
         def moveRightKeyDownHandler():
@@ -916,13 +917,13 @@ class Tetromino(Job):
             self.time_until_update = self.updateinterval
 
         self.keydownhandlers = {
-                Shared.keymap["game"]["player1"]["rotate_right"] : lambda _: self.rotate(1),
-                Shared.keymap["game"]["player1"]["rotate_left"]  : lambda _: self.rotate(-1),
-                Shared.keymap["game"]["player1"]["reverse"]      : lambda _: Shared.options["gameplay"].get("flip_tetromino") and self.flip(),
-                Shared.keymap["game"]["player1"]["move_right"]   : lambda _: moveRightKeyDownHandler(),
-                Shared.keymap["game"]["player1"]["move_left"]    : lambda _: moveLeftKeyUpHandler(),
-                Shared.keymap["game"]["player1"]["drop_down"]    : lambda _: self.drop(),
-                Shared.keymap["game"]["player1"]["speed_up"]     : lambda _: speedUpKeyDownHandler(),
+                self.keymap["rotate_right"] : lambda _: self.rotate(1),
+                self.keymap["rotate_left"]  : lambda _: self.rotate(-1),
+                self.keymap["reverse"]      : lambda _: Shared.options["gameplay"].get("flip_tetromino") and self.flip(),
+                self.keymap["move_right"]   : lambda _: moveRightKeyDownHandler(),
+                self.keymap["move_left"]    : lambda _: moveLeftKeyUpHandler(),
+                self.keymap["drop_down"]    : lambda _: self.drop(),
+                self.keymap["speed_up"]     : lambda _: speedUpKeyDownHandler(),
                 }
 
     def getActiveBlocks(self, x=None, y=None):
