@@ -53,7 +53,6 @@ def loadHighscores(top=10):
     path = Path.join(HIGHSCOREDIR, "Scores.dson")
     Log.log("Loading highscores from `{}'".format(path))
     s = Dson.loads(_loadData(path))
-    Log.tempDebug(s)
     return sorted(s, key=lambda d: d["score"], reverse=True)[:top]
 
 def loadKeymaps():

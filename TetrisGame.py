@@ -62,6 +62,8 @@ class TetrisInterface(Jobs.Job):
                 game, x, y, **kwargs
                 )
 
+        self.keymap = keymap or Shared.keymap["game"]["player1"]
+
         ## All the jobs
         self.addJob("board",
                     Jobs.Board(
@@ -127,6 +129,32 @@ class TetrisInterface(Jobs.Job):
                         ycenter=True,
                         ghostpiece=False))
         self.jobs.preview_block.update_required = False
+        self.width = SCREEN_WIDTH // 2
+        self.height = SCREEN_HEIGHT
+
+    def update(self):
+        super(TetrisInterface, self).update()
+
+        if not self.jobs.tetromino.update_required and self.jobs.board.update_required:
+            ## Create a new tetromino job from the nextTetromino Struct instance
+            self.addJob("tetromino",
+                        Jobs.Tetromino(
+                            self.jobs.board,
+                            self.nextTetromino.matrix, self.nextTetromino.type, self.nextTetromino.color,
+                            xcenter=True, updateinterval=TETRIS_FRAMERATE - (self.jobs.board.level-1)*UPDATEINTERVAL_DECREASE,
+                            keymap=self.keymap
+                            ))
+
+            ## Get the next tetromino information, create a Struct instance that stores this information,
+            ## then create another preview block.
+            color, _type, matrix = Random.choice(Shared.tetrominos)
+            self.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
+            self.addJob("preview_block",
+                        Jobs.Tetromino(
+                            self.jobs.preview_window,
+                            self.nextTetromino.matrix, self.nextTetromino.type, self.nextTetromino.color,
+                            xcenter=True, ycenter=True, ghostpiece=False))
+            self.jobs.preview_block.update_required = False
 
 class TetrisGame(Core.Game):
     def __init__(self, *args, **kwargs):
@@ -170,25 +198,6 @@ class TetrisGame(Core.Game):
             else:
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "Game Over"))
                 self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, seconds=3, anykey=True))
-
-        if not self.jobs.interface.jobs.tetromino.update_required and self.jobs.interface.jobs.board.update_required:
-            ## Create a new tetromino job from the nextTetromino Struct instance
-            self.jobs.interface.addJob("tetromino",
-                        Jobs.Tetromino(
-                            self.jobs.interface.jobs.board,
-                            self.jobs.interface.nextTetromino.matrix, self.jobs.interface.nextTetromino.type, self.jobs.interface.nextTetromino.color,
-                            xcenter=True, updateinterval=TETRIS_FRAMERATE - (self.jobs.interface.jobs.board.level-1)*UPDATEINTERVAL_DECREASE))
-
-            ## Get the next tetromino information, create a Struct instance that stores this information,
-            ## then create another preview block.
-            color, _type, matrix = Random.choice(Shared.tetrominos)
-            self.jobs.interface.nextTetromino = Struct(color=color, type=_type, matrix=matrix)
-            self.jobs.interface.addJob("preview_block",
-                        Jobs.Tetromino(
-                            self.jobs.interface.jobs.preview_window,
-                            self.jobs.interface.nextTetromino.matrix, self.jobs.interface.nextTetromino.type, self.jobs.interface.nextTetromino.color,
-                            xcenter=True, ycenter=True, ghostpiece=False))
-            self.jobs.interface.jobs.preview_block.update_required = False
 
     def eventHandler(self, event):
         if event.type == QUIT:

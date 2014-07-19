@@ -78,6 +78,7 @@ class MainMenu(Core.Menu):
         self.menu = Factory.textBoxes([
                 ("Single Player", self.launchTetrisGame),
                 ("Two Player", lambda: self.call(TwoPlayerTetrisGame.TwoPlayerTetris, caption="Loltris - Two Player")),
+                ("LAN Play", lambda: None),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
