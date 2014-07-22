@@ -46,6 +46,7 @@ import TetrisGame
 import MakeTetromino
 import SandBox
 import TwoPlayerTetrisGame
+import LANTetrisGame
 
 class MainMenu(Core.Menu):
     def __init__(self, **kwargs):
@@ -78,7 +79,7 @@ class MainMenu(Core.Menu):
         self.menu = Factory.textBoxes([
                 ("Single Player", self.launchTetrisGame),
                 ("Two Player", lambda: self.call(TwoPlayerTetrisGame.TwoPlayerTetris, caption="Loltris - Two Player")),
-                ("LAN Play", lambda: None),
+                ("LAN Play", lambda: self.call(LANTetrisGame.LANMenu, caption="Loltris - LAN play")),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),
                 ("Creative", lambda: self.call(MakeTetromino.MakeTetromino, caption="Loltris - Creator")),
                 ("Scores", lambda: self.call(HighscoreExplorer.HighscoreList, caption="Loltris - Highscores")),
@@ -221,8 +222,8 @@ class OptionsMenu(Core.Menu):
                     fill=MENU_3DBORDER_BACKGROUND,
                     )
 
-## Closure that generates a mainloop for getting a single character
-## used in KeymapMenu.*
+## Generates a mainloop for getting a single character.
+## Used in KeymapMenu.*
 def getKeyLoop(self, keys):
     if not self.jobs.input_box.update_required:
         Log.debug("Setting key {} to activate {}".format(Utils.keyToString(self.jobs.input_box.value), self.getting))
@@ -333,7 +334,9 @@ class KeymapMenu(Core.Menu):
 
     class Menu(Core.Menu):
         def __init__(self, **kwargs):
-            super(KeymapMenu.Menu, self).__init__("Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs)
+            super(KeymapMenu.Menu, self).__init__(
+                    "KeymapMenu.Menu", header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, xcenter=True, **kwargs
+                    )
             self.header = "Menu-map"
             self.menu = Factory.variableTextBoxes(
                 [( action.replace("_", " ").capitalize() + ": {key}",

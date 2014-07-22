@@ -33,7 +33,9 @@ from Globals import *
 import Jobs
 import Queue
 import Draw
+import threading as Threading
 from PSHTTBDTAJTFH import *
+from Exceptions import *
 
 class Game(object):
     """
@@ -61,6 +63,8 @@ class Game(object):
         self.playing = ""
         self.lock = {}
         self.fill = fill
+        self.threads = Struct()
+        self.running = self.mainLoop
 
         ## TODO: Explore this
         self.interrupt_table = Struct(
@@ -68,11 +72,19 @@ class Game(object):
         )
         self.interrupts = []
 
+    def mainLoop(self):
+        pass
+
     def registerInterrupt(self, name, func):
         setattr(self.interrupt_table, name, func)
 
     def unregisterInterrupt(self, name):
         delattr(self.interrupt_table, name)
+
+    def addThread(self, name, function, args=()):
+        self.threads[name] = Threading.Thread(target=function, args=args)
+        self.threads[name].daemon = True
+        self.threads[name].start()
 
     def removeJob(self, removed_job_str):
         removed_job = getattr(self.jobs, removed_job_str)
@@ -156,6 +168,8 @@ class Game(object):
         if args:
             self.ret = args[0]
         self.running = None
+        for thread in self.threads:
+            thread._Thread__stop()
         Log.debug("Returning from Game `{}'".format(self))
 
     def setup(self):
@@ -316,6 +330,9 @@ class Menu(Game):
         self.isroot = isroot
         self.onHeaderClick = onHeaderClick
         self.xcenter = xcenter
+        self.added = Struct(
+                back_button = None
+                )
 
     def setupObjects(self):
         def mouseLeave(box):
@@ -326,7 +343,7 @@ class Menu(Game):
             box.colors["font"] = self.colorscheme["selected"]
             box.renderFonts()
 
-        if not self.isroot and self.menu[-1].text != "Back":
+        if not self.isroot and not self.added.back_button:
             self.menu.append(Jobs.AutoTextBox(self, "Back", onmouseclick=self.quitGame,
                                               font=MENU_OPTION_FONT,
                                               colors={
@@ -335,6 +352,7 @@ class Menu(Game):
                                                   },
                                               fill=MENU_3DBORDER_BACKGROUND,
                                               ))
+            self.added.back_button = True
 
         if self.header:
             Log.debug("Adding header `{}' for `{}'".format(self.header, self.id))
@@ -365,13 +383,12 @@ class Menu(Game):
 
         ## Set options, then add the job
         self.options_width = 0
-        for option in self.menu:
+        for i, option in enumerate(self.menu):
             option.x = x
             if self.xcenter:
                 option.x = (self.width // 2) - (option.width // 2)
             option.y = y
-            if option.text == "Back":
-                ## XXX: This will yield "unexpected" results, if someone where to create an option with the text 'Back'.
+            if self.added.back_button and i == len(self.menu)-1:
                 option.y = y + SPACER
             option.onmouseleave = mouseLeave
             option.onmouseenter = mouseEnter
@@ -380,7 +397,6 @@ class Menu(Game):
             y += option.height
             if option.width > self.options_width:
                 self.options_width = option.width
-        Log.debug(self.options_width)
 
         self.addJob(
                 "options_border",

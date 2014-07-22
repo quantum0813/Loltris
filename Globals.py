@@ -18,6 +18,18 @@ CREDITS_FRAMERATE = 24
 MENU_FRAMERATE = 24
 ## }}}
 
+## Network {{{
+LAN_GAME_BROADCAST_PORT = 31337
+LAN_GAME_BROADCAST_INTERVAL = 1
+LAN_GAME_PLAY_PORT = 31338
+GAMES_LOOKUP = {
+        0: "knockout",
+        1: "first_to_n",
+        "knockout": 0,
+        "first_to_n": 1,
+        }
+## }}}
+
 ## Graphics {{{
 CENTER_WINDOW = False
 BOARD_WIDTH = 12
@@ -103,6 +115,11 @@ HIGHSCORELIST_FONT = {
 CREDITS_FONT = {
         "name":"freemono",
         "size":15,
+        "bold":False,
+        }
+LAN_GAMES_TABLE_FONT = {
+        "name":"orbitron",
+        "size":20,
         "bold":False,
         }
 ## }}}

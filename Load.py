@@ -111,9 +111,9 @@ def loadBlockFont(name):
     return CPickle.loads(Bz2.decompress(_loadData(Path.join(BLOCKTEXT_FONTDIR, "{}.pyobj.bz2".format(name)))))
 
 def loadImage(filename):
-    Log.notice("Loading image {!r}".format(filename))
     if Shared.images.get(filename):
         return Shared.images[filename]
+    Log.notice("Loading image {!r}".format(filename))
     Shared.images[filename] = Pygame.image.load(OS.path.join(IMAGEDIR, filename))
     return Shared.images[filename]
 

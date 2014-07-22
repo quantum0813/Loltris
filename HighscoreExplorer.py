@@ -140,7 +140,7 @@ class HighscoreList(Core.Menu):
                     )
                 )
 
-    def previewScore(self, seq, reference):
+    def previewScore(self, seq, row, reference):
         ## Don't do anything if the user clicks on the header.
         if not seq:
             return

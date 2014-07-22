@@ -64,6 +64,7 @@ class Job(object):
         setattr(self.jobs, name, obj)
 
     def runSubs(self):
+
         ## The events and updates should be handled in reverse order (the things on top go first)
         queue = sorted(self.jobs.__dict__, key=lambda obj: getattr(self.jobs, obj).queue, reverse=True)
         for objname in queue:
@@ -130,6 +131,10 @@ class Job(object):
             self.runSubEventHandlers(event)
 
     def update(self):
+        if self.force_draw:
+            for job in self.jobs:
+                self.jobs.__dict__[job].force_draw = True
+
         if self.jobs:
             self.runSubs()
 
@@ -941,6 +946,7 @@ class Tetromino(Job):
     def draw(self):
         if self.force_draw:
             if self.ghostpiece:
+                self.ghostpiece.force_draw = True
                 self.ghostpiece.draw()
             for x, y in self.getActiveBlocks():
                 self.board.drawCube(x, y, self.color)
@@ -1403,20 +1409,19 @@ class Filler(Job):
                 )
 
 class Table(Job):
-    def __init__(self, game, x, y, font, table, xcenter=False, ycenter=False, header_font=None, colors={}, onmouseclick=(lambda seq, columns: None), **kwargs):
+    def __init__(self, game, x, y, font, table, xcenter=False, ycenter=False, header_font=None, colors={}, onmouseclick=(lambda seq, columns: None),
+                 border_width=1, **kwargs):
         super(Table, self).__init__(game, x, y, **kwargs)
 
         self.rows = [columns for columns, _ in table]
-        assert any(len(self.rows[0]) == len(row) for row in self.rows[1:]), "Rows differ in the number of columns"
-
         self.colors = copy(colors)
         self.font = font
         self.spacer = 2
-        self.fill = True
         self.onmouseclick = onmouseclick
         self.table = table
         self.xcenter = xcenter
         self.ycenter = ycenter
+        self.border_width = border_width
 
         if not header_font:
             header_font = font
@@ -1452,8 +1457,7 @@ class Table(Job):
 
     def draw(self):
         ## Fill the area
-        if self.fill:
-            Pygame.draw.rect( self.game.screen, self.colors["background"], (self.x, self.y, self.width, self.height), 0)
+        Pygame.draw.rect( self.game.screen, self.colors["background"], (self.x, self.y, self.width, self.height), 0)
 
         ## Draw fonts
         y = self.y
@@ -1469,17 +1473,17 @@ class Table(Job):
         ## Draw borders between rows
         y = self.y
         for row_i in xrange(len(self.rendered_rows)):
-            Pygame.draw.line(self.game.screen, self.colors["border"], (self.x, y), (self.x + self.width, y), 1)
+            Pygame.draw.line(self.game.screen, self.colors["border"], (self.x, y), (self.x + self.width, y), self.border_width)
             y += self.rendered_rows[row_i][0].get_height()
 
         ## Draw borders between columns
         x = self.x
         for column_i in xrange(len(self.rendered_rows[0])):
-            Pygame.draw.line(self.game.screen, self.colors["border"], (x, self.y), (x, self.y + self.height), 1)
+            Pygame.draw.line(self.game.screen, self.colors["border"], (x, self.y), (x, self.y + self.height), self.border_width)
             x += self.column_widths[column_i]
 
         ## Draw a box around everything
-        Pygame.draw.rect( self.game.screen, self.colors["border"], (self.x, self.y, self.width + 1, self.height + 1), 1)
+        Pygame.draw.rect( self.game.screen, self.colors["border"], (self.x, self.y, self.width + 1, self.height + 1), self.border_width)
 
     def eventHandler(self, event):
         if event.type == MOUSEBUTTONDOWN:
@@ -1487,7 +1491,7 @@ class Table(Job):
                 x, y = Pygame.mouse.get_pos()
                 row = (y - self.y) / self.row_heights[0]
                 if (0 <= row <= len(self.rows)-1) and (self.x <= x <= self.x + self.width):
-                    self.onmouseclick(row, self.table[row][1])
+                    self.onmouseclick(row, self.table[row][0], self.table[row][1])
 
 class InputBox(TextBox):
     def __init__(self, game, prompt, maxlen=20, submit_key=Pygame.K_RETURN, colors=ERRORBOX_COLORSCHEME, font=ERRORBOX_FONT, noncharacters=NONCHARACTERS,

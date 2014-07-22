@@ -29,6 +29,7 @@ import Log
 import profile as Profile
 import os as OS
 import pygame as Pygame
+import LANTetrisGame
 from Globals import *
 from PSHTTBDTAJTFH import *
 
@@ -45,6 +46,14 @@ if __name__ == '__main__':
     Shared.tetrominos = Load.loadTetrominos()
     Shared.keymap = Load.loadKeymaps()
     Shared.options = Load.loadOptions()
+
+    ## XXX: TEST :XXX
+    ##
+    # game = LANTetrisGame.Knockout("10.8.10.36")
+    # game.setup()
+    # game.run()
+    ##
+    ## XXX: TEST :XXX
 
     ## Launch the game
     main_menu = Menus.MainMenu(caption="Loltris")

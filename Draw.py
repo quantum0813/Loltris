@@ -1,14 +1,19 @@
 
+import Log
 import pygame as Pygame
 
 def fillJob(screen, color, job):
     if hasattr(job, "fillArea"):
         job.fillArea(color)
     else:
+        padding = 0
+        if hasattr(job, "border_width"):
+            ## Workaround
+            padding = job.border_width
         Pygame.draw.rect(
                 screen,
                 color,
-                (job.x, job.y, job.width, job.height),
+                (job.x-padding, job.y-padding, job.width+padding*2, job.height+padding*2),
                 0)
 
 def draw3DBorder(screen, colors, rect, deepness, background=None):
