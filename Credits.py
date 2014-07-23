@@ -65,7 +65,7 @@ class Credits(Core.Game):
         # for x, y in Matrix.matrixToSet(TITLE_BLOCKS):
         #     self.jobs.title_board.blocks[(x, y)] = (0xaa,0xaa,0xaa)
 
-        self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, timed=False, anykey=True))
+        self.addJob("endtimer", Jobs.TimedExecution(self, self.quitGame, timed=False, anykey=True))
 
     def mainLoop(self):
         if not self.jobs.text.update_required:

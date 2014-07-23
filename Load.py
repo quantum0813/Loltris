@@ -28,7 +28,7 @@ import Dson
 import bz2 as Bz2
 import os as OS
 import pygame as Pygame
-from PSHTTBDTAJTFH import *
+from DataTypes import *
 from Globals import *
 
 DATADIR = "data"

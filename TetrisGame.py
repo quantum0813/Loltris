@@ -33,7 +33,7 @@ import random as Random
 import pygame as Pygame
 from Globals import *
 from pygame.locals import *
-from PSHTTBDTAJTFH import *
+from DataTypes import *
 
 def makeUberTetromino(board):
     """ Creates a perfect tetromino (for the current board) """
@@ -56,6 +56,7 @@ def randomTetromino(board, updateinterval=TETRIS_FRAMERATE/2):
     color, type, matrix = Random.choice(Shared.tetrominos)
     return Jobs.Tetromino(board, matrix, type, color, xcenter=True, updateinterval=updateinterval)
 
+## XXX: TODO: Syncing mechanism
 class TetrisInterface(Jobs.Job):
     def __init__(self, game, x, y, keymap=None, **kwargs):
         super(TetrisInterface, self).__init__(
@@ -197,7 +198,7 @@ class TetrisGame(Core.Game):
                 self.running = self.getName
             else:
                 self.addJob("window-game_over", Jobs.Notification(self, "window-game_over", "Game Over"))
-                self.addJob("endtimer", Jobs.TimedExecution(self.quitGame, seconds=3, anykey=True))
+                self.addJob("endtimer", Jobs.TimedExecution(self, self.quitGame, seconds=3, anykey=True))
 
     def eventHandler(self, event):
         if event.type == QUIT:

@@ -34,7 +34,7 @@ import Jobs
 import Queue
 import Draw
 import threading as Threading
-from PSHTTBDTAJTFH import *
+from DataTypes import *
 
 class GameError(Exception):
     def __init__(self, value):
@@ -88,6 +88,7 @@ class Game(object):
         delattr(self.interrupt_table, name)
 
     def addThread(self, name, function, args=()):
+        Log.notice("Launching thread {!r} for {!r}".format(name, self.id))
         self.threads[name] = Threading.Thread(target=function, args=args)
         self.threads[name].daemon = True
         self.threads[name].start()
@@ -260,7 +261,7 @@ class Game(object):
                     continue
 
                 obj = self.getJob(objname)
-                if obj.update_required:
+                if obj.handling_events:
                     for event in self.events:
                         if event.type not in self.lock:
                             obj.eventHandler(event)

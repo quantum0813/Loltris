@@ -24,21 +24,18 @@ import BlockText
 import Core
 import Load
 import Jobs
-import Queue
 import Log
 import Factory
 import Credits
 import Save
 import Matrix
 import Utils
-import pygame as Pygame
-import sys as Sys
 import webbrowser as Webbrowser
 import os.path as Path
 from functools import *
 from pygame.locals import *
 from Globals import *
-from PSHTTBDTAJTFH import *
+from DataTypes import *
 
 ## Games
 import HighscoreExplorer

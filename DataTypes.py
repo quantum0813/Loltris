@@ -1,11 +1,7 @@
 #!/usr/bin/python -OO
 #-*- coding: utf-8 -*-
 
-## PSHTTBDTAJTFH
-## Python-Should-Have-These-Things-By-Default-They-Are-Just-Too-Fucking-Helpful
-
-## Written by Jonas Møller
-## Public domain
+## Helpful general purpose datatypes
 
 ## XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
 ## XXX THIS MODULE IS NOT ALLOWED TO IMPORT FROM OTHER MODULES IN LOLTRIS, XXX
@@ -13,10 +9,7 @@
 ## XXX BUT NOT ANY OTHER MODULE THAT IS PART OF LOLTRIS.                   XXX
 ## XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
 
-## Copy should be a built-in
 from copy import copy
-
-from pprint import pprint
 
 class Struct(object):
     """ Basically a hash table, but a Struct allows for accessing attributes like this:
@@ -82,7 +75,7 @@ class BiDict(object):
     >>> b[3]
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-      File "PSHTTBDTAJTFH.py", line 104, in __getitem__
+      File "DataTypes.py", line 104, in __getitem__
         return self._dict_b[key]
     KeyError: 3
     >>> str(b)

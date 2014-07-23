@@ -6,10 +6,14 @@
 
 from pygame.locals import *
 import os as OS
-from PSHTTBDTAJTFH import *
+from DataTypes import *
+
+## Copy and pprint should be built-ins
+from copy import copy
+from pprint import pprint
 
 ## The program version (also used in the cxfreeze setup script)
-VERSION = "0.6.0"
+VERSION = "0.6"
 ## See Log.loglevel for details on this variable
 LOGLEVEL = 5
 

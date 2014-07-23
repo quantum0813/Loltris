@@ -33,7 +33,7 @@ import Draw
 import os.path as path
 from pygame.locals import *
 from Globals import *
-from PSHTTBDTAJTFH import *
+from DataTypes import *
 from Hacks import *
 
 class Job(object):
@@ -48,6 +48,7 @@ class Job(object):
         self.queue = queue
         self.update_required = True
         self.draw_required = True
+        self.handling_events = True
         self.fill = False
         self.resize = False
         self.keydownhandlers = {}
@@ -113,7 +114,7 @@ class Job(object):
 
     def runSubEventHandlers(self, event):
         for job in self.jobs:
-            if self.jobs[job].update_required:
+            if self.jobs[job].update_required and self.jobs[job].handling_events:
                 self.jobs[job].eventHandler(event)
 
     def eventHandler(self, event):
@@ -353,6 +354,8 @@ class TextBox(Job):
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
                  queue=None, variables={}, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=FALLBACK_COLOR,
                  border_width=1):
+
+        super(TextBox, self).__init__(game, x, y)
 
         assert text, "Empty string given to TextBox"
 
@@ -800,7 +803,9 @@ class TimedExecution(Job):
         Default:
             True
     """
-    def __init__(self, function, cycles=0, seconds=0.0, timed=True, anykey=True):
+    def __init__(self, game, function, cycles=0, seconds=0.0, timed=True, anykey=True):
+        super(TimedExecution, self).__init__(game, 0, 0)
+
         self.update_required = True
         self.draw_required = False
         self.queue = 0
@@ -1178,6 +1183,8 @@ class Board(Job):
     def __init__(self, game, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f), draw_border=True,
                  innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=Queue.BOARD, level=1, draw_grid=True,
                 ):
+        super(Board, self).__init__(game, x, y)
+
         self.anchor = (x, y)
         self.draw_border = draw_border
         self.x = x
