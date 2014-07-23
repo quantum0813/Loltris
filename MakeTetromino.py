@@ -3,7 +3,7 @@
 
 ## =====================================================================
 ## Tetromino creator (helper)
-## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+## Copyright (C) 2014 Jonas Møller <jonasmo441@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -116,10 +116,10 @@ class MakeTetromino(Core.Game):
         self.addJob(
                 "color_button",
                 Jobs.TextBox(self, "Change color", x=self.jobs.board.x + (self.jobs.board.blocks_width*self.jobs.board.blockwidth) + 5,
-                        y=self.jobs.exit_button.y + self.jobs.exit_button.height + MAKETETROMINO_OPTION_SPACER,
-                        textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
-                        font=TETRIS_STATUSBOX_FONT, onmouseclick=self.changeColor,
-                        fill=MENU_BACKGROUND,
+                             y=self.jobs.exit_button.y + self.jobs.exit_button.height + MAKETETROMINO_OPTION_SPACER,
+                             textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
+                             font=TETRIS_STATUSBOX_FONT, onmouseclick=self.changeColor,
+                             fill=MENU_BACKGROUND,
                     )
                 )
 

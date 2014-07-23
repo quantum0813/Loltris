@@ -5,7 +5,7 @@
 ## Write text in block letters, this kind of text can be put inside
 ## a Jobs.Board
 ##
-## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+## Copyright (C) 2014 Jonas Møller <jonasmo441@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by

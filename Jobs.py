@@ -3,7 +3,7 @@
 
 ## =====================================================================
 ## All the jobs (or game objects) used in Game derived instances
-## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+## Copyright (C) 2014 Jonas Møller <jonasmo441@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import Shared
 import Matrix
 import RGB
 import Draw
-import os.path as Path
+import os.path as path
 from pygame.locals import *
 from Globals import *
 from PSHTTBDTAJTFH import *
@@ -148,7 +148,7 @@ def loadFont(font):
         try:
             fontobj = Shared.fonts[Utils.genKey(font)] = \
                     Pygame.font.Font(
-                            Path.join(Load.TTF_FONTDIR, "{}.ttf".format(font["name"])),
+                            path.join(Load.TTF_FONTDIR, "{}.ttf".format(font["name"])),
                             font.get("size", 40),
                             bold=font.get("bold"),
                             italic=font.get("italic")
@@ -351,7 +351,7 @@ class TextBox(Job):
     """
     def __init__(self, game, text, colors={"background": (0,0,0)}, border=False, ycenter=False, underline=False, background=False,
                  xcenter=False, x=0, y=0, height=0, width=0, textfit=False, yfit=False, xfit=False, font={"name": ""}, padding=12,
-                 queue=None, variables={}, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=True,
+                 queue=None, variables={}, onmouseclick=None, onmouseenter=None, onmouseleave=None, fill=FALLBACK_COLOR,
                  border_width=1):
 
         assert text, "Empty string given to TextBox"
@@ -406,7 +406,7 @@ class TextBox(Job):
             try:
                 fontobj = Shared.fonts[Utils.genKey(self.font)] = \
                         Pygame.font.Font(
-                            Path.join(Load.TTF_FONTDIR, "{}.ttf".format(self.font["name"])),
+                            path.join(Load.TTF_FONTDIR, "{}.ttf".format(self.font["name"])),
                             self.font.get("size", 40),
                             bold=self.font.get("bold"),
                             italic=self.font.get("italic")

@@ -6,6 +6,7 @@
 
 from pygame.locals import *
 import os as OS
+from PSHTTBDTAJTFH import *
 
 ## The program version (also used in the cxfreeze setup script)
 VERSION = "0.6.0"
@@ -22,12 +23,10 @@ MENU_FRAMERATE = 24
 LAN_GAME_BROADCAST_PORT = 31337
 LAN_GAME_BROADCAST_INTERVAL = 1
 LAN_GAME_PLAY_PORT = 31338
-GAMES_LOOKUP = {
-        0: "knockout",
-        1: "first_to_n",
-        "knockout": 0,
-        "first_to_n": 1,
-        }
+GAMES_LOOKUP = BiDict(
+        knockout = 0,
+        first_to_n = 1,
+        )
 ## }}}
 
 ## Graphics {{{
@@ -42,7 +41,7 @@ PREVIEW_WIDTH = 7 ## Preview window
 BOARD_BLOCKWIDTH = 25
 SCREEN_HEIGHT = SPACER + (BOARD_BLOCKWIDTH * BOARD_HEIGHT) + SPACER
 SCREEN_WIDTH = SPACER + (BOARD_WIDTH * BOARD_BLOCKWIDTH) + SPACER + (PREVIEW_WIDTH * BOARD_BLOCKWIDTH) + SPACER
-FALLBACK_COLOR = (0xff,0xff,0xff)
+FALLBACK_COLOR = (0,0,0)
 TETRIS_3DBORDER_BACKGROUND = (29,29,29)
 MENU_3DBORDER_BACKGROUND = (29,29,29)
 MENU_BACKGROUND = (0x22, 0x22, 0x22)

@@ -19,7 +19,7 @@ from copy import copy
 from pprint import pprint
 
 class Struct(object):
-    """ Basically a hash table, but a struct allows for accessing attributes like this:
+    """ Basically a hash table, but a Struct allows for accessing attributes like this:
         struct.attribute
 
         Attributes can still be accessed as such:
@@ -33,7 +33,6 @@ class Struct(object):
         """
         >>> c = Struct(arg0=0, arg1=1)
         >>> c.arg2 = "value"
-        >>> topkek
         >>> str(c)
         "Struct(arg0 = 0, arg1 = 1, arg2 = 'value')"
         """
@@ -68,6 +67,92 @@ class Struct(object):
 
     def __delitem__(self, key):
         delattr(self, key)
+
+class BiDict(object):
+    """ Bi-directional dictionary
+
+    >>> b = BiDict({"a": 1, "b": 2, "c": 3})
+    >>> b["a"]
+    1
+    >>> b[1]
+    'a'
+    >>> b["c"] = 4
+    >>> b[4]
+    'c'
+    >>> b[3]
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "PSHTTBDTAJTFH.py", line 104, in __getitem__
+        return self._dict_b[key]
+    KeyError: 3
+    >>> str(b)
+    "{'a' <=> 1, 'c' <=> 4, 'b' <=> 2}"
+    >>> del b["b"]
+    >>> str(b)
+    "{'a' <=> 1, 'c' <=> 4}"
+    >>> 
+    """
+    def __init__(self, **kwargs):
+        if not kwargs:
+            raise TypeError("Will not create BiDict from empty kwargs state")
+
+        akey = kwargs.keys()[0]
+        self._type_a = type(akey)
+        self._type_b = type(kwargs[akey])
+        if self._type_a == self._type_b:
+            raise TypeError("Keys are of the same type as values")
+
+        self._dict_a = copy(kwargs)
+        self._dict_b = {}
+
+        for key in kwargs:
+            if not isinstance(key, self._type_a):
+                raise TypeError("Keys are of different types")
+            if not isinstance(kwargs[key], self._type_b):
+                raise TypeError("Values are of different types")
+            self._dict_b[kwargs[key]] = key
+
+    def __getitem__(self, key):
+        if isinstance(key, self._type_a):
+            return self._dict_a[key]
+        if isinstance(key, self._type_b):
+            return self._dict_b[key]
+
+    def __setitem__(self, key, value):
+        if isinstance(key, self._type_a):
+            del self[key]
+            self._dict_a[key] = value
+            self._dict_b[value] = key
+        if isinstance(key, self._type_b):
+            del self[key]
+            self._dict_b[key] = value
+            self._dict_a[value] = key
+
+    def __delitem__(self, key):
+        if isinstance(key, self._type_a):
+            del self._dict_b[self._dict_a[key]]
+            del self._dict_a[key]
+        if isinstance(key, self._type_b):
+            del self._dict_a[self._dict_b[key]]
+            del self._dict_b[key]
+
+    def __str__(self):
+        return "{" + ", ".join(["{!r} <=> {!r}".format(key, self[key]) for key in self._dict_a]) + "}"
+
+    def __contains__(self, obj):
+        return obj in self._dict_a or obj in self._dict_b
+
+    def get(self, key, *args):
+        alternative = None
+        if args:
+            alternative = args[0]
+        if key in self:
+            return self[key]
+        else:
+            return alternative
+
+    def __iter__(self):
+        return iter(self._dict_a)
 
 if __name__ == "__main__":
     import doctest

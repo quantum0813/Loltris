@@ -5,7 +5,7 @@
 ## Core functionality of the game, multi-purpose classes that are derived
 ## from elsewhere (and here)
 ## 
-## Copyright (C) 2014 Jonas Møller <shrubber@tfwno.gf>
+## Copyright (C) 2014 Jonas Møller <jonasmo441@gmail.com>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -35,7 +35,13 @@ import Queue
 import Draw
 import threading as Threading
 from PSHTTBDTAJTFH import *
-from Exceptions import *
+
+class GameError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 class Game(object):
     """
@@ -144,6 +150,9 @@ class Game(object):
         game.setup()
         ret = game.run()
 
+        if ret and self.id != ret:
+            self.quitGame(ret)
+
         ## TODO: Make the music start where it stopped, there appears to be an issue with Pygame.mixer
         ##       that makes this impossible. The game freezes when Pygame.mixer.set_pos is called.
         ## Restore music 
@@ -161,8 +170,6 @@ class Game(object):
         for job in self.jobs:
             self.jobs.__dict__[job].force_draw = True
 
-        if ret and self.id != ret:
-            self.quitGame(ret)
 
     def quitGame(self, *args):
         if args:
