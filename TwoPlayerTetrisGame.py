@@ -27,7 +27,7 @@ class TwoPlayerTetris(Core.Game):
         def handleWinner(*interfaces):
             for interface in interfaces:
                 if not interface.jobs.board.update_required and not hasattr(self.jobs, "window_game_over"):
-                    ## XXX: GAME OVER
+                    ## XXX: LOSER
                     board = interface.jobs.board
 
                     Log.log("Game over, displaying game state")
@@ -48,6 +48,7 @@ class TwoPlayerTetris(Core.Game):
                     self.jobs.window_game_over.y = interface.y + interface.height//2 - self.jobs.window_game_over.height//2
 
             if sum(int(iface.jobs.board.update_required) for iface in interfaces) == 1 and not hasattr(self.jobs, "endtimer"):
+                ## XXX: WINNER
                 interface = [iface for iface in interfaces if iface.jobs.board.update_required][0]
                 self.addJob("window_win",
                         Jobs.TextBox(self, "Yuo An Winrar", font={"name": "orbitron-bold", "size": 30, "bold": True},

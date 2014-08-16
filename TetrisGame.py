@@ -157,6 +157,11 @@ class TetrisInterface(Jobs.Job):
                             xcenter=True, ycenter=True, ghostpiece=False))
             self.jobs.preview_block.update_required = False
 
+    # def eventHandler(self, event):
+    #     super(TetrisInterface, self).eventHandler(event)
+    #     if event.key == Shared.keymap["game"]["player1"]["uber_tetromino"] and Shared.options["gameplay"].get("uber_tetromino"):
+    #         self.addJob("tetromino", makeUberTetromino(self.jobs.interface.jobs.board))
+
 class TetrisGame(Core.Game):
     def __init__(self, *args, **kwargs):
         self.id = "TetrisGame"
@@ -207,7 +212,6 @@ class TetrisGame(Core.Game):
         elif event.type == KEYDOWN:
             if event.key == Shared.keymap["game"]["pause"]:
                 self.call(Menus.PauseMenu, sound_enabled=False, caption="Tetris - Paused")
-
             if event.key == Shared.keymap["game"]["player1"]["uber_tetromino"] and Shared.options["gameplay"].get("uber_tetromino"):
-                self.addJob("tetromino", makeUberTetromino(self.jobs.interface.jobs.board))
+                self.jobs.interface.addJob("tetromino", makeUberTetromino(self.jobs.interface.jobs.board))
 

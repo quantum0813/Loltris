@@ -76,7 +76,7 @@ TETRIS_SCORES_OTHER = 9001
 ## }}}
 
 ## Sound {{{
-SOUND_ENABLED = False
+SOUND_ENABLED = True
 ## }}}
 
 ## Misc functionality {{{
