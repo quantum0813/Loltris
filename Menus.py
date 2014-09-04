@@ -52,7 +52,7 @@ class MainMenu(Core.Menu):
                 header_font=MENU_HEADER_FONT, option_font=MENU_OPTION_FONT, isroot=True, xcenter=True,
                 soundtrack=Path.join(Load.MUSICDIR, "jazz_cat_infinite_loop_cut.ogg"), sound_enabled=SOUND_ENABLED, **kwargs)
 
-        self.title_blocks = BlockText.render(TITLE_TEXT, font=BlockText.STANDARD_FONT)
+        self.title_blocks = BlockText.render(TITLE_TEXT, font=Load.loadBlockFont("standard"))
         blockwidth = (self.width) // len(self.title_blocks[0])
         Log.debug("title_board.blockwidth = {}".format(blockwidth))
         self.addJob("title_board",
@@ -74,7 +74,7 @@ class MainMenu(Core.Menu):
         self.options_pos[1] = self.jobs.title_board.y + self.jobs.title_board.height + SPACER*2
 
         self.menu = Factory.textBoxes([
-                ("Single Player", self.launchTetrisGame),
+                ("Single Player", lambda: self.call(TetrisGame.TetrisGame, caption="Loltris")),
                 ("Two Player", lambda: self.call(TwoPlayerTetrisGame.TwoPlayerTetris, caption="Loltris - Two Player")),
                 # ("LAN Play", lambda: self.call(LANTetrisGame.LANMenu, caption="Loltris - LAN play")),
                 ("Options", lambda: self.call(OptionsMenu, caption="Loltris - Options")),

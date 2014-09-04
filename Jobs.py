@@ -22,7 +22,7 @@
 ## TODO: This file should be modularized
 
 import pygame as Pygame
-import Queue
+import JobQueue
 import Load
 import Log
 import Utils
@@ -40,7 +40,7 @@ class Job(object):
     """
     The basic structure of a job, all required attributes and methods.
     """
-    def __init__(self, game, x, y, queue=Queue.GENERIC, bgcolor=(0x22,0x22,0x22)):
+    def __init__(self, game, x, y, queue=JobQueue.GENERIC, bgcolor=(0x22,0x22,0x22)):
         self.game = game
         self.x = x
         self.y = y
@@ -372,7 +372,7 @@ class TextBox(Job):
         self.ypadding = 0
         self.underline = underline
         self.background = background
-        self.queue = queue if queue != None else Queue.TEXTBOX
+        self.queue = queue if queue != None else JobQueue.TEXTBOX
         self.text = text
         self.font = copy(font)
         self.textfit = textfit
@@ -875,7 +875,7 @@ class Tetromino(Job):
         self.sped_up = False
         self.x = x
         self.y = y
-        self.queue = queue if queue != None else Queue.TETROMINO
+        self.queue = queue if queue != None else JobQueue.TETROMINO
         self.level = 1
         self.fill = fill
         self.width = len(self.matrix[0]) * BOARD_BLOCKWIDTH
@@ -1181,7 +1181,7 @@ class Notification(TextBox):
 
 class Board(Job):
     def __init__(self, game, x=0, y=0, blockwidth=0, width=0, height=0, bgcolor=(0x3f,0x3f,0x3f), draw_border=True,
-                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=Queue.BOARD, level=1, draw_grid=True,
+                 innercolor=(0x3F,0x3F,0x3F), outercolor=(0x50,0x50,0x50), queue=JobQueue.BOARD, level=1, draw_grid=True,
                 ):
         super(Board, self).__init__(game, x, y)
 
@@ -1401,7 +1401,7 @@ class Board(Job):
         pass
 
 class Filler(Job):
-    def __init__(self, game, x, y, width, height, color=None, queue=Queue.GENERIC):
+    def __init__(self, game, x, y, width, height, color=None, queue=JobQueue.GENERIC):
         super(Filler, self).__init__(game, x, y)
         self.color = color or self.game.bgcolor
         self.queue = queue

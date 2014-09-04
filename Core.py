@@ -31,7 +31,7 @@ import Shared
 from pygame.locals import *
 from Globals import *
 import Jobs
-import Queue
+import JobQueue
 import Draw
 import threading as Threading
 from DataTypes import *
@@ -367,7 +367,7 @@ class Menu(Game):
             self.addJob("header",
                     Jobs.TextBox(self, self.header, y=20, xcenter=True, textfit=True, underline=False,
                             colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                            onmouseclick=self.onHeaderClick, queue=Queue.HEADER, fill=self.bgcolor,
+                            onmouseclick=self.onHeaderClick, queue=JobQueue.HEADER, fill=self.bgcolor,
                             )
                     )
         else:
@@ -377,7 +377,7 @@ class Menu(Game):
                 "scroll_filler",
                 Jobs.Filler(
                     self, 0, 0, self.width, self.options_pos[1] - SPACER,
-                    queue=Queue.SCROLL_FILLER,
+                    queue=JobQueue.SCROLL_FILLER,
                     )
                 )
 

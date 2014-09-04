@@ -27,8 +27,6 @@ import struct
 import Load
 from math import ceil
 
-STANDARD_FONT = Load.loadBlockFont("standard")
-
 def getChar(char, font):
     if char.islower() and not font.get(char):
         return font.get(char.upper())
@@ -42,8 +40,12 @@ def getChar(char, font):
 
 def render(text, font, spaces=1, padding=False):
     """
+    Using a bitmap font represented as a 2d matrix, and some text
+    represented as an ASCII string a new matrix is returned. This
+    matrix contains the rendered blocktext.
+
     >>> Log.LOGLEVEL = 0
-    >>> Matrix.put(render("TEST", STANDARD_FONT))
+    >>> Matrix.put(render("TEST", Load.loadBlockFont("standard"))
      _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
     |#|#|#|_|#|#|#|_|#|#|#|_|#|#|#|
     |_|#|_|_|#|_|_|_|#|_|_|_|_|#|_|

@@ -25,7 +25,7 @@ import Shared
 import Jobs
 import pygame as Pygame
 import Log
-import Queue
+import JobQueue
 from pygame.locals import *
 from Globals import *
 
@@ -66,7 +66,7 @@ class Preview(Core.Game):
                     self, "Exit", x=SPACER+(BOARD_WIDTH)*BOARD_BLOCKWIDTH + SPACER,
                     y=self.jobs.status.y + self.jobs.status.height + SPACER,
                     textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
-                    font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
+                    font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=JobQueue.SCROLL_FILLER + 1,
                     fill=TETRIS_BACKGROUND,
                     )
                 )
@@ -96,7 +96,7 @@ class HighscoreList(Core.Menu):
                 Jobs.TextBox(
                     self, "Scores", y=20, xcenter=True, textfit=True, underline=False,
                     colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)}, font=self.header_font,
-                    onmouseclick=self.onHeaderClick, queue=Queue.HEADER,
+                    onmouseclick=self.onHeaderClick, queue=JobQueue.HEADER,
                     fill=TETRIS_BACKGROUND,
                     )
                 )
@@ -105,7 +105,7 @@ class HighscoreList(Core.Menu):
                 Jobs.Table(
                     self, SPACER, self.jobs.header.y+self.jobs.header.height + 1, TETRIS_STATUSBOX_FONT, sorted_score_table,
                     colors=TETRIS_STATUSBOX_COLORSCHEME, onmouseclick=self.previewScore,
-                    xcenter=True,# queue=Queue.TEXTBOX,
+                    xcenter=True,# queue=JobQueue.TEXTBOX,
                     )
                 )
 
@@ -115,7 +115,7 @@ class HighscoreList(Core.Menu):
                     self, "Exit", x=SPACER,
                     y=self.height - SPACER,
                     textfit=True, underline=True, colors={"background":(0x22,0x22,0x22), "font":(0xaa,0xaa,0xaa)},
-                    font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=Queue.SCROLL_FILLER + 1,
+                    font=TETRIS_STATUSBOX_FONT, onmouseclick=self.quitGame, queue=JobQueue.SCROLL_FILLER + 1,
                     fill=TETRIS_BACKGROUND,
                     )
                 )
@@ -128,7 +128,7 @@ class HighscoreList(Core.Menu):
                     self,
                     0, self.jobs.exit_button.y - SPACER,
                     self.width, self.jobs.exit_button.height + (self.height - self.jobs.exit_button.y) + SPACER,
-                    queue=Queue.SCROLL_FILLER,
+                    queue=JobQueue.SCROLL_FILLER,
                     )
                 )
         ## Keeps the table from being visible above the header
@@ -136,7 +136,7 @@ class HighscoreList(Core.Menu):
                 "top_filler",
                 Jobs.Filler(
                     self, 0, 0, self.width, self.jobs.header.y,
-                    queue=Queue.SCROLL_FILLER,
+                    queue=JobQueue.SCROLL_FILLER,
                     )
                 )
 

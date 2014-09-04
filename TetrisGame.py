@@ -36,7 +36,7 @@ from pygame.locals import *
 from DataTypes import *
 
 def makeUberTetromino(board):
-    """ Creates a perfect tetromino (for the current board) """
+    """ Creates a perfect tetromino (for the given board) """
 
     tetromino = []
     for y in xrange(board.blocks_height+1):
@@ -215,3 +215,6 @@ class TetrisGame(Core.Game):
             if event.key == Shared.keymap["game"]["player1"]["uber_tetromino"] and Shared.options["gameplay"].get("uber_tetromino"):
                 self.jobs.interface.addJob("tetromino", makeUberTetromino(self.jobs.interface.jobs.board))
 
+if __name__ == '__main__':
+    import Init
+    Init.initGame(TetrisGame, caption="Loltris").run()

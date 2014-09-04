@@ -11,6 +11,26 @@ import TetrisGame
 import Menus
 from Globals import *
 from DataTypes import *
+from copy import copy
+
+def matrixAddLowerLine(matrix, color):
+    matrix_ = [[None for _ in xrange(len(matrix[0]))] for _ in xrange(len(matrix))]
+    for row in xrange(len(matrix)):
+        for column in xrange(len(matrix[row])):
+            try:
+                if matrix[row][column]:
+                    matrix_[row-1][column] = matrix[row][column]
+            except IndexError:
+                return None
+
+    ## Add the extra line
+    matrix_[len(matrix)-1] = [color for _ in xrange(len(matrix[0]))]
+    return matrix_
+
+## XXX: TO BE CONTINUED
+# def setAddLowerLine(matrix, color):
+#     matrix_ = copy(matrix)
+#     for row, colum  in 
 
 class TwoPlayerTetris(Core.Game):
     def __init__(self, *args, **kwargs):

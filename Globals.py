@@ -13,7 +13,7 @@ from copy import copy
 from pprint import pprint
 
 ## The program version (also used in the cxfreeze setup script)
-VERSION = "0.6"
+VERSION = "0.7"
 ## See Log.loglevel for details on this variable
 LOGLEVEL = 5
 

@@ -1,5 +1,5 @@
 #!/usr/bin/python2 -OO
-#-*- coding: utf-8 -*--
+#-*- coding: utf-8 -*-
 
 ## =====================================================================
 ## Launcher for Loltris
@@ -20,33 +20,33 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## =====================================================================
 
-import Log
+doc = """
+Usage:
+    loltris [--loglevel=n] [--dev]
+    loltris (-h | --help | --version | -v)
+
+Options:
+    loltris --help,-h        Loltris documentation
+    loltris --version,-v     Print the loltris version and exit
+    loltris --loglevel=n     Set loglevel, 0="ONLY CRITICAL" 5="ALL"
+"""
+
 import sys
-import pygame
+import docopt
+
 from Globals import *
-Log.log("Firing up Loltris version {} from {!r}".format(VERSION, sys.argv[0]))
 
-import Shared
-import Menus
-import Load
-import Setup
-
-if CENTER_WINDOW:
-    os.environ["SDL_VIDEO_CENTERED"] = "1"
-
-pygame.font.init()
-
-## Run setup (will decide for itself whether or not it is necessary)
-Setup.setupFiles()
-
-## Load necessarry shared data
-Shared.tetrominos = Load.loadTetrominos()
-Shared.keymap = Load.loadKeymaps()
-Shared.options = Load.loadOptions()
+nice_version = "Loltris v{}".format(VERSION)
+args = docopt.docopt(doc, version=nice_version)
 
 ## Launch the game
-Log.log("Creating MainMenu instance and running setup from Loltris startup script")
-main_menu = Menus.MainMenu(caption="Loltris")
-main_menu.setup()
-Log.log("Running MainMenu from Loltris startup script")
-main_menu.run()
+if args["-h"] or args["--help"]:
+    print(doc)
+    sys.exit()
+if args["-v"]:
+    print(nice_version)
+    sys.exit()
+
+import Menus
+import Init
+Init.initGame(Menus.MainMenu, caption="Loltris").run()
