@@ -109,6 +109,8 @@ def getTime(spec="%H:%M:%S"):
 
 def panic(comment, **kwargs):
     genericLog("PANIC", comment, **kwargs)
+    if kwargs.get("exception"):
+        raise kwargs["exception"]
     fail(255)
 
 def fail(ret, **kwargs):

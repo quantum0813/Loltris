@@ -35,6 +35,8 @@ def remove(path, follow_links=False):
         return True
     return
 
+class FileExistsError(Exception): pass
+
 def mkdir(path, overwrite=False):
     """
     Calls os.mkdir on path, but calls Log.panic in case of an OSError.
@@ -42,14 +44,14 @@ def mkdir(path, overwrite=False):
     try:
         if overwrite:
             if remove(path):
-                Log.debug("Removed directory {}, overwrite".format(repr(path)))
+                Log.notice("Removed directory {!r}, overwrite".format(path))
         elif os.path.exists(path):
             return
 
-        os.mkdir(path)
-        Log.debug("Created directory {}".format(repr(path)))
-    except OSError:
-        Log.panic("Unable to create directory `{}'".format(path))
+        os.makedirs(path)
+        Log.notice("Created directory {}".format(repr(path)))
+    except OSError as e:
+        Log.panic("Unable to create directory `{}'".format(path), exception=e)
 
     return True
 
@@ -61,15 +63,15 @@ def mkfile(path, initial="", overwrite=False):
     try:
         if overwrite:
             if remove(path):
-                Log.debug("Removed file {}, overwrite".format(repr(path)))
+                Log.notice("Removed file {}, overwrite".format(repr(path)))
         elif os.path.exists(path):
             return
 
         with open(path, "wb") as wf:
             wf.write(initial)
-        Log.debug("Created file {}".format(repr(path)))
-    except OSError:
-        Log.panic("Unable to create file `{}'".format(path))
+        Log.notice("Created file {}".format(repr(path)))
+    except OSError as e:
+        Log.panic("Unable to create file `{}'".format(path), exception=e)
 
     return True
 
@@ -82,10 +84,14 @@ def setupFiles():
 
     Log.log("Running first-time setup")
 
-    mkdir(Load.HIGHSCOREDIR, overwrite=True)
-    mkdir(os.path.join(Load.HIGHSCOREDIR, "Snapshots"), overwrite=True)
+    # mkdir(Load.HIGHSCOREDIR, overwrite=True)
+    mkdir(os.path.join(Load.DATADIR))
+    mkdir(os.path.join(Load.SNAPSHOTDIR))
+    for directory in Load.LOCALDIRS:
+        Log.notice("copying {} to {}".format(os.path.join(Load.INSTALL_DATA_LOCAL, directory), os.path.join(Load.DATADIR, directory)))
+        shutil.copytree(os.path.join(Load.INSTALL_DATA_LOCAL, directory), os.path.join(Load.DATADIR, directory))
 
-    mkfile(os.path.join(Load.HIGHSCOREDIR, "Scores.dson"), initial=SCORES_CONTENTS, overwrite=True)
+    mkfile(os.path.join(Load.HIGHSCOREDIR, "Scores.dson"), initial=SCORES_CONTENTS)
     ## Finally- if everything was set up successfully- create the SETUP_FILE so Loltris
     ## know that the necessary files/directories have been set up.
     mkfile(os.path.join(Load.DATADIR, SETUP_FILE), SETUP_FILE_CONTENTS, overwrite=True)

@@ -22,9 +22,7 @@
 
 from Load import (
         IMAGEDIR,
-        MUSICDIR,
         DATADIR,
-        JSONDIR,
         SNAPSHOTDIR,
         HIGHSCOREDIR,
         TETROMINODIR,
