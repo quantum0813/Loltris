@@ -28,9 +28,9 @@ import Load
 from math import ceil
 
 def getChar(char, font):
-    if char.islower() and not font.get(char):
+    if char.islower() and char not in font:#font.get(char):
         return font.get(char.upper())
-    if char.isupper() and not font.get(char):
+    if char.isupper() and char not in font:#font.get(char):
         return font.get(char.lower())
 
     if font.get(char):

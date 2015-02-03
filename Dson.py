@@ -24,8 +24,8 @@ import Log
 
 ## Definitions:
 ## 
-##     Word: Arbitrary combination of WORDCHARS.
-##     Str: Arbitrary combination of unicode characters not in NOPRINT that can be written in the following forms
+##     Word: Arbitrary combination of Chars.word.
+##     Str: Arbitrary combination of unicode characters not in Chars.escape that can be written in the following forms
 ##         - "Str"
 ##         - 'Str'
 ##     Punctuation: Characters that can be considered single tokens by themselves.
@@ -45,10 +45,15 @@ constants_reverse = {
 OPEN = {"such", "so"}
 CLOSE = {"wow", "many"}
 
-WORDCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
-PUNCTUATION = ",.?"
-DIGITS = set("1234567")
-NOPRINT = set(chr(c) for c in range(0x20))
+class KeyWords:
+    open = {"such", "so"}
+    close = {"wow", "many"}
+
+class Chars:
+    word = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
+    digit = set("1234567")
+    punctuation = ",.?"
+    escape = set(chr(c) for c in range(0x20))
 
 def severalThings(iterable):
     items = list(iterable)
@@ -58,8 +63,8 @@ def severalThings(iterable):
     return text + "or " + repr(items[-1])
 
 class Parser(object):
-    def __init__(self, text, separators={" ", "\n", "\r", "\v", "\t"}, wordchars=WORDCHARS, list_separators={"and", "also"}, declarators={"is", ",", ".", "!", "?"},
-                 punctuation=PUNCTUATION):
+    def __init__(self, text, separators={" ", "\n", "\r", "\v", "\t"}, wordchars=Chars.word, list_separators={"and", "also"}, declarators={"is", ",", ".", "!", "?"},
+                 punctuation=Chars.punctuation):
         self.text = text
         self.separators = set(copy(separators))
         self.wordchars = set(wordchars)
@@ -84,7 +89,7 @@ class Parser(object):
                 terminator = char
                 val = ""
                 for char in chars:
-                    if char in NOPRINT:
+                    if char in Chars.escape:
                         raise SyntaxError("On {} / {}, illegal character in string, use escape sequence".format(line, column))
                     elif char == terminator:
                         break
@@ -244,7 +249,7 @@ class Parser(object):
                         digits = "".join([next(chars) for _ in range(6)])
                     except StopIteration:
                         raise SyntaxError("On {} / {} expected six digits".format(location[0], location[1]))
-                    if not all(digit in DIGITS for digit in digits):
+                    if not all(digit in Chars.digit for digit in digits):
                         raise SyntaxError("On {} / {} expected octal digits".format(location[0], location[1]))
                     return chr(int(digits, 8))
             return "\\"
@@ -280,7 +285,7 @@ class Parser(object):
             raise SyntaxError("On {} / {} Invalid number".format(location[0], location[1]))
 
 class Serializer(object):
-    def __init__(self, obj, indent=2, eol="\n", wordchars=WORDCHARS):
+    def __init__(self, obj, indent=2, eol="\n", wordchars=Chars.word):
         self.obj = obj
         self.eol = eol
         self.indent = indent
