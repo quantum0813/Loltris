@@ -6,8 +6,8 @@ otherwise in this file.
 Contact <shrubber@tfwno.gf> if links are dead.
 
 Programming/Gameplay/Design:
-    Jonas Møller     : Everything programming or design related except for the work done
-                       by Thomas Ballinger.
+    Jonas Møller     : Everything programming or design related; except for the work done
+                       by Thomas Ballinger. Shown below.
 Programming:
     Thomas Ballinger : Wrote the Jobs.Tetromino.getActiveBlocks generator that replaced the
                        Jobs.Tetromino.forBlocks higher-order function. Also rewrote the code
